@@ -51,6 +51,7 @@ static NS_DEFINE_CID(kFrameTraversalCID, NS_FRAMETRAVERSAL_CID);
 #include "nsPresContext.h"
 #include "nsIPresShell.h"
 #include "nsCaret.h"
+#include "CopyPasteManager.h"
 #include "TouchCaret.h"
 #include "SelectionCarets.h"
 
@@ -817,6 +818,14 @@ nsFrameSelection::Init(nsIPresShell *aShell, nsIContent *aLimiter)
     int8_t index = GetIndexFromSelectionType(nsISelectionController::SELECTION_NORMAL);
     if (mDomSelections[index]) {
       mDomSelections[index]->AddSelectionListener(selectionCarets);
+    }
+  }
+
+  nsRefPtr<CopyPasteManager> copyPasteManager = mShell->GetCopyPasteManager();
+  if (copyPasteManager) {
+    int8_t index = GetIndexFromSelectionType(nsISelectionController::SELECTION_NORMAL);
+    if (mDomSelections[index]) {
+      mDomSelections[index]->AddSelectionListener(copyPasteManager);
     }
   }
 }

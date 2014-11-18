@@ -100,11 +100,13 @@ EXPORTS.mozilla += [
 
 UNIFIED_SOURCES += [
     'ActiveLayerTracker.cpp',
+    'CopyPasteManager.cpp',
     'DisplayItemClip.cpp',
     'DisplayListClipState.cpp',
     'FrameLayerBuilder.cpp',
     'FramePropertyTable.cpp',
     'GeometryUtils.cpp',
+    'InteractiveCaret.cpp',
     'MaskLayerImageCache.cpp',
     'nsBidi.cpp',
     'nsBidiPresUtils.cpp',
