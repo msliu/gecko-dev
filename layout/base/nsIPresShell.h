@@ -59,6 +59,7 @@ class nsCanvasFrame;
 class nsAString;
 class nsCaret;
 namespace mozilla {
+class CopyPasteManager;
 class TouchCaret;
 class SelectionCarets;
 } // namespace mozilla
@@ -797,6 +798,7 @@ public:
    * Get the selection caret, if it exists. AddRefs it.
    */
   virtual already_AddRefed<mozilla::SelectionCarets> GetSelectionCarets() const = 0;
+  virtual already_AddRefed<mozilla::CopyPasteManager> GetCopyPasteManager() const = 0;
 
   /**
    * Returns the start part of selection caret element of the presshell.

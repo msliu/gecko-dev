@@ -78,6 +78,7 @@
 #include "nsCaret.h"
 #include "TouchCaret.h"
 #include "SelectionCarets.h"
+#include "CopyPasteManager.h"
 #include "nsIDOMHTMLDocument.h"
 #include "nsFrameManager.h"
 #include "nsXPCOM.h"
@@ -889,15 +890,16 @@ PresShell::Init(nsIDocument* aDocument,
 
   if (TouchCaretPrefEnabled()) {
     // Create touch caret handle
-    mTouchCaret = new TouchCaret(this);
+    /* mTouchCaret = new TouchCaret(this); */
   }
 
   if (SelectionCaretPrefEnabled()) {
     // Create selection caret handle
-    mSelectionCarets = new SelectionCarets(this);
-    mSelectionCarets->Init();
+    /* mSelectionCarets = new SelectionCarets(this); */
+    /* mSelectionCarets->Init(); */
   }
 
+  mCopyPasteManager = new CopyPasteManager(this);
 
   mSelection = new nsFrameSelection();
 
@@ -1165,6 +1167,10 @@ PresShell::Destroy()
   if (mSelectionCarets) {
     mSelectionCarets->Terminate();
     mSelectionCarets = nullptr;
+  }
+
+  if (mCopyPasteManager) {
+    mCopyPasteManager = nullptr;
   }
 
   // release our pref style sheet, if we have one still
@@ -2216,6 +2222,12 @@ already_AddRefed<SelectionCarets> PresShell::GetSelectionCarets() const
 {
   nsRefPtr<SelectionCarets> selectionCaret = mSelectionCarets;
   return selectionCaret.forget();
+}
+
+already_AddRefed<CopyPasteManager> PresShell::GetCopyPasteManager() const
+{
+  nsRefPtr<CopyPasteManager> copyPasteManager = mCopyPasteManager;
+  return copyPasteManager.forget();
 }
 
 void PresShell::SetCaret(nsCaret *aNewCaret)
