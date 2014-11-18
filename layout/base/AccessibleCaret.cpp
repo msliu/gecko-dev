@@ -4,22 +4,23 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "InteractiveCaret.h"
+#include "AccessibleCaret.h"
 
 #include "nsCanvasFrame.h"
 #include "nsCaret.h"
 #include "nsDOMTokenList.h"
+#include "nsIFrame.h"
 #include "mozilla/dom/AnonymousContent.h"
 #include "mozilla/Preferences.h"
 
 using namespace mozilla;
 using namespace mozilla::dom;
 
-static int32_t gInteractiveCaretInflateSize = 0;
+static int32_t gAccessibleCaretInflateSize = 0;
 
-NS_IMPL_ISUPPORTS0(InteractiveCaret)
+NS_IMPL_ISUPPORTS0(AccessibleCaret)
 
-InteractiveCaret::InteractiveCaret(nsIPresShell* aPresShell)
+AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
   : mHasInjected(false)
   , mVisible(false)
   , mPresShell(aPresShell)
@@ -29,20 +30,20 @@ InteractiveCaret::InteractiveCaret(nsIPresShell* aPresShell)
   // XXX: rename
   /* static bool addedPref = false; */
   /* if (!addedPref) { */
-  /*   Preferences::AddIntVarCache(&gInteractiveCaretInflateSize, */
+  /*   Preferences::AddIntVarCache(&gAccessibleCaretInflateSize, */
   /*                               "selectioncaret.inflatesize.threshold"); */
   /*   addedPref = true; */
   /* } */
 }
 
-InteractiveCaret::~InteractiveCaret()
+AccessibleCaret::~AccessibleCaret()
 {
   MOZ_ASSERT(NS_IsMainThread());
   mPresShell = nullptr;
 }
 
 void
-InteractiveCaret::SetVisibility(bool aVisible)
+AccessibleCaret::SetVisibility(bool aVisible)
 {
   if (mVisible == aVisible) {
     return;
@@ -63,7 +64,7 @@ InteractiveCaret::SetVisibility(bool aVisible)
 }
 
 void
-InteractiveCaret::MaybeInjectAnonymousContent()
+AccessibleCaret::MaybeInjectAnonymousContent()
 {
   if (mHasInjected) {
     return;
@@ -86,7 +87,7 @@ InteractiveCaret::MaybeInjectAnonymousContent()
 }
 
 void
-InteractiveCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset)
+AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset)
 {
   nsIFrame* canvasFrame = mPresShell->GetCanvasFrame();
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
@@ -121,7 +122,7 @@ InteractiveCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffse
 }
 
 void
-InteractiveCaret::SetPosition(const nsPoint& aPosition)
+AccessibleCaret::SetPosition(const nsPoint& aPosition)
 {
   if (!mAnonymousContent) {
     return;
