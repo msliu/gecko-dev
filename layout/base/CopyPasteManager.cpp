@@ -6,7 +6,7 @@
 
 #include "CopyPasteManager.h"
 
-#include "InteractiveCaret.h"
+#include "AccessibleCaret.h"
 #include "mozilla/dom/TreeWalker.h"
 #include "nsFocusManager.h"
 #include "nsFrameSelection.h"
@@ -19,8 +19,8 @@ NS_IMPL_ISUPPORTS(CopyPasteManager, nsISelectionListener)
 
 CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
   : mPresShell(aPresShell)
-  , mFirstCaret(new InteractiveCaret(aPresShell))
-  , mSecondCaret(new InteractiveCaret(aPresShell))
+  , mFirstCaret(new AccessibleCaret(aPresShell))
+  , mSecondCaret(new AccessibleCaret(aPresShell))
 {
 }
 

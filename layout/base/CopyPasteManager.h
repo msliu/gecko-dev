@@ -12,7 +12,7 @@
 class nsIPresShell;
 
 namespace mozilla {
-class InteractiveCaret;
+class AccessibleCaret;
 
 class CopyPasteManager MOZ_FINAL : public nsISelectionListener
 {
@@ -39,8 +39,8 @@ private:
                                           int& aOutOffset);
 
   nsIPresShell* mPresShell;
-  nsRefPtr<InteractiveCaret> mFirstCaret;
-  nsRefPtr<InteractiveCaret> mSecondCaret;
+  nsRefPtr<AccessibleCaret> mFirstCaret;
+  nsRefPtr<AccessibleCaret> mSecondCaret;
 };
 } // namespace mozilla
 

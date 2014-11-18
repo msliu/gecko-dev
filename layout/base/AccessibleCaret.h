@@ -4,10 +4,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef InteractiveCaret_h__
-#define InteractiveCaret_h__
+#ifndef AccessibleCaret_h__
+#define AccessibleCaret_h__
 
+#include "mozilla/Attributes.h"
+#include "nsISupportsBase.h"
+#include "nsISupportsImpl.h"
+#include "nsRefPtr.h"
+
+class nsIFrame;
 class nsIPresShell;
+struct nsPoint;
 
 namespace mozilla {
 
@@ -15,16 +22,16 @@ namespace dom {
 class AnonymousContent;
 }
 
-class InteractiveCaret MOZ_FINAL : public nsISupports
+class AccessibleCaret MOZ_FINAL : public nsISupports
 {
 public:
-  explicit InteractiveCaret(nsIPresShell* aPresShell);
+  explicit AccessibleCaret(nsIPresShell* aPresShell);
   NS_DECL_ISUPPORTS
 
   void SetVisibility(bool aVisible);
   void SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset);
 private:
-  ~InteractiveCaret();
+  ~AccessibleCaret();
 
   void MaybeInjectAnonymousContent();
   void SetPosition(const nsPoint& aPosition);
@@ -36,4 +43,4 @@ private:
 };
 } // namespace mozilla
 
-#endif //InteractiveCaret_h__
+#endif //AccessibleCaret_h__
