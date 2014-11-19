@@ -28,12 +28,12 @@ AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
   MOZ_ASSERT(NS_IsMainThread());
 
   // XXX: rename
-  /* static bool addedPref = false; */
-  /* if (!addedPref) { */
-  /*   Preferences::AddIntVarCache(&gAccessibleCaretInflateSize, */
-  /*                               "selectioncaret.inflatesize.threshold"); */
-  /*   addedPref = true; */
-  /* } */
+  static bool addedPref = false;
+  if (!addedPref) {
+    Preferences::AddIntVarCache(&gAccessibleCaretInflateSize,
+                                "selectioncaret.inflatesize.threshold");
+    addedPref = true;
+  }
 }
 
 AccessibleCaret::~AccessibleCaret()
@@ -64,6 +64,60 @@ AccessibleCaret::SetVisibility(bool aVisible)
 }
 
 void
+AccessibleCaret::SetTilted(bool aTilted, TiltDirection aDir /* = TILT_LEFT */)
+{
+  if (!mAnonymousContent) {
+    return;
+  }
+
+  ErrorResult err;
+  nsCOMPtr<Element> element = mAnonymousContent->GetContentNode();
+  nsRefPtr<nsDOMTokenList> classList = element->ClassList();
+  classList->Toggle(NS_LITERAL_STRING("tilt"),
+                    dom::Optional<bool>(aTilted), err);
+
+  if (aTilted) {
+    if (aDir == TILT_LEFT) {
+      classList->Add(NS_LITERAL_STRING("left"), err);
+      classList->Remove(NS_LITERAL_STRING("right"), err);
+    } else {
+      classList->Remove(NS_LITERAL_STRING("left"), err);
+      classList->Add(NS_LITERAL_STRING("right"), err);
+    }
+  } else {
+    classList->Remove(NS_LITERAL_STRING("left"), err);
+    classList->Remove(NS_LITERAL_STRING("right"), err);
+  }
+}
+
+bool
+AccessibleCaret::Intersects(const AccessibleCaret& rhs)
+{
+  MOZ_ASSERT(mPresShell == rhs.mPresShell);
+
+  nsCOMPtr<Element> thisElement = mAnonymousContent->GetContentNode();
+  nsCOMPtr<Element> rhsElement = rhs.mAnonymousContent->GetContentNode();
+  nsIFrame* rootFrame = mPresShell->GetRootFrame();
+  nsRect thisRect = nsLayoutUtils::GetRectRelativeToFrame(thisElement, rootFrame);
+  nsRect rhsRect = nsLayoutUtils::GetRectRelativeToFrame(rhsElement, rootFrame);
+  return thisRect.Intersects(rhsRect);
+}
+
+bool
+AccessibleCaret::Contains(const nsPoint& aPosition)
+{
+  if (!mVisible) {
+    return false;
+  }
+
+  nsCOMPtr<Element> element = mAnonymousContent->GetContentNode();
+  dom::Element* childElement = element->GetFirstElementChild();
+  nsIFrame* rootFrame = mPresShell->GetRootFrame();
+  nsRect rect = nsLayoutUtils::GetRectRelativeToFrame(childElement, rootFrame);
+  return nsLayoutUtils::ContainsPoint(rect, aPosition, gAccessibleCaretInflateSize);
+}
+
+void
 AccessibleCaret::MaybeInjectAnonymousContent()
 {
   if (mHasInjected) {
@@ -77,7 +131,7 @@ AccessibleCaret::MaybeInjectAnonymousContent()
     nsCOMPtr<Element> elementInner = document->CreateHTMLElement(nsGkAtoms::div);
     element->AppendChildTo(elementInner, false);
     element->SetAttr(kNameSpaceID_None, nsGkAtoms::_class,
-                     NS_LITERAL_STRING("moz-selectioncaret-left hidden"),
+                     NS_LITERAL_STRING("moz-accessiblecaret hidden"),
                      true);
     mAnonymousContent = document->InsertAnonymousContent(*element, rv);
     if (!rv.Failed() && mAnonymousContent) {

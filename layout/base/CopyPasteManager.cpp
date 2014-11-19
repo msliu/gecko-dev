@@ -172,6 +172,7 @@ CopyPasteManager::UpdateCarets()
     }
 
     mFirstCaret->SetPositionBasedOnFrameOffset(startFrame, startOffset);
+    mFirstCaret->SetTilted(false);
     mSecondCaret->SetVisibility(false);
   } else {
     int32_t rangeCount = selection->GetRangeCount();
@@ -208,5 +209,12 @@ CopyPasteManager::UpdateCarets()
 
     mFirstCaret->SetPositionBasedOnFrameOffset(startFrame, startOffset);
     mSecondCaret->SetPositionBasedOnFrameOffset(endFrame, endOffset);
+    if (mFirstCaret->Intersects(*mSecondCaret)) {
+      mFirstCaret->SetTilted(true, AccessibleCaret::TILT_LEFT);
+      mSecondCaret->SetTilted(true, AccessibleCaret::TILT_RIGHT);
+    } else {
+      mFirstCaret->SetTilted(false);
+      mSecondCaret->SetTilted(false);
+    }
   }
 }

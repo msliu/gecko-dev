@@ -314,6 +314,41 @@ parsererror|sourcetext {
   font-size: 12pt;
 }
 
+div:-moz-native-anonymous.moz-accessiblecaret,
+div:-moz-native-anonymous.moz-accessiblecaret > div {
+  position: absolute;
+  width: 29px;
+  height: 31px;
+  background-position: center center;
+  background-size: 100% 100%;
+  z-index: 2147483647;
+}
+
+div:-moz-native-anonymous.moz-accessiblecaret > div {
+  background-image: url("resource://gre/res/text_caret.png");
+}
+
+div:-moz-native-anonymous.moz-accessiblecaret {
+  margin-left: -15px;
+}
+
+div:-moz-native-anonymous.moz-accessiblecaret.left.tilt > div {
+  background-image: url("resource://gre/res/text_caret_tilt_left.png");
+  margin-left: -14px;
+}
+
+div:-moz-native-anonymous.moz-accessiblecaret.right.tilt > div {
+  background-image: url("resource://gre/res/text_caret_tilt_right.png");
+  margin-left: 14px;
+}
+
+div:-moz-native-anonymous.moz-accessiblecaret.hidden > div {
+  width: 0px;
+  height: 0px;
+  margin: 0px;
+  visibility: hidden;
+}
+
 div:-moz-native-anonymous.moz-touchcaret,
 div:-moz-native-anonymous.moz-selectioncaret-left,
 div:-moz-native-anonymous.moz-selectioncaret-right {
