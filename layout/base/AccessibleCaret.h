@@ -25,11 +25,19 @@ class AnonymousContent;
 class AccessibleCaret MOZ_FINAL : public nsISupports
 {
 public:
+  enum TiltDirection {
+    TILT_LEFT,
+    TILT_RIGHT
+  };
+
   explicit AccessibleCaret(nsIPresShell* aPresShell);
   NS_DECL_ISUPPORTS
 
   void SetVisibility(bool aVisible);
   void SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset);
+  void SetTilted(bool aTilted, TiltDirection aDir = TILT_LEFT);
+  bool Intersects(const AccessibleCaret& rhs);
+  bool Contains(const nsPoint& aPosition);
 private:
   ~AccessibleCaret();
 
