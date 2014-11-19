@@ -231,7 +231,7 @@ public:
   virtual void SetMayHaveTouchCaret(bool aSet) MOZ_OVERRIDE;
   virtual bool MayHaveTouchCaret() MOZ_OVERRIDE;
   // selection caret
-  virtual already_AddRefed<mozilla::SelectionCarets> GetSelectionCarets() const MOZ_OVERRIDE;
+  virtual already_AddRefed<mozilla::SelectionCarets> GetSelectionCarets() MOZ_OVERRIDE;
   virtual mozilla::dom::Element* GetSelectionCaretsStartElement() const MOZ_OVERRIDE;
   virtual mozilla::dom::Element* GetSelectionCaretsEndElement() const MOZ_OVERRIDE;
   // caret handling

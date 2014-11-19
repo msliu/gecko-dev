@@ -499,7 +499,6 @@ SelectionCarets::UpdateSelectionCarets()
     firstRectInRootFrame,
     hitFramesInFirstRect,
     nsLayoutUtils::IGNORE_PAINT_SUPPRESSION |
-      nsLayoutUtils::IGNORE_CROSS_DOC |
       nsLayoutUtils::IGNORE_ROOT_SCROLL_FRAME);
 
   nsAutoTArray<nsIFrame*, 16> hitFramesInLastRect;
@@ -507,7 +506,6 @@ SelectionCarets::UpdateSelectionCarets()
     lastRectInRootFrame,
     hitFramesInLastRect,
     nsLayoutUtils::IGNORE_PAINT_SUPPRESSION |
-      nsLayoutUtils::IGNORE_CROSS_DOC |
       nsLayoutUtils::IGNORE_ROOT_SCROLL_FRAME);
 
   SetStartFrameVisibility(hitFramesInFirstRect.Contains(startFrame));
@@ -541,7 +539,7 @@ SelectionCarets::SelectWord()
 
   // Find content offsets for mouse down point
   nsIFrame *ptFrame = nsLayoutUtils::GetFrameForPoint(rootFrame, mDownPoint,
-    nsLayoutUtils::IGNORE_PAINT_SUPPRESSION | nsLayoutUtils::IGNORE_CROSS_DOC);
+    nsLayoutUtils::IGNORE_PAINT_SUPPRESSION);
   if (!ptFrame) {
     return NS_OK;
   }
@@ -671,7 +669,7 @@ SelectionCarets::DragSelection(const nsPoint &movePoint)
 
   // Find out which content we point to
   nsIFrame *ptFrame = nsLayoutUtils::GetFrameForPoint(rootFrame, movePoint,
-    nsLayoutUtils::IGNORE_PAINT_SUPPRESSION | nsLayoutUtils::IGNORE_CROSS_DOC);
+    nsLayoutUtils::IGNORE_PAINT_SUPPRESSION);
   if (!ptFrame) {
     return nsEventStatus_eConsumeNoDefault;
   }

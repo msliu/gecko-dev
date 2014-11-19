@@ -902,8 +902,11 @@ PresShell::Init(nsIDocument* aDocument,
 
   if (SelectionCaretPrefEnabled()) {
     // Create selection caret handle
-    mSelectionCarets = new SelectionCarets(this);
-    mSelectionCarets->Init();
+    nsCOMPtr<nsIPresShell> parent = GetParentPresShellForEventHandling();
+    if (!parent) {
+      mSelectionCarets = new SelectionCarets(this);
+      mSelectionCarets->Init();
+    }
   }
 
 
@@ -2218,9 +2221,12 @@ already_AddRefed<TouchCaret> PresShell::GetTouchCaret() const
   return touchCaret.forget();
 }
 
-already_AddRefed<SelectionCarets> PresShell::GetSelectionCarets() const
+already_AddRefed<SelectionCarets> PresShell::GetSelectionCarets()
 {
   nsRefPtr<SelectionCarets> selectionCaret = mSelectionCarets;
+  if (mPresContext && !mPresContext->IsRoot()) {
+    selectionCaret = GetRootPresShell()->GetSelectionCarets();
+  }
   return selectionCaret.forget();
 }
 
@@ -7265,9 +7271,7 @@ PresShell::HandleEvent(nsIFrame* aFrame,
       }
     }
 
-    nsRefPtr<SelectionCarets> selectionCaret = presShell ?
-                                               presShell->GetSelectionCarets() :
-                                               nullptr;
+    nsRefPtr<SelectionCarets> selectionCaret = GetSelectionCarets();
     if (selectionCaret) {
       *aEventStatus = selectionCaret->HandleEvent(aEvent);
       if (*aEventStatus == nsEventStatus_eConsumeNoDefault) {
