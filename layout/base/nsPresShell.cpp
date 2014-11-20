@@ -7261,6 +7261,19 @@ PresShell::HandleEvent(nsIFrame* aFrame,
         return NS_OK;
       }
     }
+
+    nsRefPtr<CopyPasteManager> copyPasteManager = presShell ?
+                                                  presShell->GetCopyPasteManager() :
+                                                  nullptr;
+    if (copyPasteManager) {
+      *aEventStatus = copyPasteManager->HandleEvent(aEvent);
+      if (*aEventStatus == nsEventStatus_eConsumeNoDefault) {
+        // If the event is consumed by the selection carets, cancel APZC panning by
+        // setting mMultipleActionsPrevented.
+        aEvent->mFlags.mMultipleActionsPrevented = true;
+        return NS_OK;
+      }
+    }
   }
 
   if (sPointerEventEnabled) {
