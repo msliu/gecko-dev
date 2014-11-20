@@ -11,6 +11,7 @@
 #include "mozilla/TypedEnum.h"
 #include "nsISupportsBase.h"
 #include "nsISupportsImpl.h"
+#include "nsRect.h"
 #include "nsRefPtr.h"
 
 class nsIFrame;
@@ -41,6 +42,7 @@ public:
   void SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset);
   bool Intersects(const AccessibleCaret& rhs);
   bool Contains(const nsPoint& aPosition);
+  const nsRect& GetFrameOffsetRect() const { return mFrameOffsetRect; }
 
 private:
   ~AccessibleCaret();
@@ -52,6 +54,7 @@ private:
   Appearance mAppearance;
   nsIPresShell* mPresShell;
   nsRefPtr<mozilla::dom::AnonymousContent> mAnonymousContent;
+  nsRect mFrameOffsetRect;
 }; // class AccessibleCaret
 
 MOZ_FINISH_NESTED_ENUM_CLASS(AccessibleCaret::Appearance)
