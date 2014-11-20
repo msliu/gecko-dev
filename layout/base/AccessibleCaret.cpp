@@ -82,6 +82,15 @@ AccessibleCaret::SetAppearance(Appearance aAppearance)
 bool
 AccessibleCaret::Intersects(const AccessibleCaret& rhs)
 {
+  if (mAppearance == Appearance::NONE ||
+      rhs.mAppearance == Appearance::NONE) {
+    return false;
+  }
+
+  if (!mAnonymousContent) {
+    return false;
+  }
+
   MOZ_ASSERT(mPresShell == rhs.mPresShell);
 
   nsCOMPtr<Element> thisElement = mAnonymousContent->GetContentNode();
@@ -95,7 +104,11 @@ AccessibleCaret::Intersects(const AccessibleCaret& rhs)
 bool
 AccessibleCaret::Contains(const nsPoint& aPosition)
 {
-  if (mAppearance != Appearance::NONE) {
+  if (mAppearance == Appearance::NONE) {
+    return false;
+  }
+
+  if (!mAnonymousContent) {
     return false;
   }
 
@@ -144,22 +157,21 @@ AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset
   nsIFrame* containerFrame = customContainer->GetPrimaryFrame();
   MOZ_ASSERT(containerFrame);
 
-  nsRect rectInRootFrame =
-    nsCaret::GetGeometryForFrame(aFrame, aOffset, nullptr);
+  mFrameOffsetRect = nsCaret::GetGeometryForFrame(aFrame, aOffset, nullptr);
 
   // GetGeometryForFrame may return a rect that outside frame's rect. So
   // constrain rect inside frame's rect.
-  rectInRootFrame = rectInRootFrame.ForceInside(aFrame->GetRectRelativeToSelf());
-  nsRect rectInContainerFrame = rectInRootFrame;
+  mFrameOffsetRect = mFrameOffsetRect.ForceInside(aFrame->GetRectRelativeToSelf());
+  nsRect rectInContainerFrame = mFrameOffsetRect;
 
-  nsLayoutUtils::TransformRect(aFrame, rootFrame, rectInRootFrame);
+  nsLayoutUtils::TransformRect(aFrame, rootFrame, mFrameOffsetRect);
   nsLayoutUtils::TransformRect(aFrame, containerFrame, rectInContainerFrame);
 
-  rectInRootFrame.Inflate(AppUnitsPerCSSPixel(), 0);
+  mFrameOffsetRect.Inflate(AppUnitsPerCSSPixel(), 0);
 
   nsAutoTArray<nsIFrame*, 16> hitFramesInRect;
   nsLayoutUtils::GetFramesForArea(rootFrame,
-    rectInRootFrame,
+    mFrameOffsetRect,
     hitFramesInRect,
     nsLayoutUtils::IGNORE_PAINT_SUPPRESSION |
       nsLayoutUtils::IGNORE_CROSS_DOC |
