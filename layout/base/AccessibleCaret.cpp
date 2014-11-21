@@ -22,7 +22,7 @@ NS_IMPL_ISUPPORTS0(AccessibleCaret)
 
 AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
   : mHasInjected(false)
-  , mVisible(false)
+  , mAppearance(Appearance::NONE)
   , mPresShell(aPresShell)
 {
   MOZ_ASSERT(NS_IsMainThread());
@@ -43,50 +43,39 @@ AccessibleCaret::~AccessibleCaret()
 }
 
 void
-AccessibleCaret::SetVisibility(bool aVisible)
+AccessibleCaret::SetAppearance(Appearance aAppearance)
 {
-  if (mVisible == aVisible) {
+  if (mAppearance == aAppearance) {
     return;
   }
 
-  if (aVisible) {
+  if (aAppearance != Appearance::NONE) {
     MaybeInjectAnonymousContent();
   }
 
-  mVisible = aVisible;
+  mAppearance = aAppearance;
 
   if (mAnonymousContent) {
-    ErrorResult err;
+    ErrorResult rv;
     nsCOMPtr<Element> element = mAnonymousContent->GetContentNode();
-    element->ClassList()->Toggle(NS_LITERAL_STRING("hidden"),
-                                 Optional<bool>(!mVisible), err);
-  }
-}
 
-void
-AccessibleCaret::SetTilted(bool aTilted, TiltDirection aDir /* = TILT_LEFT */)
-{
-  if (!mAnonymousContent) {
-    return;
-  }
-
-  ErrorResult err;
-  nsCOMPtr<Element> element = mAnonymousContent->GetContentNode();
-  nsRefPtr<nsDOMTokenList> classList = element->ClassList();
-  classList->Toggle(NS_LITERAL_STRING("tilt"),
-                    Optional<bool>(aTilted), err);
-
-  if (aTilted) {
-    if (aDir == TILT_LEFT) {
-      classList->Add(NS_LITERAL_STRING("left"), err);
-      classList->Remove(NS_LITERAL_STRING("right"), err);
-    } else {
-      classList->Remove(NS_LITERAL_STRING("left"), err);
-      classList->Add(NS_LITERAL_STRING("right"), err);
+    // TODO: extract this switch as a function.
+    nsAutoString classString;
+    switch (aAppearance) {
+      case Appearance::NONE:
+        classString = NS_LITERAL_STRING("moz-accessiblecaret none");
+        break;
+      case Appearance::NORMAL:
+        classString = NS_LITERAL_STRING("moz-accessiblecaret normal");
+        break;
+      case Appearance::RIGHT:
+        classString = NS_LITERAL_STRING("moz-accessiblecaret right");
+        break;
+      case Appearance::LEFT:
+        classString = NS_LITERAL_STRING("moz-accessiblecaret left");
+        break;
     }
-  } else {
-    classList->Remove(NS_LITERAL_STRING("left"), err);
-    classList->Remove(NS_LITERAL_STRING("right"), err);
+    element->SetAttribute(NS_LITERAL_STRING("class"), classString, rv);
   }
 }
 
@@ -106,7 +95,7 @@ AccessibleCaret::Intersects(const AccessibleCaret& rhs)
 bool
 AccessibleCaret::Contains(const nsPoint& aPosition)
 {
-  if (!mVisible) {
+  if (mAppearance != Appearance::NONE) {
     return false;
   }
 
@@ -130,9 +119,8 @@ AccessibleCaret::MaybeInjectAnonymousContent()
     nsCOMPtr<Element> element = document->CreateHTMLElement(nsGkAtoms::div);
     nsCOMPtr<Element> elementInner = document->CreateHTMLElement(nsGkAtoms::div);
     element->AppendChildTo(elementInner, false);
-    element->SetAttr(kNameSpaceID_None, nsGkAtoms::_class,
-                     NS_LITERAL_STRING("moz-accessiblecaret hidden"),
-                     true);
+    element->SetAttribute(NS_LITERAL_STRING("class"),
+                          NS_LITERAL_STRING("moz-accessiblecaret none"), rv);
     mAnonymousContent = document->InsertAnonymousContent(*element, rv);
     if (!rv.Failed() && mAnonymousContent) {
       mHasInjected = true;
@@ -177,7 +165,7 @@ AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset
       nsLayoutUtils::IGNORE_CROSS_DOC |
       nsLayoutUtils::IGNORE_ROOT_SCROLL_FRAME);
 
-  SetVisibility(true);
+  SetAppearance(Appearance::NORMAL);
   /* SetVisibility(hitFramesInRect.Contains(aFrame)); */
   SetPosition(rectInContainerFrame.BottomLeft());
 }
