@@ -59,7 +59,7 @@ AccessibleCaret::SetVisibility(bool aVisible)
     ErrorResult err;
     nsCOMPtr<Element> element = mAnonymousContent->GetContentNode();
     element->ClassList()->Toggle(NS_LITERAL_STRING("hidden"),
-                                 dom::Optional<bool>(!mVisible), err);
+                                 Optional<bool>(!mVisible), err);
   }
 }
 
@@ -74,7 +74,7 @@ AccessibleCaret::SetTilted(bool aTilted, TiltDirection aDir /* = TILT_LEFT */)
   nsCOMPtr<Element> element = mAnonymousContent->GetContentNode();
   nsRefPtr<nsDOMTokenList> classList = element->ClassList();
   classList->Toggle(NS_LITERAL_STRING("tilt"),
-                    dom::Optional<bool>(aTilted), err);
+                    Optional<bool>(aTilted), err);
 
   if (aTilted) {
     if (aDir == TILT_LEFT) {
@@ -111,7 +111,7 @@ AccessibleCaret::Contains(const nsPoint& aPosition)
   }
 
   nsCOMPtr<Element> element = mAnonymousContent->GetContentNode();
-  dom::Element* childElement = element->GetFirstElementChild();
+  Element* childElement = element->GetFirstElementChild();
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
   nsRect rect = nsLayoutUtils::GetRectRelativeToFrame(childElement, rootFrame);
   return nsLayoutUtils::ContainsPoint(rect, aPosition, gAccessibleCaretInflateSize);
