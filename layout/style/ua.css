@@ -317,6 +317,7 @@ div:-moz-native-anonymous.moz-accessiblecaret > div {
   background-position: center center;
   background-size: 100% 100%;
   z-index: 2147483647;
+  border: 0.1px solid red;
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret > div {
