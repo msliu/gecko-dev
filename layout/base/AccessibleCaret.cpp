@@ -143,12 +143,18 @@ AccessibleCaret::MaybeInjectAnonymousContent()
 void
 AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset)
 {
-  nsIFrame* canvasFrame = mPresShell->GetCanvasFrame();
+  nsCanvasFrame* canvasFrame = mPresShell->GetCanvasFrame();
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
 
   if (!canvasFrame || !rootFrame) {
     return;
   }
+
+  Element* customContainer = canvasFrame->GetCustomContentContainer();
+  MOZ_ASSERT(customContainer);
+
+  nsIFrame* containerFrame = customContainer->GetPrimaryFrame();
+  MOZ_ASSERT(containerFrame);
 
   nsRect rectInRootFrame =
     nsCaret::GetGeometryForFrame(aFrame, aOffset, nullptr);
@@ -156,9 +162,10 @@ AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset
   // GetGeometryForFrame may return a rect that outside frame's rect. So
   // constrain rect inside frame's rect.
   rectInRootFrame = rectInRootFrame.ForceInside(aFrame->GetRectRelativeToSelf());
-  nsRect rectInCanvasFrame = rectInRootFrame;
+  nsRect rectInContainerFrame = rectInRootFrame;
+
   nsLayoutUtils::TransformRect(aFrame, rootFrame, rectInRootFrame);
-  nsLayoutUtils::TransformRect(aFrame, canvasFrame, rectInCanvasFrame);
+  nsLayoutUtils::TransformRect(aFrame, containerFrame, rectInContainerFrame);
 
   rectInRootFrame.Inflate(AppUnitsPerCSSPixel(), 0);
 
@@ -172,7 +179,7 @@ AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset
 
   SetVisibility(true);
   /* SetVisibility(hitFramesInRect.Contains(aFrame)); */
-  SetPosition(rectInCanvasFrame.BottomLeft());
+  SetPosition(rectInContainerFrame.BottomLeft());
 }
 
 void
