@@ -708,6 +708,7 @@ static uint32_t sNextPresShellId;
 static bool sPointerEventEnabled = true;
 static bool sTouchCaretEnabled = false;
 static bool sSelectionCaretEnabled = false;
+static bool sAccessibleCaretEnabled = false;
 static bool sBeforeAfterKeyboardEventEnabled = false;
 
 /* static */ bool
@@ -730,6 +731,17 @@ PresShell::SelectionCaretPrefEnabled()
     initialized = true;
   }
   return sSelectionCaretEnabled;
+}
+
+/* static */ bool
+PresShell::AccessibleCaretEnabled()
+{
+  static bool initialized = false;
+  if (!initialized) {
+    Preferences::AddBoolVarCache(&sAccessibleCaretEnabled, "layout.accessiblecaret.enabled");
+    initialized = true;
+  }
+  return sAccessibleCaretEnabled;
 }
 
 /* static */ bool
@@ -895,18 +907,20 @@ PresShell::Init(nsIDocument* aDocument,
   // before creating any frames.
   SetPreferenceStyleRules(false);
 
-  if (TouchCaretPrefEnabled()) {
+  if (TouchCaretPrefEnabled() && !AccessibleCaretEnabled()) {
     // Create touch caret handle
-    /* mTouchCaret = new TouchCaret(this); */
+    mTouchCaret = new TouchCaret(this);
   }
 
-  if (SelectionCaretPrefEnabled()) {
+  if (SelectionCaretPrefEnabled() && !AccessibleCaretEnabled()) {
     // Create selection caret handle
-    /* mSelectionCarets = new SelectionCarets(this); */
-    /* mSelectionCarets->Init(); */
+    mSelectionCarets = new SelectionCarets(this);
+    mSelectionCarets->Init();
   }
 
-  mCopyPasteManager = new CopyPasteManager(this);
+  if (AccessibleCaretEnabled()) {
+    mCopyPasteManager = new CopyPasteManager(this);
+  }
 
   NS_ADDREF(mSelection = new nsFrameSelection());
 
