@@ -103,7 +103,7 @@ CopyPasteManager::FindFirstNodeWithFrame(nsIDocument* aDocument,
   }
 
   ErrorResult err;
-  nsRefPtr<dom::TreeWalker> walker =
+  nsRefPtr<TreeWalker> walker =
     aDocument->CreateTreeWalker(*startNode,
                                 nsIDOMNodeFilter::SHOW_ALL,
                                 nullptr,
@@ -138,7 +138,7 @@ CopyPasteManager::UpdateCarets()
     return;
   }
 
-  nsRefPtr<dom::Selection> selection = GetSelection();
+  nsRefPtr<Selection> selection = GetSelection();
   if (!selection) {
     mFirstCaret->SetVisibility(false);
     mSecondCaret->SetVisibility(false);
