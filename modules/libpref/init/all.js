@@ -4507,6 +4507,9 @@ pref("selectioncaret.inflatesize.threshold", 40);
 // Selection carets will fall-back to internal LongTap detector.
 pref("selectioncaret.detects.longtap", true);
 
+// Turn of accessible caret by default
+pref("layout.accessiblecaret.enabled", false);
+
 // Wakelock is disabled by default.
 pref("dom.wakelock.enabled", false);
 
