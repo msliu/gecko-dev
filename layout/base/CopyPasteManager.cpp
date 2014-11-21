@@ -14,6 +14,7 @@
 
 using namespace mozilla;
 using namespace mozilla::dom;
+using Appearance = AccessibleCaret::Appearance;
 
 NS_IMPL_ISUPPORTS(CopyPasteManager, nsISelectionListener)
 
@@ -140,8 +141,8 @@ CopyPasteManager::UpdateCarets()
 
   nsRefPtr<Selection> selection = GetSelection();
   if (!selection) {
-    mFirstCaret->SetVisibility(false);
-    mSecondCaret->SetVisibility(false);
+    mFirstCaret->SetAppearance(Appearance::NONE);
+    mSecondCaret->SetAppearance(Appearance::NONE);
     return;
   }
 
@@ -150,8 +151,8 @@ CopyPasteManager::UpdateCarets()
 
     nsRefPtr<nsFrameSelection> fs = GetFrameSelection();
     if (!fs) {
-      mFirstCaret->SetVisibility(false);
-      mSecondCaret->SetVisibility(false);
+      mFirstCaret->SetAppearance(Appearance::NONE);
+      mSecondCaret->SetAppearance(Appearance::NONE);
       return;
     }
 
@@ -160,20 +161,20 @@ CopyPasteManager::UpdateCarets()
                                                                     firstRange, fs, false, startOffset);
 
     if (!startFrame) {
-      mFirstCaret->SetVisibility(false);
-      mSecondCaret->SetVisibility(false);
+      mFirstCaret->SetAppearance(Appearance::NONE);
+      mSecondCaret->SetAppearance(Appearance::NONE);
       return;
     }
 
     if (!startFrame->GetContent()->IsEditable()) {
-      mFirstCaret->SetVisibility(false);
-      mSecondCaret->SetVisibility(false);
+      mFirstCaret->SetAppearance(Appearance::NONE);
+      mSecondCaret->SetAppearance(Appearance::NONE);
       return;
     }
 
     mFirstCaret->SetPositionBasedOnFrameOffset(startFrame, startOffset);
-    mFirstCaret->SetTilted(false);
-    mSecondCaret->SetVisibility(false);
+    mFirstCaret->SetAppearance(Appearance::NORMAL);
+    mSecondCaret->SetAppearance(Appearance::NONE);
   } else {
     int32_t rangeCount = selection->GetRangeCount();
     nsRefPtr<nsRange> firstRange = selection->GetRangeAt(0);
@@ -181,8 +182,8 @@ CopyPasteManager::UpdateCarets()
 
     nsRefPtr<nsFrameSelection> fs = GetFrameSelection();
     if (!fs) {
-      mFirstCaret->SetVisibility(false);
-      mSecondCaret->SetVisibility(false);
+      mFirstCaret->SetAppearance(Appearance::NONE);
+      mSecondCaret->SetAppearance(Appearance::NONE);
       return;
     }
 
@@ -195,26 +196,26 @@ CopyPasteManager::UpdateCarets()
                                                                   lastRange, fs, true, endOffset);
 
     if (!startFrame || !endFrame) {
-      mFirstCaret->SetVisibility(false);
-      mSecondCaret->SetVisibility(false);
+      mFirstCaret->SetAppearance(Appearance::NONE);
+      mSecondCaret->SetAppearance(Appearance::NONE);
       return;
     }
 
     // Check if startFrame is after endFrame.
     if (nsLayoutUtils::CompareTreePosition(startFrame, endFrame) > 0) {
-      mFirstCaret->SetVisibility(false);
-      mSecondCaret->SetVisibility(false);
+      mFirstCaret->SetAppearance(Appearance::NONE);
+      mSecondCaret->SetAppearance(Appearance::NONE);
       return;
     }
 
     mFirstCaret->SetPositionBasedOnFrameOffset(startFrame, startOffset);
     mSecondCaret->SetPositionBasedOnFrameOffset(endFrame, endOffset);
     if (mFirstCaret->Intersects(*mSecondCaret)) {
-      mFirstCaret->SetTilted(true, AccessibleCaret::TILT_LEFT);
-      mSecondCaret->SetTilted(true, AccessibleCaret::TILT_RIGHT);
+      mFirstCaret->SetAppearance(Appearance::LEFT);
+      mSecondCaret->SetAppearance(Appearance::RIGHT);
     } else {
-      mFirstCaret->SetTilted(false);
-      mSecondCaret->SetTilted(false);
+      mFirstCaret->SetAppearance(Appearance::NORMAL);
+      mSecondCaret->SetAppearance(Appearance::NORMAL);
     }
   }
 }
