@@ -8,6 +8,7 @@
 #define AccessibleCaret_h__
 
 #include "mozilla/Attributes.h"
+#include "mozilla/TypedEnum.h"
 #include "nsISupportsBase.h"
 #include "nsISupportsImpl.h"
 #include "nsRefPtr.h"
@@ -25,19 +26,22 @@ class AnonymousContent;
 class AccessibleCaret MOZ_FINAL : public nsISupports
 {
 public:
-  enum TiltDirection {
-    TILT_LEFT,
-    TILT_RIGHT
-  };
-
   explicit AccessibleCaret(nsIPresShell* aPresShell);
   NS_DECL_ISUPPORTS
 
-  void SetVisibility(bool aVisible);
+  MOZ_BEGIN_NESTED_ENUM_CLASS(Appearance, uint8_t)
+    NONE,
+    NORMAL,
+    LEFT,
+    RIGHT
+  MOZ_END_ENUM_CLASS(Appearance)
+
+  void SetAppearance(Appearance aAppearance);
+
   void SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset);
-  void SetTilted(bool aTilted, TiltDirection aDir = TILT_LEFT);
   bool Intersects(const AccessibleCaret& rhs);
   bool Contains(const nsPoint& aPosition);
+
 private:
   ~AccessibleCaret();
 
@@ -45,10 +49,13 @@ private:
   void SetPosition(const nsPoint& aPosition);
 
   bool mHasInjected;
-  bool mVisible;
+  Appearance mAppearance;
   nsIPresShell* mPresShell;
   nsRefPtr<mozilla::dom::AnonymousContent> mAnonymousContent;
-};
+}; // class AccessibleCaret
+
+MOZ_FINISH_NESTED_ENUM_CLASS(AccessibleCaret::Appearance)
+
 } // namespace mozilla
 
 #endif //AccessibleCaret_h__

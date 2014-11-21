@@ -316,33 +316,28 @@ div:-moz-native-anonymous.moz-accessiblecaret > div {
   height: 31px;
   background-position: center center;
   background-size: 100% 100%;
+  margin-left: -15px;
   z-index: 2147483647;
   border: 0.1px solid red;
 }
 
-div:-moz-native-anonymous.moz-accessiblecaret > div {
+div:-moz-native-anonymous.moz-accessiblecaret.normal > div {
   background-image: url("resource://gre/res/text_caret.png");
+  margin-left: 0px;
 }
 
-div:-moz-native-anonymous.moz-accessiblecaret {
-  margin-left: -15px;
-}
-
-div:-moz-native-anonymous.moz-accessiblecaret.left.tilt > div {
+div:-moz-native-anonymous.moz-accessiblecaret.left > div {
   background-image: url("resource://gre/res/text_caret_tilt_left.png");
   margin-left: -14px;
 }
 
-div:-moz-native-anonymous.moz-accessiblecaret.right.tilt > div {
+div:-moz-native-anonymous.moz-accessiblecaret.right > div {
   background-image: url("resource://gre/res/text_caret_tilt_right.png");
   margin-left: 14px;
 }
 
-div:-moz-native-anonymous.moz-accessiblecaret.hidden > div {
-  width: 0px;
-  height: 0px;
-  margin: 0px;
-  visibility: hidden;
+div:-moz-native-anonymous.moz-accessiblecaret.none {
+  display: none;
 }
 
 div:-moz-native-anonymous.moz-touchcaret,
