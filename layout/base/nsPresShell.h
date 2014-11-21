@@ -78,6 +78,8 @@ public:
   // Selection caret preference
   static bool SelectionCaretPrefEnabled();
 
+  static bool AccessibleCaretEnabled();
+
   // BeforeAfterKeyboardEvent preference
   static bool BeforeAfterKeyboardEventEnabled();
 

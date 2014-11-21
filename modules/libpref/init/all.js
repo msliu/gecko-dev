@@ -4495,6 +4495,9 @@ pref("selectioncaret.enabled", false);
 // user click on selection caret or not. In app units.
 pref("selectioncaret.inflatesize.threshold", 40);
 
+// Turn of accessible caret by default
+pref("layout.accessiblecaret.enabled", false);
+
 // Wakelock is disabled by default.
 pref("dom.wakelock.enabled", false);
 
