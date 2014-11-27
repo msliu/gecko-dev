@@ -15,6 +15,7 @@
 #include "nsRefPtr.h"
 #include "nsString.h"
 
+class nsIDocument;
 class nsIFrame;
 class nsIPresShell;
 struct nsPoint;
@@ -23,12 +24,14 @@ namespace mozilla {
 
 namespace dom {
 class AnonymousContent;
+class Element;
 }
 
 class AccessibleCaret MOZ_FINAL : public nsISupports
 {
 public:
   explicit AccessibleCaret(nsIPresShell* aPresShell);
+
   NS_DECL_ISUPPORTS
 
   MOZ_BEGIN_NESTED_ENUM_CLASS(Appearance, uint8_t)
@@ -49,13 +52,14 @@ public:
 private:
   ~AccessibleCaret();
 
-  void MaybeInjectAnonymousContent();
+  void InjectAnonymousContent();
   void SetPosition(const nsPoint& aPosition);
 
   // Utilities
   static nsString AppearanceString(Appearance aAppearance);
+  static already_AddRefed<dom::Element> CreateCaretElement(nsIDocument* aDocument);
 
-  bool mHasInjected;
+  // Member variables
   Appearance mAppearance;
   nsIPresShell* mPresShell;
   nsRefPtr<dom::AnonymousContent> mAnonymousContent;
