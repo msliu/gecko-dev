@@ -42,6 +42,12 @@ AccessibleCaret::~AccessibleCaret()
   mPresShell = nullptr;
 }
 
+bool
+AccessibleCaret::IsVisible() const
+{
+  return mAppearance != Appearance::NONE;
+}
+
 void
 AccessibleCaret::SetAppearance(Appearance aAppearance)
 {
@@ -49,7 +55,7 @@ AccessibleCaret::SetAppearance(Appearance aAppearance)
     return;
   }
 
-  if (aAppearance != Appearance::NONE) {
+  if (IsVisible()) {
     MaybeInjectAnonymousContent();
   }
 
@@ -88,8 +94,7 @@ AccessibleCaret::AppearanceString(Appearance aAppearance)
 bool
 AccessibleCaret::Intersects(const AccessibleCaret& rhs)
 {
-  if (mAppearance == Appearance::NONE ||
-      rhs.mAppearance == Appearance::NONE) {
+  if (!IsVisible() || !rhs.IsVisible()) {
     return false;
   }
 
@@ -110,7 +115,7 @@ AccessibleCaret::Intersects(const AccessibleCaret& rhs)
 bool
 AccessibleCaret::Contains(const nsPoint& aPosition)
 {
-  if (mAppearance == Appearance::NONE) {
+  if (!IsVisible()) {
     return false;
   }
 

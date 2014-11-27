@@ -38,6 +38,7 @@ public:
     RIGHT
   MOZ_END_ENUM_CLASS(Appearance)
 
+  bool IsVisible() const;
   void SetAppearance(Appearance aAppearance);
 
   void SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset);
