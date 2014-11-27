@@ -55,9 +55,7 @@ AccessibleCaret::SetAppearance(Appearance aAppearance)
     return;
   }
 
-  if (IsVisible()) {
-    MaybeInjectAnonymousContent();
-  }
+  MaybeInjectAnonymousContent();
 
   mAppearance = aAppearance;
 
