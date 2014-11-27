@@ -58,7 +58,7 @@ private:
   bool mHasInjected;
   Appearance mAppearance;
   nsIPresShell* mPresShell;
-  nsRefPtr<mozilla::dom::AnonymousContent> mAnonymousContent;
+  nsRefPtr<dom::AnonymousContent> mAnonymousContent;
   nsRect mFrameOffsetRect;
 }; // class AccessibleCaret
 
