@@ -59,24 +59,30 @@ AccessibleCaret::SetAppearance(Appearance aAppearance)
     ErrorResult rv;
     nsCOMPtr<Element> element = mAnonymousContent->GetContentNode();
 
-    // TODO: extract this switch as a function.
-    nsAutoString classString;
-    switch (aAppearance) {
-      case Appearance::NONE:
-        classString = NS_LITERAL_STRING("moz-accessiblecaret none");
-        break;
-      case Appearance::NORMAL:
-        classString = NS_LITERAL_STRING("moz-accessiblecaret normal");
-        break;
-      case Appearance::RIGHT:
-        classString = NS_LITERAL_STRING("moz-accessiblecaret right");
-        break;
-      case Appearance::LEFT:
-        classString = NS_LITERAL_STRING("moz-accessiblecaret left");
-        break;
-    }
-    element->SetAttribute(NS_LITERAL_STRING("class"), classString, rv);
+    element->SetAttribute(NS_LITERAL_STRING("class"),
+                          AppearanceString(aAppearance), rv);
   }
+}
+
+nsString
+AccessibleCaret::AppearanceString(Appearance aAppearance)
+{
+  nsAutoString string;
+  switch (aAppearance) {
+  case Appearance::NONE:
+    string = NS_LITERAL_STRING("moz-accessiblecaret none");
+    break;
+  case Appearance::NORMAL:
+    string = NS_LITERAL_STRING("moz-accessiblecaret normal");
+    break;
+  case Appearance::RIGHT:
+    string = NS_LITERAL_STRING("moz-accessiblecaret right");
+    break;
+  case Appearance::LEFT:
+    string = NS_LITERAL_STRING("moz-accessiblecaret left");
+    break;
+  }
+  return string;
 }
 
 bool
@@ -133,7 +139,7 @@ AccessibleCaret::MaybeInjectAnonymousContent()
     nsCOMPtr<Element> elementInner = document->CreateHTMLElement(nsGkAtoms::div);
     element->AppendChildTo(elementInner, false);
     element->SetAttribute(NS_LITERAL_STRING("class"),
-                          NS_LITERAL_STRING("moz-accessiblecaret none"), rv);
+                          AppearanceString(Appearance::NONE), rv);
     mAnonymousContent = document->InsertAnonymousContent(*element, rv);
     if (!rv.Failed() && mAnonymousContent) {
       mHasInjected = true;
