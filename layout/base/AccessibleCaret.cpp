@@ -21,11 +21,11 @@ static int32_t gAccessibleCaretInflateSize = 0;
 NS_IMPL_ISUPPORTS0(AccessibleCaret)
 
 AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
-  : mHasInjected(false)
-  , mAppearance(Appearance::NONE)
+  : mAppearance(Appearance::NONE)
   , mPresShell(aPresShell)
 {
   MOZ_ASSERT(NS_IsMainThread());
+  InjectAnonymousContent();
 
   // XXX: rename
   static bool addedPref = false;
@@ -54,8 +54,6 @@ AccessibleCaret::SetAppearance(Appearance aAppearance)
   if (mAppearance == aAppearance) {
     return;
   }
-
-  MaybeInjectAnonymousContent();
 
   mAppearance = aAppearance;
 
@@ -129,25 +127,28 @@ AccessibleCaret::Contains(const nsPoint& aPosition)
 }
 
 void
-AccessibleCaret::MaybeInjectAnonymousContent()
+AccessibleCaret::InjectAnonymousContent()
 {
-  if (mHasInjected) {
-    return;
-  }
-
   nsIDocument* document = mPresShell->GetDocument();
-  if (document) {
-    ErrorResult rv;
-    nsCOMPtr<Element> element = document->CreateHTMLElement(nsGkAtoms::div);
-    nsCOMPtr<Element> elementInner = document->CreateHTMLElement(nsGkAtoms::div);
-    element->AppendChildTo(elementInner, false);
-    element->SetAttribute(NS_LITERAL_STRING("class"),
-                          AppearanceString(Appearance::NONE), rv);
-    mAnonymousContent = document->InsertAnonymousContent(*element, rv);
-    if (!rv.Failed() && mAnonymousContent) {
-      mHasInjected = true;
-    }
-  }
+  MOZ_ASSERT(document, "PresShell should have document!");
+
+  ErrorResult rv;
+  nsCOMPtr<Element> element = CreateCaretElement(document);
+  mAnonymousContent = document->InsertAnonymousContent(*element, rv);
+  MOZ_ASSERT(!rv.Failed() && mAnonymousContent,
+             "We must have anonymous content!");
+}
+
+/* static */ already_AddRefed<Element>
+AccessibleCaret::CreateCaretElement(nsIDocument* aDocument)
+{
+  ErrorResult rv;
+  nsCOMPtr<Element> element = aDocument->CreateHTMLElement(nsGkAtoms::div);
+  nsCOMPtr<Element> elementInner = aDocument->CreateHTMLElement(nsGkAtoms::div);
+  element->AppendChildTo(elementInner, false);
+  element->SetAttribute(NS_LITERAL_STRING("class"),
+                        AppearanceString(Appearance::NONE), rv);
+  return element.forget();
 }
 
 void

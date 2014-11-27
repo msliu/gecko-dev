@@ -1931,6 +1931,11 @@ PresShell::Initialize(nscoord aWidth, nscoord aHeight)
       mFrameConstructor->EndUpdate();
     }
 
+    // Initialize after nsCanvasFrame is created.
+    if (mCopyPasteManager) {
+      mCopyPasteManager->Init();
+    }
+
     // nsAutoScriptBlocker going out of scope may have killed us too
     NS_ENSURE_STATE(!mHaveShutDown);
 

@@ -18,6 +18,8 @@ class CopyPasteManager MOZ_FINAL : public nsISelectionListener
 {
 public:
   explicit CopyPasteManager(nsIPresShell* aPresShell);
+  void Init();
+
   nsEventStatus HandleEvent(WidgetEvent* aEvent);
 
   NS_DECL_ISUPPORTS
