@@ -23,13 +23,21 @@ NS_IMPL_ISUPPORTS(CopyPasteManager, nsISelectionListener)
 
 CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
   : mPresShell(aPresShell)
-  , mFirstCaret(new AccessibleCaret(aPresShell))
-  , mSecondCaret(new AccessibleCaret(aPresShell))
   , mDragMode(DragMode::NONE)
   , mCaretMode(CaretMode::NONE)
   , mCaretCenterToDownPointOffsetY(0)
   , mGestureManager(aPresShell, this)
 {
+}
+
+void
+CopyPasteManager::Init()
+{
+  if (mPresShell->GetCanvasFrame()) {
+    // TODO: Pass canvas frame directly to AccessibleCaret's constructor.
+    mFirstCaret = new AccessibleCaret(mPresShell);
+    mSecondCaret = new AccessibleCaret(mPresShell);
+  }
 }
 
 CopyPasteManager::~CopyPasteManager()
@@ -47,6 +55,10 @@ CopyPasteManager::NotifySelectionChanged(nsIDOMDocument* aDoc,
                                          nsISelection* aSel,
                                          int16_t aReason)
 {
+  if (!mFirstCaret || !mSecondCaret) {
+    return NS_OK;
+  }
+
   UpdateCarets();
   return NS_OK;
 }
