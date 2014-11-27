@@ -64,7 +64,7 @@ AccessibleCaret::SetAppearance(Appearance aAppearance)
   }
 }
 
-nsString
+/* static */ nsString
 AccessibleCaret::AppearanceString(Appearance aAppearance)
 {
   nsAutoString string;
