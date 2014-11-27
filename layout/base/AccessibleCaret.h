@@ -13,6 +13,7 @@
 #include "nsISupportsImpl.h"
 #include "nsRect.h"
 #include "nsRefPtr.h"
+#include "nsString.h"
 
 class nsIFrame;
 class nsIPresShell;
@@ -49,6 +50,9 @@ private:
 
   void MaybeInjectAnonymousContent();
   void SetPosition(const nsPoint& aPosition);
+
+  // Utilities
+  static nsString AppearanceString(Appearance aAppearance);
 
   bool mHasInjected;
   Appearance mAppearance;
