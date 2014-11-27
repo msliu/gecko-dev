@@ -98,7 +98,7 @@ AccessibleCaret::Intersects(const AccessibleCaret& rhs)
     return false;
   }
 
-  if (!mAnonymousContent) {
+  if (!mAnonymousContent || !rhs.mAnonymousContent) {
     return false;
   }
 
