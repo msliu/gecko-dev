@@ -215,16 +215,18 @@ CopyPasteManager::GestureManager::GestureManager(nsIPresShell* aPresShell,
   , mHandler(aHandler)
   , mAsyncPanZoomEnabled(false)
 {
-  nsPresContext* presContext = mPresShell->GetPresContext();
-  MOZ_ASSERT(presContext, "PresContext should be given in PresShell::Init()");
+  if (mPresShell) {
+    nsPresContext* presContext = mPresShell->GetPresContext();
+    MOZ_ASSERT(presContext, "PresContext should be given in PresShell::Init()");
 
-  nsIDocShell* docShell = presContext->GetDocShell();
-  if (!docShell) {
-    return;
+    nsIDocShell* docShell = presContext->GetDocShell();
+    if (!docShell) {
+      return;
+    }
+
+    docShell->GetAsyncPanZoomEnabled(&mAsyncPanZoomEnabled);
+    mAsyncPanZoomEnabled = mAsyncPanZoomEnabled && gfxPrefs::AsyncPanZoomEnabled();
   }
-
-  docShell->GetAsyncPanZoomEnabled(&mAsyncPanZoomEnabled);
-  mAsyncPanZoomEnabled = mAsyncPanZoomEnabled && gfxPrefs::AsyncPanZoomEnabled();
 }
 
 nsEventStatus
@@ -493,6 +495,10 @@ CopyPasteManager::GestureManager::FireLongTap(nsITimer* aTimer, void* aGestureMa
 nsPoint
 CopyPasteManager::GestureManager::GetEventPosition(WidgetTouchEvent* aEvent, int32_t aIdentifier)
 {
+  if (!mPresShell) {
+    return nsPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE);
+  }
+
   for (size_t i = 0; i < aEvent->touches.Length(); i++) {
     if (aEvent->touches[i]->mIdentifier == aIdentifier) {
       // Get event coordinate relative to root frame.
@@ -509,6 +515,10 @@ CopyPasteManager::GestureManager::GetEventPosition(WidgetTouchEvent* aEvent, int
 nsPoint
 CopyPasteManager::GestureManager::GetEventPosition(WidgetMouseEvent* aEvent)
 {
+  if (!mPresShell) {
+    return nsPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE);
+  }
+
   // Get event coordinate relative to root frame.
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
   nsIntPoint mouseIntPoint =
