@@ -31,7 +31,7 @@ AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
   MOZ_ASSERT(mPresShell->GetCanvasFrame());
   MOZ_ASSERT(mPresShell->GetCanvasFrame()->GetCustomContentContainer());
 
-  mAnonymousContent = InjectCaretElement(mPresShell->GetDocument());
+  mCaretContentHolder = InjectCaretElement(mPresShell->GetDocument());
 }
 
 AccessibleCaret::~AccessibleCaret()
@@ -55,9 +55,9 @@ AccessibleCaret::SetAppearance(Appearance aAppearance)
 
   mAppearance = aAppearance;
 
-  if (mAnonymousContent) {
+  if (mCaretContentHolder) {
     ErrorResult rv;
-    nsCOMPtr<Element> element = mAnonymousContent->GetContentNode();
+    nsCOMPtr<Element> element = mCaretContentHolder->GetContentNode();
 
     element->SetAttribute(NS_LITERAL_STRING("class"),
                           AppearanceString(aAppearance), rv);
@@ -92,14 +92,14 @@ AccessibleCaret::Intersects(const AccessibleCaret& rhs)
     return false;
   }
 
-  if (!mAnonymousContent || !rhs.mAnonymousContent) {
+  if (!mCaretContentHolder || !rhs.mCaretContentHolder) {
     return false;
   }
 
   MOZ_ASSERT(mPresShell == rhs.mPresShell);
 
-  nsCOMPtr<Element> thisElement = mAnonymousContent->GetContentNode();
-  nsCOMPtr<Element> rhsElement = rhs.mAnonymousContent->GetContentNode();
+  nsCOMPtr<Element> thisElement = mCaretContentHolder->GetContentNode();
+  nsCOMPtr<Element> rhsElement = rhs.mCaretContentHolder->GetContentNode();
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
   nsRect thisRect = nsLayoutUtils::GetRectRelativeToFrame(thisElement, rootFrame);
   nsRect rhsRect = nsLayoutUtils::GetRectRelativeToFrame(rhsElement, rootFrame);
@@ -113,11 +113,11 @@ AccessibleCaret::Contains(const nsPoint& aPosition)
     return false;
   }
 
-  if (!mAnonymousContent) {
+  if (!mCaretContentHolder) {
     return false;
   }
 
-  nsCOMPtr<Element> element = mAnonymousContent->GetContentNode();
+  nsCOMPtr<Element> element = mCaretContentHolder->GetContentNode();
   Element* childElement = element->GetFirstElementChild();
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
   nsRect rect = nsLayoutUtils::GetRectRelativeToFrame(childElement, rootFrame);
@@ -194,7 +194,7 @@ AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset
 void
 AccessibleCaret::SetPosition(const nsPoint& aPosition)
 {
-  if (!mAnonymousContent) {
+  if (!mCaretContentHolder) {
     return;
   }
 
@@ -205,6 +205,6 @@ AccessibleCaret::SetPosition(const nsPoint& aPosition)
   styleStr.AppendFloat(nsPresContext::AppUnitsToFloatCSSPixels(aPosition.y));
   styleStr.AppendLiteral("px;");
 
-  nsCOMPtr<Element> element = mAnonymousContent->GetContentNode();
+  nsCOMPtr<Element> element = mCaretContentHolder->GetContentNode();
   element->SetAttr(kNameSpaceID_None, nsGkAtoms::style, styleStr, true);
 }
