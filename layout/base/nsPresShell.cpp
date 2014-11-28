@@ -912,7 +912,7 @@ PresShell::Init(nsIDocument* aDocument,
   }
 
   if (AccessibleCaretEnabled()) {
-    mCopyPasteManager = new CopyPasteManager(this);
+    mCopyPasteManager = new CopyPasteManager();
   }
 
   mSelection = new nsFrameSelection();
@@ -1933,7 +1933,7 @@ PresShell::Initialize(nscoord aWidth, nscoord aHeight)
 
     // Initialize after nsCanvasFrame is created.
     if (mCopyPasteManager) {
-      mCopyPasteManager->Init();
+      mCopyPasteManager->Init(this);
     }
 
     // nsAutoScriptBlocker going out of scope may have killed us too
