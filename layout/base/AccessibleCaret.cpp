@@ -184,12 +184,11 @@ void
 AccessibleCaret::SetPosition(const nsPoint& aPosition)
 {
   nsAutoString styleStr;
-  styleStr.AppendLiteral("left: ");
-  styleStr.AppendFloat(nsPresContext::AppUnitsToFloatCSSPixels(aPosition.x));
-  styleStr.AppendLiteral("px; top: ");
-  styleStr.AppendFloat(nsPresContext::AppUnitsToFloatCSSPixels(aPosition.y));
-  styleStr.AppendLiteral("px;");
+  styleStr.AppendPrintf("left: %dpx; top: %dpx;",
+                        nsPresContext::AppUnitsToIntCSSPixels(aPosition.x),
+                        nsPresContext::AppUnitsToIntCSSPixels(aPosition.y));
 
+  ErrorResult rv;
   nsCOMPtr<Element> element = mCaretContentHolder->GetContentNode();
-  element->SetAttr(kNameSpaceID_None, nsGkAtoms::style, styleStr, true);
+  element->SetAttribute(NS_LITERAL_STRING("style"), styleStr, rv);
 }
