@@ -37,7 +37,6 @@ AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
 AccessibleCaret::~AccessibleCaret()
 {
   MOZ_ASSERT(NS_IsMainThread());
-  mPresShell = nullptr;
 }
 
 bool
