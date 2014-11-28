@@ -149,6 +149,9 @@ SOURCES += [
     'nsRefreshDriver.cpp',
 ]
 
+if CONFIG['ENABLE_TESTS']:
+    DIRS += ['gtest']
+
 FAIL_ON_WARNINGS = True
 
 MSVC_ENABLE_PGO = True

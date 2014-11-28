@@ -7,7 +7,12 @@
 #ifndef CopyPasteManager_h__
 #define CopyPasteManager_h__
 
+#include "mozilla/EventForwards.h"
+#include "nsCOMPtr.h"
 #include "nsISelectionListener.h"
+#include "nsITimer.h"
+#include "nsPoint.h"
+#include "nsRefPtr.h"
 
 class nsIPresShell;
 
