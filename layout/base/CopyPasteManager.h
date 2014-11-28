@@ -13,14 +13,14 @@ class nsIPresShell;
 
 namespace mozilla {
 class AccessibleCaret;
+class CopyPasteManagerGlue;
 
-class CopyPasteManager MOZ_FINAL : public nsISelectionListener
+class CopyPasteManager : public nsISelectionListener
 {
 public:
-  explicit CopyPasteManager(nsIPresShell* aPresShell);
-  void Init();
-
-  nsEventStatus HandleEvent(WidgetEvent* aEvent);
+  CopyPasteManager();
+  virtual void Init(nsIPresShell* aPresShell);
+  virtual nsEventStatus HandleEvent(WidgetEvent* aEvent);
 
   NS_DECL_ISUPPORTS
   NS_DECL_NSISELECTIONLISTENER
@@ -34,53 +34,14 @@ public:
     SECOND_CARET
   MOZ_END_ENUM_CLASS(DragMode)
 
-private:
-  MOZ_BEGIN_NESTED_ENUM_CLASS(CaretMode, uint8_t)
-    NONE,
-    CURSOR,
-    SELECTION
-  MOZ_END_ENUM_CLASS(CaretMode);
-
-  ~CopyPasteManager();
-
-  // Utility function
-  dom::Selection* GetSelection();
-  already_AddRefed<nsFrameSelection> GetFrameSelection();
-  nsIContent* GetFocusedContent();
-
-  // Input event handler
-  nsEventStatus OnPress(const nsPoint& aPoint);
-  nsEventStatus OnDrag(const nsPoint& aPoint);
-  nsEventStatus OnRelease();
-  nsEventStatus OnLongTap(const nsPoint& aPoint);
-  nsEventStatus OnTap(const nsPoint& aPoint);
-
-  void UpdateCarets();
-  nsresult SelectWord(const nsPoint& aPoint);
-  void SetSelectionDragState(bool aState);
-  void SetSelectionDirection(bool aForward);
-  void HideCarets();
-  nsEventStatus DragCaret(const nsPoint &aMovePoint);
-
-  static nsIFrame* FindFirstNodeWithFrame(nsIDocument* aDocument,
-                                          nsRange* aRange,
-                                          nsFrameSelection* aFrameSelection,
-                                          bool aBackward,
-                                          int& aOutOffset);
-
-  nsIPresShell* mPresShell;
-  nsRefPtr<AccessibleCaret> mFirstCaret;
-  nsRefPtr<AccessibleCaret> mSecondCaret;
-  DragMode mDragMode;
-  CaretMode mCaretMode;
-  nscoord mCaretCenterToDownPointOffsetY;
-
-  class GestureManager {
+  class GestureManager : public nsISupports {
   public:
-    GestureManager(nsIPresShell* aPresShell, CopyPasteManager* aManager);
+    NS_DECL_ISUPPORTS
+    GestureManager(nsIPresShell* aPresShell, CopyPasteManager* aHandler);
     nsEventStatus HandleEvent(WidgetEvent* aEvent);
 
   private:
+    virtual ~GestureManager() {}
     MOZ_BEGIN_NESTED_ENUM_CLASS(InputState, uint8_t)
       PRESS,
       DRAG,
@@ -125,8 +86,33 @@ private:
     // True if AsyncPanZoom is enabled
     bool mAsyncPanZoomEnabled;
   };
+protected:
+  MOZ_BEGIN_NESTED_ENUM_CLASS(CaretMode, uint8_t)
+    NONE,
+    CURSOR,
+    SELECTION
+  MOZ_END_ENUM_CLASS(CaretMode);
 
-  GestureManager mGestureManager;
+  virtual ~CopyPasteManager();
+
+  virtual nsEventStatus OnPress(const nsPoint& aPoint);
+  virtual nsEventStatus OnDrag(const nsPoint& aPoint);
+  virtual nsEventStatus OnRelease();
+  virtual nsEventStatus OnLongTap(const nsPoint& aPoint);
+  virtual nsEventStatus OnTap(const nsPoint& aPoint);
+
+  void UpdateCarets();
+  void HideCarets();
+  nsEventStatus DragCaret(const nsPoint &aMovePoint);
+
+  nsRefPtr<AccessibleCaret> mFirstCaret;
+  nsRefPtr<AccessibleCaret> mSecondCaret;
+  DragMode mDragMode;
+  CaretMode mCaretMode;
+  nscoord mCaretCenterToDownPointOffsetY;
+  nsRefPtr<CopyPasteManagerGlue> mGlue;
+  bool mHasInited;
+  nsRefPtr<GestureManager> mGestureManager;
 };
 
 MOZ_FINISH_NESTED_ENUM_CLASS(CopyPasteManager::DragMode)
