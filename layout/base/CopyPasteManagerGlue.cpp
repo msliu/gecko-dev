@@ -341,7 +341,7 @@ CopyPasteManagerGlue::DragCaret(const nsPoint &aMovePoint, bool aIsExtend, bool 
   }
 
   int32_t rangeCount = selection->GetRangeCount();
-  MOZ_ASSERT(rangeCount <= 0);
+  MOZ_ASSERT(rangeCount > 0);
 
   nsRefPtr<nsRange> range = aIsBeginRange ?
     selection->GetRangeAt(0) : selection->GetRangeAt(rangeCount - 1);
