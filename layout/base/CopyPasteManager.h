@@ -36,7 +36,7 @@ public:
     GestureManager(nsIPresShell* aPresShell, CopyPasteManager* aHandler);
     nsEventStatus HandleEvent(WidgetEvent* aEvent);
 
-  private:
+  protected:
     virtual ~GestureManager() {}
     MOZ_BEGIN_NESTED_ENUM_CLASS(InputState, uint8_t)
       PRESS,
