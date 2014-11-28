@@ -24,12 +24,12 @@ public:
 
   virtual nsIFrame* FindFirstNodeWithFrame(bool aBackward, int& aOutOffset);
   virtual nsEventStatus DragCaret(const nsPoint &aMovePoint, bool aIsExtend, bool aIsBeginRange);
-private:
+protected:
   virtual ~CopyPasteManagerGlue() {}
   // Utility function
   dom::Selection* GetSelection();
-  virtual already_AddRefed<nsFrameSelection> GetFrameSelection();
-  virtual nsIContent* GetFocusedContent();
+  already_AddRefed<nsFrameSelection> GetFrameSelection();
+  nsIContent* GetFocusedContent();
 
   nsIPresShell* mPresShell;
 };

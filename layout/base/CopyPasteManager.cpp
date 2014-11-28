@@ -81,38 +81,39 @@ CopyPasteManager::HideCarets()
 void
 CopyPasteManager::UpdateCarets()
 {
-  nsRefPtr<Selection> selection = mGlue->GetSelection();
-  if (!selection) {
+  int32_t rangeCount = mGlue->GetSelectionRangeCount();
+  if (!rangeCount) {
     HideCarets();
     return;
   }
 
-  if (selection->IsCollapsed()) {
-    int32_t startOffset;
-    nsIFrame* startFrame = mGlue->FindFirstNodeWithFrame(false, startOffset);
+  mCaretMode = mGlue->GetSelectionIsCollapsed() ?
+               CaretMode::CURSOR :
+               CaretMode::SELECTION;
 
-    if (!startFrame) {
-      HideCarets();
-      return;
-    }
+  // Update first caret
+  int32_t startOffset;
+  nsIFrame* startFrame = mGlue->FindFirstNodeWithFrame(false, startOffset);
 
-    if (!startFrame->GetContent()->IsEditable()) {
-      HideCarets();
-      return;
-    }
+  if (!startFrame) {
+    HideCarets();
+    return;
+  }
 
-    mFirstCaret->SetPositionBasedOnFrameOffset(startFrame, startOffset);
-    mFirstCaret->SetAppearance(Appearance::NORMAL);
-    mSecondCaret->SetAppearance(Appearance::NONE);
-    mCaretMode = CaretMode::CURSOR;
-  } else {
-    int32_t startOffset;
-    nsIFrame* startFrame = mGlue->FindFirstNodeWithFrame(false, startOffset);
+  if (mCaretMode == CaretMode::CURSOR &&
+      !startFrame->GetContent()->IsEditable()) {
+    HideCarets();
+    return;
+  }
 
+  mFirstCaret->SetPositionBasedOnFrameOffset(startFrame, startOffset);
+
+  //Update second caret
+  if (mCaretMode == CaretMode::SELECTION) {
     int32_t endOffset;
     nsIFrame* endFrame = mGlue->FindFirstNodeWithFrame(true, endOffset);
 
-    if (!startFrame || !endFrame) {
+    if (!endFrame) {
       HideCarets();
       return;
     }
@@ -123,16 +124,20 @@ CopyPasteManager::UpdateCarets()
       return;
     }
 
-    mFirstCaret->SetPositionBasedOnFrameOffset(startFrame, startOffset);
     mSecondCaret->SetPositionBasedOnFrameOffset(endFrame, endOffset);
-    if (mFirstCaret->Intersects(*mSecondCaret)) {
-      mFirstCaret->SetAppearance(Appearance::LEFT);
-      mSecondCaret->SetAppearance(Appearance::RIGHT);
-    } else {
-      mFirstCaret->SetAppearance(Appearance::NORMAL);
+  }
+
+  if (mFirstCaret->Intersects(*mSecondCaret)) {
+    mFirstCaret->SetAppearance(Appearance::LEFT);
+    mSecondCaret->SetAppearance(Appearance::RIGHT);
+  } else {
+    mFirstCaret->SetAppearance(Appearance::NORMAL);
+
+    if (mCaretMode == CaretMode::CURSOR) {
+      mSecondCaret->SetAppearance(Appearance::NONE);
+    } else if (mCaretMode == CaretMode::SELECTION) {
       mSecondCaret->SetAppearance(Appearance::NORMAL);
     }
-    mCaretMode = CaretMode::SELECTION;
   }
 }
 
