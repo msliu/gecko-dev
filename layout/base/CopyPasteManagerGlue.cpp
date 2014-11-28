@@ -52,7 +52,23 @@ CopyPasteManagerGlue::GetFrameSelection()
 bool
 CopyPasteManagerGlue::GetSelectionIsCollapsed()
 {
-  return true;
+  Selection* sel = GetSelection();
+  if (!sel) {
+    return true;
+  }
+
+  return sel->IsCollapsed();
+}
+
+int32_t
+CopyPasteManagerGlue::GetSelectionRangeCount()
+{
+  Selection* sel = GetSelection();
+  if (!sel) {
+    return 0;
+  }
+
+  return sel->GetRangeCount();
 }
 
 nsresult
