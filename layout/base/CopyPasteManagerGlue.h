@@ -15,11 +15,8 @@ public:
   CopyPasteManagerGlue(nsIPresShell* aPresShell);
 
   NS_DECL_ISUPPORTS
-  // Utility function
-  virtual dom::Selection* GetSelection();
-  virtual already_AddRefed<nsFrameSelection> GetFrameSelection();
-  virtual nsIContent* GetFocusedContent();
   virtual bool GetSelectionIsCollapsed();
+  virtual int32_t GetSelectionRangeCount();
 
   virtual nsresult SelectWord(const nsPoint& aPoint);
   virtual void SetSelectionDragState(bool aState);
@@ -29,6 +26,11 @@ public:
   virtual nsEventStatus DragCaret(const nsPoint &aMovePoint, bool aIsExtend, bool aIsBeginRange);
 private:
   virtual ~CopyPasteManagerGlue() {}
+  // Utility function
+  dom::Selection* GetSelection();
+  virtual already_AddRefed<nsFrameSelection> GetFrameSelection();
+  virtual nsIContent* GetFocusedContent();
+
   nsIPresShell* mPresShell;
 };
 

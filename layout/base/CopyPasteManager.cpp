@@ -88,8 +88,6 @@ CopyPasteManager::UpdateCarets()
   }
 
   if (selection->IsCollapsed()) {
-    nsRefPtr<nsRange> firstRange = selection->GetRangeAt(0);
-
     int32_t startOffset;
     nsIFrame* startFrame = mGlue->FindFirstNodeWithFrame(false, startOffset);
 
@@ -108,10 +106,6 @@ CopyPasteManager::UpdateCarets()
     mSecondCaret->SetAppearance(Appearance::NONE);
     mCaretMode = CaretMode::CURSOR;
   } else {
-    int32_t rangeCount = selection->GetRangeCount();
-    nsRefPtr<nsRange> firstRange = selection->GetRangeAt(0);
-    nsRefPtr<nsRange> lastRange = selection->GetRangeAt(rangeCount - 1);
-
     int32_t startOffset;
     nsIFrame* startFrame = mGlue->FindFirstNodeWithFrame(false, startOffset);
 
