@@ -25,15 +25,6 @@ public:
   NS_DECL_ISUPPORTS
   NS_DECL_NSISELECTIONLISTENER
 
-  /**
-   * Indicate which part of caret we are dragging at.
-   */
-  MOZ_BEGIN_NESTED_ENUM_CLASS(DragMode, uint8_t)
-    NONE,
-    FIRST_CARET,
-    SECOND_CARET
-  MOZ_END_ENUM_CLASS(DragMode)
-
   class GestureManager : public nsISupports {
   public:
     NS_DECL_ISUPPORTS
@@ -87,6 +78,15 @@ public:
     bool mAsyncPanZoomEnabled;
   };
 protected:
+  /**
+   * Indicate which part of caret we are dragging at.
+   */
+  MOZ_BEGIN_NESTED_ENUM_CLASS(DragMode, uint8_t)
+    NONE,
+    FIRST_CARET,
+    SECOND_CARET
+  MOZ_END_ENUM_CLASS(DragMode)
+
   MOZ_BEGIN_NESTED_ENUM_CLASS(CaretMode, uint8_t)
     NONE,
     CURSOR,
