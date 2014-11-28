@@ -90,6 +90,12 @@ CopyPasteManagerGlue::SelectWord(const nsPoint& aPoint)
     return NS_OK;
   }
 
+  bool selectable;
+  ptFrame->IsSelectable(&selectable, nullptr);
+  if (!selectable) {
+    return NS_OK;
+  }
+
   nsPoint ptInFrame = aPoint;
   nsLayoutUtils::TransformPoint(rootFrame, ptFrame, ptInFrame);
 
@@ -117,7 +123,6 @@ CopyPasteManagerGlue::SelectWord(const nsPoint& aPoint)
   nsFrame* frame = static_cast<nsFrame*>(ptFrame);
   nsresult rs = frame->SelectByTypeAtPoint(mPresShell->GetPresContext(), ptInFrame,
                                            eSelectWord, eSelectWord, 0);
-
   SetSelectionDragState(false);
 
   // Clear maintain selection otherwise we cannot select less than a word
@@ -336,9 +341,7 @@ CopyPasteManagerGlue::DragCaret(const nsPoint &aMovePoint, bool aIsExtend, bool 
   }
 
   int32_t rangeCount = selection->GetRangeCount();
-  if (rangeCount <= 0) {
-    return nsEventStatus_eConsumeNoDefault;
-  }
+  MOZ_ASSERT(rangeCount <= 0);
 
   nsRefPtr<nsRange> range = aIsBeginRange ?
     selection->GetRangeAt(0) : selection->GetRangeAt(rangeCount - 1);
