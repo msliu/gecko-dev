@@ -55,13 +55,11 @@ AccessibleCaret::SetAppearance(Appearance aAppearance)
 
   mAppearance = aAppearance;
 
-  if (mCaretContentHolder) {
-    ErrorResult rv;
-    nsCOMPtr<Element> element = mCaretContentHolder->GetContentNode();
+  ErrorResult rv;
+  nsCOMPtr<Element> element = mCaretContentHolder->GetContentNode();
 
-    element->SetAttribute(NS_LITERAL_STRING("class"),
-                          AppearanceString(aAppearance), rv);
-  }
+  element->SetAttribute(NS_LITERAL_STRING("class"),
+                        AppearanceString(aAppearance), rv);
 }
 
 /* static */ nsString
@@ -92,10 +90,6 @@ AccessibleCaret::Intersects(const AccessibleCaret& rhs)
     return false;
   }
 
-  if (!mCaretContentHolder || !rhs.mCaretContentHolder) {
-    return false;
-  }
-
   MOZ_ASSERT(mPresShell == rhs.mPresShell);
 
   nsCOMPtr<Element> thisElement = mCaretContentHolder->GetContentNode();
@@ -110,10 +104,6 @@ bool
 AccessibleCaret::Contains(const nsPoint& aPosition)
 {
   if (!IsVisible()) {
-    return false;
-  }
-
-  if (!mCaretContentHolder) {
     return false;
   }
 
@@ -194,10 +184,6 @@ AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset
 void
 AccessibleCaret::SetPosition(const nsPoint& aPosition)
 {
-  if (!mCaretContentHolder) {
-    return;
-  }
-
   nsAutoString styleStr;
   styleStr.AppendLiteral("left: ");
   styleStr.AppendFloat(nsPresContext::AppUnitsToFloatCSSPixels(aPosition.x));

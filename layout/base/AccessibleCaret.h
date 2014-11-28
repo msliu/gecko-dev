@@ -57,8 +57,7 @@ private:
   // Utilities
   static nsString AppearanceString(Appearance aAppearance);
 
-  static already_AddRefed<dom::AnonymousContent> InjectCaretElement(
-    nsIDocument* aDocument);
+  static already_AddRefed<dom::AnonymousContent> InjectCaretElement(nsIDocument* aDocument);
   static already_AddRefed<dom::Element> CreateCaretElement(nsIDocument* aDocument);
 
   // Member variables
