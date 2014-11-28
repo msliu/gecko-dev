@@ -16,8 +16,6 @@
 using namespace mozilla;
 using namespace mozilla::dom;
 
-static int32_t gAccessibleCaretInflateSize = 0;
-
 NS_IMPL_ISUPPORTS0(AccessibleCaret)
 
 AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
@@ -26,14 +24,6 @@ AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
 {
   MOZ_ASSERT(NS_IsMainThread());
   InjectAnonymousContent();
-
-  // XXX: rename
-  static bool addedPref = false;
-  if (!addedPref) {
-    Preferences::AddIntVarCache(&gAccessibleCaretInflateSize,
-                                "selectioncaret.inflatesize.threshold");
-    addedPref = true;
-  }
 }
 
 AccessibleCaret::~AccessibleCaret()
@@ -123,7 +113,7 @@ AccessibleCaret::Contains(const nsPoint& aPosition)
   Element* childElement = element->GetFirstElementChild();
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
   nsRect rect = nsLayoutUtils::GetRectRelativeToFrame(childElement, rootFrame);
-  return nsLayoutUtils::ContainsPoint(rect, aPosition, gAccessibleCaretInflateSize);
+  return rect.Contains(aPosition);
 }
 
 void
