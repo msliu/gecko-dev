@@ -64,7 +64,7 @@ private:
   // Member variables
   Appearance mAppearance;
   nsIPresShell* mPresShell;
-  nsRefPtr<dom::AnonymousContent> mAnonymousContent;
+  nsRefPtr<dom::AnonymousContent> mCaretContentHolder;
   nsRect mFrameOffsetRect;
 }; // class AccessibleCaret
 
