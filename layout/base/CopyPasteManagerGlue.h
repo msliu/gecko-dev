@@ -30,8 +30,16 @@ protected:
   dom::Selection* GetSelection();
   already_AddRefed<nsFrameSelection> GetFrameSelection();
   nsIContent* GetFocusedContent();
+  /*
+   * If we're dragging start caret, we do not want to drag over previous
+   * character of end caret. Same as end caret. So we check if content offset
+   * exceed previous/next character of end/start caret base on aDragMode.
+   */
+   bool CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffsets,
+                                      bool aIsBeginRange);
 
   nsIPresShell* mPresShell;
+  static const int32_t sAutoScrollTimerDelay = 30;
 };
 
 } // namespace mozilla

@@ -223,18 +223,21 @@ CopyPasteManagerGlue::FindFirstNodeWithFrame(bool aBackward,
   return startFrame;
 }
 
-/*
- * If we're dragging start caret, we do not want to drag over previous
- * character of end caret. Same as end caret. So we check if content offset
- * exceed previous/next character of end/start caret base on aDragMode.
- */
-// XXX we have same name at SelectionCarets.
-static bool
-CompareRangeWithContentOffset2(nsRange* aRange,
-                              nsFrameSelection* aSelection,
-                              nsIFrame::ContentOffsets& aOffsets,
-                              bool aIsBeginRange)
+bool
+CopyPasteManagerGlue::CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffsets,
+                                                    bool aIsBeginRange)
 {
+  nsRefPtr<dom::Selection> selection = GetSelection();
+  if (!selection) {
+    return nsEventStatus_eConsumeNoDefault;
+  }
+
+  int32_t rangeCount = selection->GetRangeCount();
+  MOZ_ASSERT(rangeCount > 0);
+
+  nsRefPtr<nsRange> range = aIsBeginRange ?
+    selection->GetRangeAt(0) : selection->GetRangeAt(rangeCount - 1);
+
   nsINode* node = nullptr;
   int32_t nodeOffset = 0;
   CaretAssociationHint hint;
@@ -242,22 +245,27 @@ CompareRangeWithContentOffset2(nsRange* aRange,
 
   if (aIsBeginRange) {
     // Check previous character of end node offset
-    node = aRange->GetEndParent();
-    nodeOffset = aRange->EndOffset();
+    node = range->GetEndParent();
+    nodeOffset = range->EndOffset();
     hint = CARET_ASSOCIATE_BEFORE;
     dir = eDirPrevious;
   } else {
     // Check next character of start node offset
-    node = aRange->GetStartParent();
-    nodeOffset = aRange->StartOffset();
+    node = range->GetStartParent();
+    nodeOffset = range->StartOffset();
     hint =  CARET_ASSOCIATE_AFTER;
     dir = eDirNext;
   }
   nsCOMPtr<nsIContent> content = do_QueryInterface(node);
 
+  nsRefPtr<nsFrameSelection> fs = GetFrameSelection();
+  if (!fs) {
+    return false;
+  }
+
   int32_t offset = 0;
   nsIFrame* theFrame =
-    aSelection->GetFrameForNodeOffset(content, nodeOffset, hint, &offset);
+    fs->GetFrameForNodeOffset(content, nodeOffset, hint, &offset);
 
   if (!theFrame) {
     return false;
@@ -296,6 +304,10 @@ CompareRangeWithContentOffset2(nsRange* aRange,
 nsEventStatus
 CopyPasteManagerGlue::DragCaret(const nsPoint &aMovePoint, bool aIsExtend, bool aIsBeginRange)
 {
+  if (!mPresShell) {
+    return nsEventStatus_eConsumeNoDefault;
+  }
+
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
   if (!rootFrame) {
     return nsEventStatus_eConsumeNoDefault;
@@ -340,13 +352,7 @@ CopyPasteManagerGlue::DragCaret(const nsPoint &aMovePoint, bool aIsExtend, bool 
     return nsEventStatus_eConsumeNoDefault;
   }
 
-  int32_t rangeCount = selection->GetRangeCount();
-  MOZ_ASSERT(rangeCount > 0);
-
-  nsRefPtr<nsRange> range = aIsBeginRange ?
-    selection->GetRangeAt(0) : selection->GetRangeAt(rangeCount - 1);
-  if (aIsExtend &&
-      !CompareRangeWithContentOffset2(range, fs, offsets, aIsBeginRange)) {
+  if (aIsExtend && !CompareRangeWithContentOffset(offsets, aIsBeginRange)) {
     return nsEventStatus_eConsumeNoDefault;
   }
 
@@ -374,8 +380,7 @@ CopyPasteManagerGlue::DragCaret(const nsPoint &aMovePoint, bool aIsExtend, bool 
   nsIFrame *capturingFrame = saf->GetScrolledFrame();
   nsPoint ptInScrolled = aMovePoint;
   nsLayoutUtils::TransformPoint(rootFrame, capturingFrame, ptInScrolled);
-  // XXX: move 300 to a static const variable
-  fs->StartAutoScrollTimer(capturingFrame, ptInScrolled, 300);
+  fs->StartAutoScrollTimer(capturingFrame, ptInScrolled, sAutoScrollTimerDelay);
   return nsEventStatus_eConsumeNoDefault;
 }
 
