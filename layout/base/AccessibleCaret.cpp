@@ -85,11 +85,11 @@ AccessibleCaret::AppearanceString(Appearance aAppearance)
 bool
 AccessibleCaret::Intersects(const AccessibleCaret& aCaret)
 {
+  MOZ_ASSERT(mPresShell == aCaret.mPresShell);
+
   if (!IsVisible() || !aCaret.IsVisible()) {
     return false;
   }
-
-  MOZ_ASSERT(mPresShell == aCaret.mPresShell);
 
   nsCOMPtr<Element> thisElement = mCaretContentHolder->GetContentNode();
   nsCOMPtr<Element> rhsElement = aCaret.mCaretContentHolder->GetContentNode();
