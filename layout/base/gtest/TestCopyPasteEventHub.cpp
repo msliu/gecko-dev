@@ -6,10 +6,12 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#include "CopyPasteEventHub.h"
 #include "CopyPasteManager.h"
 #include "gfxPrefs.h"
 #include "mozilla/BasicEvents.h"
 #include "mozilla/MouseEvents.h"
+#include "nsDocShell.h"
 
 using namespace mozilla;
 using ::testing::_;
@@ -26,17 +28,17 @@ public:
   MOCK_METHOD1(OnTap, nsEventStatus(const nsPoint&));
 };
 
-class MockGestureManager : public CopyPasteManager::GestureManager {
+class MockGestureManager : public CopyPasteEventHub {
 public:
   MockGestureManager(MockCopyPasteManager* aManager)
-    : CopyPasteManager::GestureManager(nullptr, aManager)
+    : CopyPasteEventHub(nullptr, aManager)
   { }
 
-  CopyPasteManager::GestureManager::InputType GetType() { return mType; }
-  CopyPasteManager::GestureManager::InputState GetState() { return mState; }
+  CopyPasteEventHub::InputType GetType() { return mType; }
+  CopyPasteEventHub::InputState GetState() { return mState; }
 
-  typedef CopyPasteManager::GestureManager::InputState InputState;
-  typedef CopyPasteManager::GestureManager::InputType InputType;
+  typedef CopyPasteEventHub::InputState InputState;
+  typedef CopyPasteEventHub::InputType InputType;
 };
 
 class GestureManagerTester : public ::testing::Test {

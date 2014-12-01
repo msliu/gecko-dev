@@ -39,7 +39,7 @@ protected:
                                       bool aIsBeginRange);
 
   nsIPresShell* mPresShell;
-  static const int32_t sAutoScrollTimerDelay = 30;
+  static const int32_t kAutoScrollTimerDelay = 30;
 };
 
 } // namespace mozilla
