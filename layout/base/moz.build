@@ -101,6 +101,7 @@ EXPORTS.mozilla += [
 UNIFIED_SOURCES += [
     'AccessibleCaret.cpp',
     'ActiveLayerTracker.cpp',
+    'CopyPasteEventHub.cpp',
     'CopyPasteManager.cpp',
     'CopyPasteManagerGlue.cpp',
     'DisplayItemClip.cpp',

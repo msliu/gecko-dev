@@ -6,6 +6,8 @@
 
 #include "CopyPasteManagerGlue.h"
 
+#include "mozilla/dom/TreeWalker.h"
+
 NS_IMPL_ISUPPORTS0(CopyPasteManagerGlue)
 
 CopyPasteManagerGlue::CopyPasteManagerGlue(nsIPresShell* aPresShell)
@@ -380,7 +382,7 @@ CopyPasteManagerGlue::DragCaret(const nsPoint &aMovePoint, bool aIsExtend, bool 
   nsIFrame *capturingFrame = saf->GetScrolledFrame();
   nsPoint ptInScrolled = aMovePoint;
   nsLayoutUtils::TransformPoint(rootFrame, capturingFrame, ptInScrolled);
-  fs->StartAutoScrollTimer(capturingFrame, ptInScrolled, sAutoScrollTimerDelay);
+  fs->StartAutoScrollTimer(capturingFrame, ptInScrolled, kAutoScrollTimerDelay);
   return nsEventStatus_eConsumeNoDefault;
 }
 
