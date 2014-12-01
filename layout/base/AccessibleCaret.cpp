@@ -175,8 +175,6 @@ AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset
       nsLayoutUtils::IGNORE_CROSS_DOC |
       nsLayoutUtils::IGNORE_ROOT_SCROLL_FRAME);
 
-  SetAppearance(Appearance::NORMAL);
-  /* SetVisibility(hitFramesInRect.Contains(aFrame)); */
   SetPosition(rectInContainerFrame.BottomLeft());
 }
 

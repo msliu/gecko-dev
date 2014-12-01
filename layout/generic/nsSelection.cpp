@@ -51,9 +51,9 @@ static NS_DEFINE_CID(kFrameTraversalCID, NS_FRAMETRAVERSAL_CID);
 #include "nsPresContext.h"
 #include "nsIPresShell.h"
 #include "nsCaret.h"
-#include "CopyPasteManager.h"
 #include "TouchCaret.h"
 #include "SelectionCarets.h"
+#include "CopyPasteManager.h"
 
 #include "mozilla/MouseEvents.h"
 #include "mozilla/TextEvents.h"
