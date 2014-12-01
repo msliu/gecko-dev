@@ -83,16 +83,16 @@ AccessibleCaret::AppearanceString(Appearance aAppearance)
 }
 
 bool
-AccessibleCaret::Intersects(const AccessibleCaret& rhs)
+AccessibleCaret::Intersects(const AccessibleCaret& aCaret)
 {
-  if (!IsVisible() || !rhs.IsVisible()) {
+  if (!IsVisible() || !aCaret.IsVisible()) {
     return false;
   }
 
-  MOZ_ASSERT(mPresShell == rhs.mPresShell);
+  MOZ_ASSERT(mPresShell == aCaret.mPresShell);
 
   nsCOMPtr<Element> thisElement = mCaretContentHolder->GetContentNode();
-  nsCOMPtr<Element> rhsElement = rhs.mCaretContentHolder->GetContentNode();
+  nsCOMPtr<Element> rhsElement = aCaret.mCaretContentHolder->GetContentNode();
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
   nsRect thisRect = nsLayoutUtils::GetRectRelativeToFrame(thisElement, rootFrame);
   nsRect rhsRect = nsLayoutUtils::GetRectRelativeToFrame(rhsElement, rootFrame);
