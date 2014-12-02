@@ -398,15 +398,17 @@ nsPoint
 CopyPasteEventHub::GetEventPosition(WidgetTouchEvent* aEvent,
                                     int32_t aIdentifier)
 {
-  if (!mPresShell) {
-    return nsPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE);
-  }
-
   for (size_t i = 0; i < aEvent->touches.Length(); i++) {
     if (aEvent->touches[i]->mIdentifier == aIdentifier) {
+      nsIntPoint touchIntPoint = aEvent->touches[i]->mRefPoint;
+
+      // Return dev pixel directly, only used for gtest.
+      if (!mPresShell) {
+        return nsPoint(touchIntPoint.x, touchIntPoint.y);
+      }
+
       // Get event coordinate relative to root frame.
       nsIFrame* rootFrame = mPresShell->GetRootFrame();
-      nsIntPoint touchIntPoint = aEvent->touches[i]->mRefPoint;
       return nsLayoutUtils::GetEventCoordinatesRelativeTo(aEvent,
                                                           touchIntPoint,
                                                           rootFrame);
@@ -418,14 +420,16 @@ CopyPasteEventHub::GetEventPosition(WidgetTouchEvent* aEvent,
 nsPoint
 CopyPasteEventHub::GetEventPosition(WidgetMouseEvent* aEvent)
 {
+  nsIntPoint mouseIntPoint =
+    LayoutDeviceIntPoint::ToUntyped(aEvent->AsGUIEvent()->refPoint);
+
+  // Return dev pixel directly, only used for gtest.
   if (!mPresShell) {
-    return nsPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE);
+    return nsPoint(mouseIntPoint.x, mouseIntPoint.y);
   }
 
   // Get event coordinate relative to root frame.
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
-  nsIntPoint mouseIntPoint =
-    LayoutDeviceIntPoint::ToUntyped(aEvent->AsGUIEvent()->refPoint);
   return nsLayoutUtils::GetEventCoordinatesRelativeTo(aEvent,
                                                       mouseIntPoint,
                                                       rootFrame);
