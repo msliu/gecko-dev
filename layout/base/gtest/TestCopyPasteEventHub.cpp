@@ -12,7 +12,6 @@
 #include "gfxPrefs.h"
 #include "mozilla/BasicEvents.h"
 #include "mozilla/MouseEvents.h"
-#include "nsDocShell.h"
 
 using namespace mozilla;
 using ::testing::_;
