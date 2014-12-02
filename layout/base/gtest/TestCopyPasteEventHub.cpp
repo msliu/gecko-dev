@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#include "nsIFrame.h"
 #include "CopyPasteEventHub.h"
 #include "CopyPasteManager.h"
 #include "gfxPrefs.h"
@@ -22,6 +23,10 @@ using ::testing::DefaultValue;
 class MockCopyPasteManager : public CopyPasteManager
 {
 public:
+  MockCopyPasteManager()
+    : CopyPasteManager(nullptr)
+  { }
+
   MOCK_METHOD1(OnPress, nsEventStatus(const nsPoint&));
   MOCK_METHOD1(OnDrag, nsEventStatus(const nsPoint&));
   MOCK_METHOD0(OnRelease, nsEventStatus());
