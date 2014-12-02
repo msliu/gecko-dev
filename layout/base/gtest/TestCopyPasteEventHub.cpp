@@ -15,6 +15,7 @@
 
 using namespace mozilla;
 using ::testing::_;
+using ::testing::Eq;
 using ::testing::AtLeast;
 using ::testing::DefaultValue;
 
@@ -41,7 +42,7 @@ public:
   typedef CopyPasteEventHub::InputType InputType;
 };
 
-class GestureManagerTester : public ::testing::Test {
+class CopyPasteEventHubTester : public ::testing::Test {
 protected:
   virtual void SetUp()
   {
@@ -56,14 +57,41 @@ protected:
   nsRefPtr<MockCopyPasteManager> mMockHandler;
 };
 
-TEST_F(GestureManagerTester, TestOnPress) {
-  EXPECT_CALL(*mMockHandler, OnPress(_))
-    .Times(AtLeast(1));
+TEST_F(CopyPasteEventHubTester, TestOnPress) {
+  EXPECT_CALL(*mMockHandler, OnPress(Eq(nsPoint(0, 0))))
+    .Times(1);
 
   WidgetMouseEvent evt(true, NS_MOUSE_BUTTON_DOWN, nullptr, WidgetMouseEvent::eReal);
   evt.button = WidgetMouseEvent::eLeftButton;
   mGestureManager->HandleEvent(&evt);
 
   EXPECT_EQ(mGestureManager->GetState(), MockGestureManager::InputState::PRESS);
+  EXPECT_EQ(mGestureManager->GetType(), MockGestureManager::InputType::MOUSE);
+}
+
+TEST_F(CopyPasteEventHubTester, TestOnDrag) {
+  // Press first
+  EXPECT_CALL(*mMockHandler, OnPress(Eq(nsPoint(0, 0))))
+    .Times(1);
+  WidgetMouseEvent evt(true, NS_MOUSE_BUTTON_DOWN, nullptr, WidgetMouseEvent::eReal);
+  evt.button = WidgetMouseEvent::eLeftButton;
+  evt.refPoint = LayoutDeviceIntPoint(0, 0);
+  mGestureManager->HandleEvent(&evt);
+  EXPECT_EQ(mGestureManager->GetState(), MockGestureManager::InputState::PRESS);
+
+  // Then drag but not exceed kMoveStartTolerancePx
+  EXPECT_CALL(*mMockHandler, OnDrag(Eq(nsPoint(100, 100))))
+    .Times(1);
+  evt.message = NS_MOUSE_MOVE;
+  evt.refPoint = LayoutDeviceIntPoint(100, 100);
+  mGestureManager->HandleEvent(&evt);
+  EXPECT_EQ(mGestureManager->GetState(), MockGestureManager::InputState::PRESS);
+
+  // Then drag over kMoveStartTolerancePx
+  EXPECT_CALL(*mMockHandler, OnDrag(Eq(nsPoint(300, 300))))
+    .Times(1);
+  evt.refPoint = LayoutDeviceIntPoint(300, 300);
+  mGestureManager->HandleEvent(&evt);
+  EXPECT_EQ(mGestureManager->GetState(), MockGestureManager::InputState::DRAG);
   EXPECT_EQ(mGestureManager->GetType(), MockGestureManager::InputType::MOUSE);
 }
