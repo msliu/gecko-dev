@@ -7,11 +7,13 @@
 #include "CopyPasteEventHub.h"
 
 #include "CopyPasteManager.h"
+#include "gfxPrefs.h"
 #include "mozilla/TouchEvents.h"
-#include "nsDocShell.h"
 #include "nsFocusManager.h"
 #include "nsFrameSelection.h"
 #include "nsITimer.h"
+
+using namespace mozilla;
 
 NS_IMPL_ISUPPORTS(CopyPasteEventHub,
                   nsIReflowObserver,

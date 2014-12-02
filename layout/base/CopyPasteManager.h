@@ -8,6 +8,8 @@
 #define CopyPasteManager_h__
 
 #include "nsCOMPtr.h"
+#include "nsCoord.h"
+#include "nsIFrame.h"
 #include "nsISelectionListener.h"
 #include "nsRefPtr.h"
 #include "nsWeakReference.h"
@@ -16,8 +18,8 @@
 
 class nsFrameSelection;
 class nsIContent;
-class nsIFrame;
 class nsIPresShell;
+struct nsPoint;
 
 namespace mozilla {
 

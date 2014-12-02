@@ -8,6 +8,7 @@
 #define CopyPasteEventHub_h__
 
 #include "nsCOMPtr.h"
+#include "nsDocShell.h"
 #include "nsIReflowObserver.h"
 #include "nsIScrollObserver.h"
 #include "nsISelectionListener.h"
