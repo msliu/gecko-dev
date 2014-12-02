@@ -7,7 +7,13 @@
 #include "CopyPasteManager.h"
 
 #include "AccessibleCaret.h"
+#include "CopyPasteEventHub.h"
+#include "mozilla/dom/Element.h"
+#include "mozilla/dom/Selection.h"
 #include "mozilla/dom/TreeWalker.h"
+#include "nsFocusManager.h"
+#include "nsFrame.h"
+#include "nsFrameSelection.h"
 
 using namespace mozilla;
 using namespace mozilla::dom;
