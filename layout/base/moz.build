@@ -103,7 +103,6 @@ UNIFIED_SOURCES += [
     'ActiveLayerTracker.cpp',
     'CopyPasteEventHub.cpp',
     'CopyPasteManager.cpp',
-    'CopyPasteManagerGlue.cpp',
     'DisplayItemClip.cpp',
     'DisplayListClipState.cpp',
     'FrameLayerBuilder.cpp',

@@ -14,18 +14,25 @@
 #include "mozilla/EventForwards.h"
 #include "mozilla/WeakPtr.h"
 
+class nsFrameSelection;
+class nsIContent;
+class nsIFrame;
 class nsIPresShell;
 
 namespace mozilla {
+
+namespace dom {
+class Selection;
+}
+
 class AccessibleCaret;
 class CopyPasteEventHub;
-class CopyPasteManagerGlue;
 
 class CopyPasteManager : public nsISelectionListener
 {
 public:
-  CopyPasteManager();
-  virtual void Init(nsIPresShell* aPresShell);
+  explicit CopyPasteManager(nsIPresShell* aPresShell);
+  virtual void Init();
   virtual void Terminate();
   virtual nsEventStatus HandleEvent(WidgetEvent* aEvent);
 
@@ -62,15 +69,36 @@ protected:
   void UpdateCarets();
   void HideCarets();
 
+  // Glue function
+  virtual bool GetSelectionIsCollapsed();
+  virtual int32_t GetSelectionRangeCount();
+  virtual nsresult SelectWord(const nsPoint& aPoint);
+  virtual void SetSelectionDragState(bool aState);
+  virtual void SetSelectionDirection(bool aForward);
+  virtual nsIFrame* FindFirstNodeWithFrame(bool aBackward, int& aOutOffset);
+  virtual nsEventStatus DragCaret(const nsPoint &aMovePoint);
+
+  // Utility function
+  dom::Selection* GetSelection();
+  already_AddRefed<nsFrameSelection> GetFrameSelection();
+  nsIContent* GetFocusedContent();
+  /*
+   * If we're dragging start caret, we do not want to drag over previous
+   * character of end caret. Same as end caret. So we check if content offset
+   * exceed previous/next character of end/start caret base on aDragMode.
+   */
+  bool CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffsets);
+
   bool mHasInited;
   DragMode mDragMode;
   CaretMode mCaretMode;
   nscoord mCaretCenterToDownPointOffsetY;
+  nsIPresShell* mPresShell;
   nsRefPtr<AccessibleCaret> mFirstCaret;
   nsRefPtr<AccessibleCaret> mSecondCaret;
-  nsRefPtr<CopyPasteManagerGlue> mGlue;
   nsRefPtr<CopyPasteEventHub> mCopyPasteEventHub;
 
+  static const int32_t kAutoScrollTimerDelay = 30;
   friend class CopyPasteEventHub;
 };
 
