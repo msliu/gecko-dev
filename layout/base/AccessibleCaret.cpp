@@ -168,21 +168,21 @@ AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset
   nsIFrame* containerFrame = customContainer->GetPrimaryFrame();
   MOZ_ASSERT(containerFrame);
 
-  mFrameOffsetRect = nsCaret::GetGeometryForFrame(aFrame, aOffset, nullptr);
+  mImaginaryCaretRect = nsCaret::GetGeometryForFrame(aFrame, aOffset, nullptr);
 
   // GetGeometryForFrame may return a rect that outside frame's rect. So
   // constrain rect inside frame's rect.
-  mFrameOffsetRect = mFrameOffsetRect.ForceInside(aFrame->GetRectRelativeToSelf());
-  nsRect rectInContainerFrame = mFrameOffsetRect;
+  mImaginaryCaretRect = mImaginaryCaretRect.ForceInside(aFrame->GetRectRelativeToSelf());
+  nsRect rectInContainerFrame = mImaginaryCaretRect;
 
-  nsLayoutUtils::TransformRect(aFrame, rootFrame, mFrameOffsetRect);
+  nsLayoutUtils::TransformRect(aFrame, rootFrame, mImaginaryCaretRect);
   nsLayoutUtils::TransformRect(aFrame, containerFrame, rectInContainerFrame);
 
-  mFrameOffsetRect.Inflate(AppUnitsPerCSSPixel(), 0);
+  mImaginaryCaretRect.Inflate(AppUnitsPerCSSPixel(), 0);
 
   nsAutoTArray<nsIFrame*, 16> hitFramesInRect;
   nsLayoutUtils::GetFramesForArea(rootFrame,
-    mFrameOffsetRect,
+    mImaginaryCaretRect,
     hitFramesInRect,
     nsLayoutUtils::IGNORE_PAINT_SUPPRESSION |
       nsLayoutUtils::IGNORE_CROSS_DOC |
@@ -197,14 +197,14 @@ AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset
 nsPoint
 AccessibleCaret::LogicalPosition() const
 {
-  return mFrameOffsetRect.Center();
+  return mImaginaryCaretRect.Center();
 }
 
 nsPoint
 AccessibleCaret::CaretElementPosition() const
 {
-  return mFrameOffsetRect.TopLeft()
-    + nsPoint(mFrameOffsetRect.width/2, mFrameOffsetRect.height);
+  return mImaginaryCaretRect.TopLeft()
+    + nsPoint(mImaginaryCaretRect.width/2, mImaginaryCaretRect.height);
 }
 
 void
