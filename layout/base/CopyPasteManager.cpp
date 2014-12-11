@@ -163,13 +163,13 @@ CopyPasteManager::OnPress(const nsPoint& aPoint)
 {
   if (mFirstCaret->Contains(aPoint)) {
     mDragMode = DragMode::FIRST_CARET;
-    mCaretCenterToDownPointOffsetY = mFirstCaret->GetFrameOffsetRect().Center().y - aPoint.y;
+    mCaretCenterToDownPointOffsetY = mFirstCaret->LogicalPosition().y - aPoint.y;
     SetSelectionDirection(false);
     SetSelectionDragState(true);
     return nsEventStatus_eConsumeNoDefault;
   } else if (mSecondCaret->Contains(aPoint)) {
     mDragMode = DragMode::SECOND_CARET;
-    mCaretCenterToDownPointOffsetY = mSecondCaret->GetFrameOffsetRect().Center().y - aPoint.y;
+    mCaretCenterToDownPointOffsetY = mSecondCaret->LogicalPosition().y - aPoint.y;
     SetSelectionDirection(true);
     SetSelectionDragState(true);
     return nsEventStatus_eConsumeNoDefault;
