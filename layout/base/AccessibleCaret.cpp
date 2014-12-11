@@ -160,7 +160,7 @@ AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset
   mImaginaryCaretRect = nsCaret::GetGeometryForFrame(aFrame, aOffset, nullptr);
   nsLayoutUtils::TransformRect(aFrame, rootFrame, mImaginaryCaretRect);
 
-  SetPosition(CaretElementPosition());
+  SetCaretElementPosition(CaretElementPosition());
 }
 
 nsIFrame*
@@ -187,7 +187,7 @@ AccessibleCaret::CaretElementPosition() const
 }
 
 void
-AccessibleCaret::SetPosition(const nsPoint& aPosition)
+AccessibleCaret::SetCaretElementPosition(const nsPoint& aPosition)
 {
   // Transform aPosition so that it relatives to containerFrame.
   nsPoint position = aPosition;
