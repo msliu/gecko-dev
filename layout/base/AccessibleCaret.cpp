@@ -30,6 +30,7 @@ AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
   MOZ_ASSERT(mPresShell->GetDocument());
   MOZ_ASSERT(mPresShell->GetCanvasFrame());
   MOZ_ASSERT(mPresShell->GetCanvasFrame()->GetCustomContentContainer());
+  MOZ_ASSERT(ElementContainerFrame());
 
   mCaretElementHolder = InjectCaretElement(mPresShell->GetDocument());
 }
@@ -169,7 +170,6 @@ AccessibleCaret::ElementContainerFrame() const
   nsCanvasFrame* canvasFrame = mPresShell->GetCanvasFrame();
   Element* container = canvasFrame->GetCustomContentContainer();
   nsIFrame* containerFrame = container->GetPrimaryFrame();
-  MOZ_ASSERT(containerFrame);
   return containerFrame;
 }
 
