@@ -87,6 +87,12 @@ AccessibleCaret::CaretElement() const
   return mCaretContentHolder->GetContentNode();
 }
 
+Element*
+AccessibleCaret::CaretElementInner() const
+{
+  return CaretElement()->GetFirstElementChild();
+}
+
 bool
 AccessibleCaret::Intersects(const AccessibleCaret& aCaret)
 {
@@ -111,10 +117,8 @@ AccessibleCaret::Contains(const nsPoint& aPosition)
     return false;
   }
 
-  Element* element = CaretElement();
-  Element* childElement = element->GetFirstElementChild();
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
-  nsRect rect = nsLayoutUtils::GetRectRelativeToFrame(childElement, rootFrame);
+  nsRect rect = nsLayoutUtils::GetRectRelativeToFrame(CaretElementInner(), rootFrame);
   return rect.Contains(aPosition);
 }
 

@@ -56,6 +56,7 @@ private:
   void SetPosition(const nsPoint& aPosition);
 
   dom::Element* CaretElement() const;
+  dom::Element* CaretElementInner() const;
 
   // Utilities
   static nsString AppearanceString(Appearance aAppearance);
