@@ -70,6 +70,8 @@ private:
   // Element which contains the caret image for 'Contains' test.
   dom::Element* CaretElementInner() const;
 
+  nsIFrame* ElementContainerFrame() const;
+
   nsRect GetRectRelativeToRootFrame(dom::Element* aElement);
 
   // Utilities
