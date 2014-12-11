@@ -191,6 +191,12 @@ AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset
   SetPosition(rectInContainerFrame.BottomLeft());
 }
 
+nsPoint
+AccessibleCaret::LogicalPosition() const
+{
+  return mFrameOffsetRect.Center();
+}
+
 void
 AccessibleCaret::SetPosition(const nsPoint& aPosition)
 {

@@ -48,7 +48,10 @@ public:
   void SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset);
   bool Intersects(const AccessibleCaret& rhs);
   bool Contains(const nsPoint& aPosition);
-  const nsRect& GetFrameOffsetRect() const { return mFrameOffsetRect; }
+
+  // The geometry center of a imaginary caret to which this AccessibleCaret is
+  // attached.
+  nsPoint LogicalPosition() const;
 
 private:
   ~AccessibleCaret();
