@@ -26,7 +26,7 @@ AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
 
   // Check all resources required.
   MOZ_ASSERT(mPresShell);
-  MOZ_ASSERT(mPresShell->GetRootFrame());
+  MOZ_ASSERT(RootFrame());
   MOZ_ASSERT(mPresShell->GetDocument());
   MOZ_ASSERT(mPresShell->GetCanvasFrame());
   MOZ_ASSERT(mPresShell->GetCanvasFrame()->GetCustomContentContainer());
@@ -103,8 +103,8 @@ AccessibleCaret::Intersects(const AccessibleCaret& aCaret)
     return false;
   }
 
-  nsRect rect = GetRectRelativeToRootFrame(CaretElement());
-  nsRect rhsRect = GetRectRelativeToRootFrame(aCaret.CaretElement());
+  nsRect rect = nsLayoutUtils::GetRectRelativeToFrame(CaretElement(), RootFrame());
+  nsRect rhsRect = nsLayoutUtils::GetRectRelativeToFrame(aCaret.CaretElement(), RootFrame());
   return rect.Intersects(rhsRect);
 }
 
@@ -115,15 +115,8 @@ AccessibleCaret::Contains(const nsPoint& aPosition)
     return false;
   }
 
-  nsRect rect = GetRectRelativeToRootFrame(CaretElementInner());
+  nsRect rect = nsLayoutUtils::GetRectRelativeToFrame(CaretElementInner(), RootFrame());
   return rect.Contains(aPosition);
-}
-
-nsRect
-AccessibleCaret::GetRectRelativeToRootFrame(Element* aElement)
-{
-  nsIFrame* rootFrame = mPresShell->GetRootFrame();
-  return nsLayoutUtils::GetRectRelativeToFrame(aElement, rootFrame);
 }
 
 /* static */ already_AddRefed<AnonymousContent>
@@ -156,12 +149,16 @@ AccessibleCaret::CreateCaretElement(nsIDocument* aDocument)
 void
 AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
 {
-  nsIFrame* rootFrame = mPresShell->GetRootFrame();
-
   mImaginaryCaretRect = nsCaret::GetGeometryForFrame(aFrame, aOffset, nullptr);
-  nsLayoutUtils::TransformRect(aFrame, rootFrame, mImaginaryCaretRect);
+  nsLayoutUtils::TransformRect(aFrame, RootFrame(), mImaginaryCaretRect);
 
   SetCaretElementPosition(CaretElementPosition());
+}
+
+nsIFrame*
+AccessibleCaret::RootFrame() const
+{
+  return mPresShell->GetRootFrame();
 }
 
 nsIFrame*
@@ -191,8 +188,7 @@ AccessibleCaret::SetCaretElementPosition(const nsPoint& aPosition)
 {
   // Transform aPosition so that it relatives to containerFrame.
   nsPoint position = aPosition;
-  nsLayoutUtils::TransformPoint(mPresShell->GetRootFrame(), ElementContainerFrame(),
-                                position);
+  nsLayoutUtils::TransformPoint(RootFrame(), ElementContainerFrame(), position);
 
   nsAutoString styleStr;
   styleStr.AppendPrintf("left: %dpx; top: %dpx;",
