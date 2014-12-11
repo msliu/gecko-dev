@@ -148,6 +148,7 @@ AccessibleCaret::CreateCaretElement(nsIDocument* aDocument)
   element->AppendChildTo(elementInner, false);
   element->SetAttribute(NS_LITERAL_STRING("class"),
                         AppearanceString(Appearance::NONE), rv);
+  MOZ_ASSERT(!rv.Failed());
   return element.forget();
 }
 
