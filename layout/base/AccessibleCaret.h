@@ -58,6 +58,8 @@ private:
   dom::Element* CaretElement() const;
   dom::Element* CaretElementInner() const;
 
+  nsRect GetRectRelativeToRootFrame(dom::Element* aElement);
+
   // Utilities
   static nsString AppearanceString(Appearance aAppearance);
 

@@ -102,12 +102,9 @@ AccessibleCaret::Intersects(const AccessibleCaret& aCaret)
     return false;
   }
 
-  Element* thisElement = CaretElement();
-  Element* rhsElement = aCaret.CaretElement();
-  nsIFrame* rootFrame = mPresShell->GetRootFrame();
-  nsRect thisRect = nsLayoutUtils::GetRectRelativeToFrame(thisElement, rootFrame);
-  nsRect rhsRect = nsLayoutUtils::GetRectRelativeToFrame(rhsElement, rootFrame);
-  return thisRect.Intersects(rhsRect);
+  nsRect rect = GetRectRelativeToRootFrame(CaretElement());
+  nsRect rhsRect = GetRectRelativeToRootFrame(aCaret.CaretElement());
+  return rect.Intersects(rhsRect);
 }
 
 bool
@@ -117,9 +114,15 @@ AccessibleCaret::Contains(const nsPoint& aPosition)
     return false;
   }
 
-  nsIFrame* rootFrame = mPresShell->GetRootFrame();
-  nsRect rect = nsLayoutUtils::GetRectRelativeToFrame(CaretElementInner(), rootFrame);
+  nsRect rect = GetRectRelativeToRootFrame(CaretElementInner());
   return rect.Contains(aPosition);
+}
+
+nsRect
+AccessibleCaret::GetRectRelativeToRootFrame(Element* aElement)
+{
+  nsIFrame* rootFrame = mPresShell->GetRootFrame();
+  return nsLayoutUtils::GetRectRelativeToFrame(aElement, rootFrame);
 }
 
 /* static */ already_AddRefed<AnonymousContent>
