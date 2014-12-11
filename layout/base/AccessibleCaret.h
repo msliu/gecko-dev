@@ -62,7 +62,7 @@ private:
   // attached.
   nsPoint CaretElementPosition() const;
 
-  void SetPosition(const nsPoint& aPosition);
+  void SetCaretElementPosition(const nsPoint& aPosition);
 
   // Element for 'Intersects' test.
   dom::Element* CaretElement() const;
