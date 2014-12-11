@@ -11,6 +11,7 @@
 #include "mozilla/TypedEnum.h"
 #include "nsISupportsBase.h"
 #include "nsISupportsImpl.h"
+#include "nsCOMPtr.h"
 #include "nsRect.h"
 #include "nsRefPtr.h"
 #include "nsString.h"
@@ -53,6 +54,8 @@ private:
   ~AccessibleCaret();
 
   void SetPosition(const nsPoint& aPosition);
+
+  dom::Element* CaretElement() const;
 
   // Utilities
   static nsString AppearanceString(Appearance aAppearance);
