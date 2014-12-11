@@ -82,7 +82,7 @@ private:
   Appearance mAppearance;
   nsIPresShell* mPresShell;
   nsRefPtr<dom::AnonymousContent> mCaretElementHolder;
-  nsRect mFrameOffsetRect;
+  nsRect mImaginaryCaretRect;
 }; // class AccessibleCaret
 
 MOZ_FINISH_NESTED_ENUM_CLASS(AccessibleCaret::Appearance)
