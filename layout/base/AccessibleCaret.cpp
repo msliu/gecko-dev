@@ -156,15 +156,11 @@ void
 AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset)
 {
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
-  nsIFrame* containerFrame = ElementContainerFrame();
 
   mImaginaryCaretRect = nsCaret::GetGeometryForFrame(aFrame, aOffset, nullptr);
   nsLayoutUtils::TransformRect(aFrame, rootFrame, mImaginaryCaretRect);
 
-  nsPoint caretElementPositionRelativeToContainerFrame = CaretElementPosition();
-  nsLayoutUtils::TransformPoint(rootFrame, containerFrame,
-                                caretElementPositionRelativeToContainerFrame);
-  SetPosition(caretElementPositionRelativeToContainerFrame);
+  SetPosition(CaretElementPosition());
 }
 
 nsIFrame*
@@ -193,10 +189,15 @@ AccessibleCaret::CaretElementPosition() const
 void
 AccessibleCaret::SetPosition(const nsPoint& aPosition)
 {
+  // Transform aPosition so that it relatives to containerFrame.
+  nsPoint position = aPosition;
+  nsLayoutUtils::TransformPoint(mPresShell->GetRootFrame(), ElementContainerFrame(),
+                                position);
+
   nsAutoString styleStr;
   styleStr.AppendPrintf("left: %dpx; top: %dpx;",
-                        nsPresContext::AppUnitsToIntCSSPixels(aPosition.x),
-                        nsPresContext::AppUnitsToIntCSSPixels(aPosition.y));
+                        nsPresContext::AppUnitsToIntCSSPixels(position.x),
+                        nsPresContext::AppUnitsToIntCSSPixels(position.y));
 
   ErrorResult rv;
   CaretElement()->SetAttribute(NS_LITERAL_STRING("style"), styleStr, rv);
