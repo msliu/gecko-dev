@@ -188,13 +188,23 @@ AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset
       nsLayoutUtils::IGNORE_CROSS_DOC |
       nsLayoutUtils::IGNORE_ROOT_SCROLL_FRAME);
 
-  SetPosition(rectInContainerFrame.BottomLeft());
+  nsPoint caretElementPositionRelativeToContainerFrame = CaretElementPosition();
+    nsLayoutUtils::TransformPoint(rootFrame, containerFrame,
+                                  caretElementPositionRelativeToContainerFrame);
+  SetPosition(caretElementPositionRelativeToContainerFrame);
 }
 
 nsPoint
 AccessibleCaret::LogicalPosition() const
 {
   return mFrameOffsetRect.Center();
+}
+
+nsPoint
+AccessibleCaret::CaretElementPosition() const
+{
+  return mFrameOffsetRect.TopLeft()
+    + nsPoint(mFrameOffsetRect.width/2, mFrameOffsetRect.height);
 }
 
 void

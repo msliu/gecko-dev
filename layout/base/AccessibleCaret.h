@@ -28,6 +28,8 @@ class AnonymousContent;
 class Element;
 }
 
+// All the rect or point used are relative to root frame except being specified
+// explicitly.
 class AccessibleCaret MOZ_FINAL : public nsISupports
 {
 public:
@@ -55,6 +57,10 @@ public:
 
 private:
   ~AccessibleCaret();
+
+  // The bottom-center of a imaginary caret to which this AccessibleCaret is
+  // attached.
+  nsPoint CaretElementPosition() const;
 
   void SetPosition(const nsPoint& aPosition);
 
