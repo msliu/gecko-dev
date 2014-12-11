@@ -55,7 +55,10 @@ private:
 
   void SetPosition(const nsPoint& aPosition);
 
+  // Element for 'Intersects' test.
   dom::Element* CaretElement() const;
+
+  // Element which contains the caret image for 'Contains' test.
   dom::Element* CaretElementInner() const;
 
   nsRect GetRectRelativeToRootFrame(dom::Element* aElement);
