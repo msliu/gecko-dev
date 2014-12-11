@@ -155,43 +155,26 @@ AccessibleCaret::CreateCaretElement(nsIDocument* aDocument)
 void
 AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset)
 {
-  nsCanvasFrame* canvasFrame = mPresShell->GetCanvasFrame();
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
-
-  if (!canvasFrame || !rootFrame) {
-    return;
-  }
-
-  Element* customContainer = canvasFrame->GetCustomContentContainer();
-  MOZ_ASSERT(customContainer);
-
-  nsIFrame* containerFrame = customContainer->GetPrimaryFrame();
-  MOZ_ASSERT(containerFrame);
+  nsIFrame* containerFrame = ElementContainerFrame();
 
   mImaginaryCaretRect = nsCaret::GetGeometryForFrame(aFrame, aOffset, nullptr);
-
-  // GetGeometryForFrame may return a rect that outside frame's rect. So
-  // constrain rect inside frame's rect.
-  mImaginaryCaretRect = mImaginaryCaretRect.ForceInside(aFrame->GetRectRelativeToSelf());
-  nsRect rectInContainerFrame = mImaginaryCaretRect;
-
   nsLayoutUtils::TransformRect(aFrame, rootFrame, mImaginaryCaretRect);
-  nsLayoutUtils::TransformRect(aFrame, containerFrame, rectInContainerFrame);
-
-  mImaginaryCaretRect.Inflate(AppUnitsPerCSSPixel(), 0);
-
-  nsAutoTArray<nsIFrame*, 16> hitFramesInRect;
-  nsLayoutUtils::GetFramesForArea(rootFrame,
-    mImaginaryCaretRect,
-    hitFramesInRect,
-    nsLayoutUtils::IGNORE_PAINT_SUPPRESSION |
-      nsLayoutUtils::IGNORE_CROSS_DOC |
-      nsLayoutUtils::IGNORE_ROOT_SCROLL_FRAME);
 
   nsPoint caretElementPositionRelativeToContainerFrame = CaretElementPosition();
-    nsLayoutUtils::TransformPoint(rootFrame, containerFrame,
-                                  caretElementPositionRelativeToContainerFrame);
+  nsLayoutUtils::TransformPoint(rootFrame, containerFrame,
+                                caretElementPositionRelativeToContainerFrame);
   SetPosition(caretElementPositionRelativeToContainerFrame);
+}
+
+nsIFrame*
+AccessibleCaret::ElementContainerFrame() const
+{
+  nsCanvasFrame* canvasFrame = mPresShell->GetCanvasFrame();
+  Element* container = canvasFrame->GetCustomContentContainer();
+  nsIFrame* containerFrame = container->GetPrimaryFrame();
+  MOZ_ASSERT(containerFrame);
+  return containerFrame;
 }
 
 nsPoint
