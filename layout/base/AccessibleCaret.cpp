@@ -55,10 +55,9 @@ AccessibleCaret::SetAppearance(Appearance aAppearance)
   mAppearance = aAppearance;
 
   ErrorResult rv;
-  nsCOMPtr<Element> element = mCaretContentHolder->GetContentNode();
-
-  element->SetAttribute(NS_LITERAL_STRING("class"),
-                        AppearanceString(aAppearance), rv);
+  CaretElement()->SetAttribute(NS_LITERAL_STRING("class"),
+                               AppearanceString(aAppearance), rv);
+  MOZ_ASSERT(!rv.Failed());
 }
 
 /* static */ nsString
@@ -82,6 +81,12 @@ AccessibleCaret::AppearanceString(Appearance aAppearance)
   return string;
 }
 
+Element*
+AccessibleCaret::CaretElement() const
+{
+  return mCaretContentHolder->GetContentNode();
+}
+
 bool
 AccessibleCaret::Intersects(const AccessibleCaret& aCaret)
 {
@@ -91,8 +96,8 @@ AccessibleCaret::Intersects(const AccessibleCaret& aCaret)
     return false;
   }
 
-  nsCOMPtr<Element> thisElement = mCaretContentHolder->GetContentNode();
-  nsCOMPtr<Element> rhsElement = aCaret.mCaretContentHolder->GetContentNode();
+  Element* thisElement = CaretElement();
+  Element* rhsElement = aCaret.CaretElement();
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
   nsRect thisRect = nsLayoutUtils::GetRectRelativeToFrame(thisElement, rootFrame);
   nsRect rhsRect = nsLayoutUtils::GetRectRelativeToFrame(rhsElement, rootFrame);
@@ -106,7 +111,7 @@ AccessibleCaret::Contains(const nsPoint& aPosition)
     return false;
   }
 
-  nsCOMPtr<Element> element = mCaretContentHolder->GetContentNode();
+  Element* element = CaretElement();
   Element* childElement = element->GetFirstElementChild();
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
   nsRect rect = nsLayoutUtils::GetRectRelativeToFrame(childElement, rootFrame);
@@ -187,6 +192,6 @@ AccessibleCaret::SetPosition(const nsPoint& aPosition)
                         nsPresContext::AppUnitsToIntCSSPixels(aPosition.y));
 
   ErrorResult rv;
-  nsCOMPtr<Element> element = mCaretContentHolder->GetContentNode();
-  element->SetAttribute(NS_LITERAL_STRING("style"), styleStr, rv);
+  CaretElement()->SetAttribute(NS_LITERAL_STRING("style"), styleStr, rv);
+  MOZ_ASSERT(!rv.Failed());
 }
