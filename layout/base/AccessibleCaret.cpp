@@ -153,7 +153,7 @@ AccessibleCaret::CreateCaretElement(nsIDocument* aDocument)
 }
 
 void
-AccessibleCaret::SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset)
+AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
 {
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
 

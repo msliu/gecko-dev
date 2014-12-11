@@ -47,7 +47,7 @@ public:
   bool IsVisible() const;
   void SetAppearance(Appearance aAppearance);
 
-  void SetPositionBasedOnFrameOffset(nsIFrame* aFrame, int32_t aOffset);
+  void SetPosition(nsIFrame* aFrame, int32_t aOffset);
   bool Intersects(const AccessibleCaret& rhs);
   bool Contains(const nsPoint& aPosition);
 
