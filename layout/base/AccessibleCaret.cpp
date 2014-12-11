@@ -31,7 +31,7 @@ AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
   MOZ_ASSERT(mPresShell->GetCanvasFrame());
   MOZ_ASSERT(mPresShell->GetCanvasFrame()->GetCustomContentContainer());
 
-  mCaretContentHolder = InjectCaretElement(mPresShell->GetDocument());
+  mCaretElementHolder = InjectCaretElement(mPresShell->GetDocument());
 }
 
 AccessibleCaret::~AccessibleCaret()
@@ -84,7 +84,7 @@ AccessibleCaret::AppearanceString(Appearance aAppearance)
 Element*
 AccessibleCaret::CaretElement() const
 {
-  return mCaretContentHolder->GetContentNode();
+  return mCaretElementHolder->GetContentNode();
 }
 
 Element*
