@@ -123,7 +123,7 @@ CopyPasteManager::UpdateCarets()
     return;
   }
 
-  mFirstCaret->SetPositionBasedOnFrameOffset(startFrame, startOffset);
+  mFirstCaret->SetPosition(startFrame, startOffset);
 
   //Update second caret
   if (mCaretMode == CaretMode::SELECTION) {
@@ -141,7 +141,7 @@ CopyPasteManager::UpdateCarets()
       return;
     }
 
-    mSecondCaret->SetPositionBasedOnFrameOffset(endFrame, endOffset);
+    mSecondCaret->SetPosition(endFrame, endOffset);
   }
 
   if (mFirstCaret->Intersects(*mSecondCaret)) {
