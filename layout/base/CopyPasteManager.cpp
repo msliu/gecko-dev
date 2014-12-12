@@ -17,7 +17,8 @@
 
 using namespace mozilla;
 using namespace mozilla::dom;
-using Appearance = AccessibleCaret::Appearance;
+
+typedef AccessibleCaret::Appearance Appearance;
 
 NS_IMPL_ISUPPORTS(CopyPasteManager, nsISelectionListener)
 
