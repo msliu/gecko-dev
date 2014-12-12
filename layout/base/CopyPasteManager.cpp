@@ -47,7 +47,9 @@ CopyPasteManager::Init()
 void
 CopyPasteManager::Terminate()
 {
-  mCopyPasteEventHub->Terminate();
+  if (mHasInited) {
+    mCopyPasteEventHub->Terminate();
+  }
 }
 
 CopyPasteManager::~CopyPasteManager()
