@@ -112,6 +112,16 @@ CopyPasteEventHub::Terminate()
     docShell->RemoveWeakReflowObserver(this);
     docShell->RemoveWeakScrollObserver(this);
   }
+
+  if (mLongTapDetectorTimer) {
+    mLongTapDetectorTimer->Cancel();
+    mLongTapDetectorTimer = nullptr;
+  }
+
+  if (mScrollEndDetectorTimer) {
+    mScrollEndDetectorTimer->Cancel();
+    mScrollEndDetectorTimer = nullptr;
+  }
 }
 
 nsEventStatus
