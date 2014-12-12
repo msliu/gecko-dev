@@ -1184,6 +1184,7 @@ PresShell::Destroy()
   }
 
   if (mCopyPasteManager) {
+    mCopyPasteManager->Terminate();
     mCopyPasteManager = nullptr;
   }
 
