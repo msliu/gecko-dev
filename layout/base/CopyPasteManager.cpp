@@ -34,21 +34,25 @@ CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
 void
 CopyPasteManager::Init()
 {
-  if (mPresShell->GetCanvasFrame()) {
-    mFirstCaret = MakeUnique<AccessibleCaret>(mPresShell);
-    mSecondCaret = MakeUnique<AccessibleCaret>(mPresShell);
-    mCopyPasteEventHub = new CopyPasteEventHub(mPresShell, this);
-    mCopyPasteEventHub->Init();
-    mInitialized = true;
+  if (!mPresShell->GetCanvasFrame()) {
+    return;
   }
+
+  mFirstCaret = MakeUnique<AccessibleCaret>(mPresShell);
+  mSecondCaret = MakeUnique<AccessibleCaret>(mPresShell);
+  mCopyPasteEventHub = new CopyPasteEventHub(mPresShell, this);
+  mCopyPasteEventHub->Init();
+  mInitialized = true;
 }
 
 void
 CopyPasteManager::Terminate()
 {
-  if (mInitialized) {
-    mCopyPasteEventHub->Terminate();
+  if (!mInitialized) {
+    return;
   }
+
+  mCopyPasteEventHub->Terminate();
 }
 
 CopyPasteManager::~CopyPasteManager()
