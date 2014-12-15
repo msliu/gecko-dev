@@ -131,7 +131,6 @@ CopyPasteManager::UpdateCaretsForCursorMode()
   }
 
   mFirstCaret->SetPosition(startFrame, startOffset);
-  mFirstCaret->SetAppearance(Appearance::NORMAL);
   mSecondCaret->SetAppearance(Appearance::NONE);
 }
 
@@ -156,9 +155,6 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
   if (mFirstCaret->Intersects(*mSecondCaret)) {
     mFirstCaret->SetAppearance(Appearance::LEFT);
     mSecondCaret->SetAppearance(Appearance::RIGHT);
-  } else {
-    mFirstCaret->SetAppearance(Appearance::NORMAL);
-    mSecondCaret->SetAppearance(Appearance::NORMAL);
   }
 }
 
