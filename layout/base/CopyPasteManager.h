@@ -92,7 +92,7 @@ protected:
    */
   bool CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffsets);
 
-  bool mHasInited;
+  bool mInitialized;
   DragMode mDragMode;
   CaretMode mCaretMode;
   nscoord mCaretCenterToDownPointOffsetY;

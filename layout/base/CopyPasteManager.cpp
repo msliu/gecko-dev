@@ -23,7 +23,7 @@ typedef AccessibleCaret::Appearance Appearance;
 NS_IMPL_ISUPPORTS(CopyPasteManager, nsISelectionListener)
 
 CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
-  : mHasInited(false)
+  : mInitialized(false)
   , mDragMode(DragMode::NONE)
   , mCaretMode(CaretMode::NONE)
   , mCaretCenterToDownPointOffsetY(0)
@@ -39,14 +39,14 @@ CopyPasteManager::Init()
     mSecondCaret = MakeUnique<AccessibleCaret>(mPresShell);
     mCopyPasteEventHub = new CopyPasteEventHub(mPresShell, this);
     mCopyPasteEventHub->Init();
-    mHasInited = true;
+    mInitialized = true;
   }
 }
 
 void
 CopyPasteManager::Terminate()
 {
-  if (mHasInited) {
+  if (mInitialized) {
     mCopyPasteEventHub->Terminate();
   }
 }
@@ -58,7 +58,7 @@ CopyPasteManager::~CopyPasteManager()
 nsEventStatus
 CopyPasteManager::HandleEvent(WidgetEvent* aEvent)
 {
-  if (!mHasInited) {
+  if (!mInitialized) {
     return nsEventStatus_eIgnore;
   }
 
@@ -70,7 +70,7 @@ CopyPasteManager::NotifySelectionChanged(nsIDOMDocument* aDoc,
                                          nsISelection* aSel,
                                          int16_t aReason)
 {
-  if (!mHasInited) {
+  if (!mInitialized) {
     return NS_OK;
   }
 
