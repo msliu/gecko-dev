@@ -144,10 +144,52 @@ AccessibleCaret::CreateCaretElement(nsIDocument* aDocument)
 void
 AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
 {
-  mImaginaryCaretRect = nsCaret::GetGeometryForFrame(aFrame, aOffset, nullptr);
-  nsLayoutUtils::TransformRect(aFrame, RootFrame(), mImaginaryCaretRect);
+  nsRect imaginaryCaretRect =
+    nsCaret::GetGeometryForFrame(aFrame, aOffset, nullptr);
+  bool imaginaryCaretRectVisible =
+    nsLayoutUtils::IsRectVisibleInScrollFrames(aFrame, imaginaryCaretRect);
 
-  SetCaretElementPosition(CaretElementPosition());
+  if (!imaginaryCaretRectVisible) {
+    SetAppearance(Appearance::NONE);
+    return;
+  }
+
+  SetAppearance(Appearance::NORMAL);
+
+  nsPoint caretElementPosition = CaretElementPosition(imaginaryCaretRect);
+
+  caretElementPosition =
+    ClampPositionToScrollFrames(aFrame, caretElementPosition);
+  SetCaretElementPosition(aFrame, caretElementPosition);
+
+  mImaginaryCaretRect = imaginaryCaretRect;
+  nsLayoutUtils::TransformRect(aFrame, RootFrame(), mImaginaryCaretRect);
+}
+
+/* static */ nsPoint
+AccessibleCaret::ClampPositionToScrollFrames(nsIFrame* aFrame,
+                                             const nsPoint& aPosition)
+{
+  nsPoint position = aPosition;
+
+  nsIFrame* closestScrollFrame =
+    nsLayoutUtils::GetClosestFrameOfType(aFrame, nsGkAtoms::scrollFrame);
+
+  while (closestScrollFrame) {
+    nsIScrollableFrame* sf = do_QueryFrame(closestScrollFrame);
+    nsRect closestScrollPortRect = sf->GetScrollPortRect();
+
+    // Clamp the position in the scroll port.
+    nsLayoutUtils::TransformRect(closestScrollFrame, aFrame,
+                                 closestScrollPortRect);
+    position = closestScrollPortRect.ClampPoint(position);
+
+    // Get next ancestor scroll frame.
+    closestScrollFrame = nsLayoutUtils::GetClosestFrameOfType(
+      closestScrollFrame->GetParent(), nsGkAtoms::scrollFrame);
+  }
+
+  return position;
 }
 
 nsIFrame*
@@ -171,19 +213,19 @@ AccessibleCaret::LogicalPosition() const
   return mImaginaryCaretRect.Center();
 }
 
-nsPoint
-AccessibleCaret::CaretElementPosition() const
+/* static */ nsPoint
+AccessibleCaret::CaretElementPosition(const nsRect& aRect)
 {
-  return mImaginaryCaretRect.TopLeft()
-    + nsPoint(mImaginaryCaretRect.width/2, mImaginaryCaretRect.height);
+  return aRect.TopLeft() + nsPoint(aRect.width / 2, aRect.height);
 }
 
 void
-AccessibleCaret::SetCaretElementPosition(const nsPoint& aPosition)
+AccessibleCaret::SetCaretElementPosition(nsIFrame* aFrame,
+                                         const nsPoint& aPosition)
 {
   // Transform aPosition so that it relatives to containerFrame.
   nsPoint position = aPosition;
-  nsLayoutUtils::TransformPoint(RootFrame(), ElementContainerFrame(), position);
+  nsLayoutUtils::TransformPoint(aFrame, ElementContainerFrame(), position);
 
   nsAutoString styleStr;
   styleStr.AppendPrintf("left: %dpx; top: %dpx;",

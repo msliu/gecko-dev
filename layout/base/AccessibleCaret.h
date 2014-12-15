@@ -55,11 +55,7 @@ public:
   nsPoint LogicalPosition() const;
 
 private:
-  // The bottom-center of a imaginary caret to which this AccessibleCaret is
-  // attached.
-  nsPoint CaretElementPosition() const;
-
-  void SetCaretElementPosition(const nsPoint& aPosition);
+  void SetCaretElementPosition(nsIFrame* aFrame, const nsPoint& aPosition);
 
   // Element for 'Intersects' test.
   dom::Element* CaretElement() const;
@@ -75,6 +71,13 @@ private:
 
   static already_AddRefed<dom::AnonymousContent> InjectCaretElement(nsIDocument* aDocument);
   static already_AddRefed<dom::Element> CreateCaretElement(nsIDocument* aDocument);
+
+  // The bottom-center of a imaginary caret to which this AccessibleCaret is
+  // attached.
+  static nsPoint CaretElementPosition(const nsRect& aRect);
+
+  static nsPoint ClampPositionToScrollFrames(nsIFrame* aFrame,
+                                             const nsPoint& aPosition);
 
   // Member variables
   Appearance mAppearance;
