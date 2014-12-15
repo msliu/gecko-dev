@@ -105,7 +105,7 @@ void
 CopyPasteManager::UpdateCarets()
 {
   int32_t rangeCount = GetSelectionRangeCount();
-  if (!rangeCount) {
+  if (rangeCount <= 0) {
     HideCarets();
     return;
   }
