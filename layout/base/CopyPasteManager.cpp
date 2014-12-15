@@ -110,57 +110,55 @@ CopyPasteManager::UpdateCarets()
     return;
   }
 
-  mCaretMode = GetSelectionIsCollapsed() ?
-               CaretMode::CURSOR :
-               CaretMode::SELECTION;
+  if (GetSelectionIsCollapsed()) {
+    mCaretMode = CaretMode::CURSOR;
+    UpdateCaretsForCursorMode();
+  } else {
+    mCaretMode = CaretMode::SELECTION;
+    UpdateCaretsForSelectionMode();
+  }
+}
 
-  // Update first caret
+void
+CopyPasteManager::UpdateCaretsForCursorMode()
+{
   int32_t startOffset;
   nsIFrame* startFrame = FindFirstNodeWithFrame(false, startOffset);
 
-  if (!startFrame) {
-    HideCarets();
-    return;
-  }
-
-  if (mCaretMode == CaretMode::CURSOR &&
-      !startFrame->GetContent()->IsEditable()) {
+  if (!startFrame || !startFrame->GetContent()->IsEditable()) {
     HideCarets();
     return;
   }
 
   mFirstCaret->SetPosition(startFrame, startOffset);
+  mFirstCaret->SetAppearance(Appearance::NORMAL);
+  mSecondCaret->SetAppearance(Appearance::NONE);
+}
 
-  //Update second caret
-  if (mCaretMode == CaretMode::SELECTION) {
-    int32_t endOffset;
-    nsIFrame* endFrame = FindFirstNodeWithFrame(true, endOffset);
+void
+CopyPasteManager::UpdateCaretsForSelectionMode()
+{
+  int32_t startOffset;
+  nsIFrame* startFrame = FindFirstNodeWithFrame(false, startOffset);
 
-    if (!endFrame) {
-      HideCarets();
-      return;
-    }
+  int32_t endOffset;
+  nsIFrame* endFrame = FindFirstNodeWithFrame(true, endOffset);
 
-    // Check if startFrame is after endFrame.
-    if (nsLayoutUtils::CompareTreePosition(startFrame, endFrame) > 0) {
-      HideCarets();
-      return;
-    }
-
-    mSecondCaret->SetPosition(endFrame, endOffset);
+  if(!startFrame || !endFrame ||
+     nsLayoutUtils::CompareTreePosition(startFrame, endFrame) > 0) {
+    HideCarets();
+    return;
   }
+
+  mFirstCaret->SetPosition(startFrame, startOffset);
+  mSecondCaret->SetPosition(endFrame, endOffset);
 
   if (mFirstCaret->Intersects(*mSecondCaret)) {
     mFirstCaret->SetAppearance(Appearance::LEFT);
     mSecondCaret->SetAppearance(Appearance::RIGHT);
   } else {
     mFirstCaret->SetAppearance(Appearance::NORMAL);
-
-    if (mCaretMode == CaretMode::CURSOR) {
-      mSecondCaret->SetAppearance(Appearance::NONE);
-    } else if (mCaretMode == CaretMode::SELECTION) {
-      mSecondCaret->SetAppearance(Appearance::NORMAL);
-    }
+    mSecondCaret->SetAppearance(Appearance::NORMAL);
   }
 }
 

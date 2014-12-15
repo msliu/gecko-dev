@@ -72,6 +72,9 @@ protected:
   void UpdateCarets();
   void HideCarets();
 
+  void UpdateCaretsForCursorMode();
+  void UpdateCaretsForSelectionMode();
+
   // Glue function
   virtual bool GetSelectionIsCollapsed();
   virtual int32_t GetSelectionRangeCount();
