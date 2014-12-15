@@ -20,8 +20,6 @@ AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
   : mAppearance(Appearance::NONE)
   , mPresShell(aPresShell)
 {
-  MOZ_ASSERT(NS_IsMainThread());
-
   // Check all resources required.
   MOZ_ASSERT(mPresShell);
   MOZ_ASSERT(RootFrame());
@@ -35,7 +33,6 @@ AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
 
 AccessibleCaret::~AccessibleCaret()
 {
-  MOZ_ASSERT(NS_IsMainThread());
 }
 
 bool
