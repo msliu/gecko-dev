@@ -16,8 +16,6 @@
 using namespace mozilla;
 using namespace mozilla::dom;
 
-NS_IMPL_ISUPPORTS0(AccessibleCaret)
-
 AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
   : mAppearance(Appearance::NONE)
   , mPresShell(aPresShell)

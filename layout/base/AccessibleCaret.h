@@ -30,12 +30,11 @@ class Element;
 
 // All the rect or point used are relative to root frame except being specified
 // explicitly.
-class AccessibleCaret MOZ_FINAL : public nsISupports
+class AccessibleCaret MOZ_FINAL
 {
 public:
   explicit AccessibleCaret(nsIPresShell* aPresShell);
-
-  NS_DECL_ISUPPORTS
+  ~AccessibleCaret();
 
   MOZ_BEGIN_NESTED_ENUM_CLASS(Appearance, uint8_t)
     NONE,
@@ -56,8 +55,6 @@ public:
   nsPoint LogicalPosition() const;
 
 private:
-  ~AccessibleCaret();
-
   // The bottom-center of a imaginary caret to which this AccessibleCaret is
   // attached.
   nsPoint CaretElementPosition() const;

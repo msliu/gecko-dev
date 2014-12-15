@@ -35,9 +35,8 @@ void
 CopyPasteManager::Init()
 {
   if (mPresShell->GetCanvasFrame()) {
-    // TODO: Pass canvas frame directly to AccessibleCaret's constructor.
-    mFirstCaret = new AccessibleCaret(mPresShell);
-    mSecondCaret = new AccessibleCaret(mPresShell);
+    mFirstCaret = MakeUnique<AccessibleCaret>(mPresShell);
+    mSecondCaret = MakeUnique<AccessibleCaret>(mPresShell);
     mCopyPasteEventHub = new CopyPasteEventHub(mPresShell, this);
     mCopyPasteEventHub->Init();
     mHasInited = true;

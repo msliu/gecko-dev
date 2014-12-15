@@ -14,6 +14,7 @@
 #include "nsRefPtr.h"
 #include "nsWeakReference.h"
 #include "mozilla/EventForwards.h"
+#include "mozilla/UniquePtr.h"
 #include "mozilla/WeakPtr.h"
 
 class nsFrameSelection;
@@ -96,8 +97,8 @@ protected:
   CaretMode mCaretMode;
   nscoord mCaretCenterToDownPointOffsetY;
   nsIPresShell* mPresShell;
-  nsRefPtr<AccessibleCaret> mFirstCaret;
-  nsRefPtr<AccessibleCaret> mSecondCaret;
+  UniquePtr<AccessibleCaret> mFirstCaret;
+  UniquePtr<AccessibleCaret> mSecondCaret;
   nsRefPtr<CopyPasteEventHub> mCopyPasteEventHub;
 
   static const int32_t kAutoScrollTimerDelay = 30;
