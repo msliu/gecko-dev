@@ -244,11 +244,8 @@ nsIContent*
 CopyPasteManager::GetFocusedContent()
 {
   nsFocusManager* fm = nsFocusManager::GetFocusManager();
-  if (fm) {
-    return fm->GetFocusedContent();
-  }
-
-  return nullptr;
+  MOZ_ASSERT(fm);
+  return fm->GetFocusedContent();
 }
 
 Selection*
