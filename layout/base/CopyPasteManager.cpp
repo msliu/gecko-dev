@@ -123,7 +123,7 @@ void
 CopyPasteManager::UpdateCaretsForCursorMode()
 {
   int32_t startOffset;
-  nsIFrame* startFrame = FindFirstNodeWithFrame(false, startOffset);
+  nsIFrame* startFrame = FindFirstNodeWithFrame(false, &startOffset);
 
   if (!startFrame || !startFrame->GetContent()->IsEditable()) {
     HideCarets();
@@ -138,10 +138,10 @@ void
 CopyPasteManager::UpdateCaretsForSelectionMode()
 {
   int32_t startOffset;
-  nsIFrame* startFrame = FindFirstNodeWithFrame(false, startOffset);
+  nsIFrame* startFrame = FindFirstNodeWithFrame(false, &startOffset);
 
   int32_t endOffset;
-  nsIFrame* endFrame = FindFirstNodeWithFrame(true, endOffset);
+  nsIFrame* endFrame = FindFirstNodeWithFrame(true, &endOffset);
 
   if(!startFrame || !endFrame ||
      nsLayoutUtils::CompareTreePosition(startFrame, endFrame) > 0) {
@@ -385,7 +385,7 @@ CopyPasteManager::SetSelectionDirection(bool aForward)
 }
 
 nsIFrame*
-CopyPasteManager::FindFirstNodeWithFrame(bool aBackward, int& aOutOffset)
+CopyPasteManager::FindFirstNodeWithFrame(bool aBackward, int* aOutOffset)
 {
   if (!mPresShell) {
     return nullptr;
@@ -415,10 +415,8 @@ CopyPasteManager::FindFirstNodeWithFrame(bool aBackward, int& aOutOffset)
   nsIContent* startContent = startNode->AsContent();
   CaretAssociationHint hintStart =
     aBackward ? CARET_ASSOCIATE_BEFORE : CARET_ASSOCIATE_AFTER;
-  nsIFrame* startFrame = fs->GetFrameForNodeOffset(startContent,
-                                                   offset,
-                                                   hintStart,
-                                                   &aOutOffset);
+  nsIFrame* startFrame =
+    fs->GetFrameForNodeOffset(startContent, offset, hintStart, aOutOffset);
 
   if (startFrame) {
     return startFrame;
