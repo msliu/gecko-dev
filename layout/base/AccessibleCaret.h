@@ -90,4 +90,4 @@ MOZ_FINISH_NESTED_ENUM_CLASS(AccessibleCaret::Appearance)
 
 } // namespace mozilla
 
-#endif //AccessibleCaret_h__
+#endif // AccessibleCaret_h__
