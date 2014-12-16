@@ -84,7 +84,7 @@ protected:
   virtual nsIFrame* FindFirstNodeWithFrame(bool aBackward, int& aOutOffset);
   virtual nsEventStatus DragCaret(const nsPoint &aMovePoint);
 
-  // Utility function
+  // Utility functions
   dom::Selection* GetSelection();
   already_AddRefed<nsFrameSelection> GetFrameSelection();
   nsIContent* GetFocusedContent();
@@ -113,4 +113,4 @@ MOZ_FINISH_NESTED_ENUM_CLASS(CopyPasteManager::CaretMode)
 
 } // namespace mozilla
 
-#endif //CopyPasteManager_h__
+#endif // CopyPasteManager_h__
