@@ -385,8 +385,7 @@ CopyPasteManager::SetSelectionDirection(bool aForward)
 }
 
 nsIFrame*
-CopyPasteManager::FindFirstNodeWithFrame(bool aBackward,
-                                             int& aOutOffset)
+CopyPasteManager::FindFirstNodeWithFrame(bool aBackward, int& aOutOffset)
 {
   if (!mPresShell) {
     return nullptr;
@@ -403,19 +402,17 @@ CopyPasteManager::FindFirstNodeWithFrame(bool aBackward,
   }
 
   int32_t rangeCount = selection->GetRangeCount();
-  if (!rangeCount) {
+  if (rangeCount <= 0) {
     return nullptr;
   }
 
-  nsRefPtr<nsRange> range = selection->GetRangeAt(aBackward ? rangeCount - 1 : 0);
-
-  nsCOMPtr<nsINode> startNode =
-    do_QueryInterface(aBackward ? range->GetEndParent() : range->GetStartParent());
-  nsCOMPtr<nsINode> endNode =
-    do_QueryInterface(aBackward ? range->GetStartParent() : range->GetEndParent());
+  nsRange* range = selection->GetRangeAt(aBackward ? rangeCount - 1 : 0);
+  nsRefPtr<nsINode> startNode =
+    aBackward ? range->GetEndParent() : range->GetStartParent();
+  nsRefPtr<nsINode> endNode =
+    aBackward ? range->GetStartParent() : range->GetEndParent();
   int32_t offset = aBackward ? range->EndOffset() : range->StartOffset();
-
-  nsCOMPtr<nsIContent> startContent = do_QueryInterface(startNode);
+  nsIContent* startContent = startNode->AsContent();
   CaretAssociationHint hintStart =
     aBackward ? CARET_ASSOCIATE_BEFORE : CARET_ASSOCIATE_AFTER;
   nsIFrame* startFrame = fs->GetFrameForNodeOffset(startContent,
@@ -440,17 +437,13 @@ CopyPasteManager::FindFirstNodeWithFrame(bool aBackward,
 
   startFrame = startContent ? startContent->GetPrimaryFrame() : nullptr;
   while (!startFrame && startNode != endNode) {
-    if (aBackward) {
-      startNode = walker->PreviousNode(err);
-    } else {
-      startNode = walker->NextNode(err);
-    }
+    startNode = aBackward ? walker->PreviousNode(err) : walker->NextNode(err);
 
     if (!startNode) {
       break;
     }
 
-    startContent = do_QueryInterface(startNode);
+    startContent = startNode->AsContent();
     startFrame = startContent ? startContent->GetPrimaryFrame() : nullptr;
   }
   return startFrame;
