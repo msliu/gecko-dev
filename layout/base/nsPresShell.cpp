@@ -7266,15 +7266,24 @@ PresShell::HandleEvent(nsIFrame* aFrame,
         return NS_OK;
       }
     }
+  }
 
-    nsRefPtr<CopyPasteManager> copyPasteManager = presShell ?
-                                                  presShell->GetCopyPasteManager() :
-                                                  nullptr;
+  if (AccessibleCaretEnabled()) {
+    // We have to target the focus window because regardless of where the
+    // touch goes, we want to access the copy paste manager.
+    nsCOMPtr<nsPIDOMWindow> window = GetFocusedDOMWindowInOurWindow();
+    nsCOMPtr<nsIDocument> retargetEventDoc =
+      window ? window->GetExtantDoc() : nullptr;
+    nsCOMPtr<nsIPresShell> presShell =
+      retargetEventDoc ? retargetEventDoc->GetShell() : nullptr;
+
+    nsRefPtr<CopyPasteManager> copyPasteManager =
+      presShell ? presShell->GetCopyPasteManager() : nullptr;
     if (copyPasteManager) {
       *aEventStatus = copyPasteManager->HandleEvent(aEvent);
       if (*aEventStatus == nsEventStatus_eConsumeNoDefault) {
-        // If the event is consumed by the selection carets, cancel APZC panning by
-        // setting mMultipleActionsPrevented.
+        // If the event is consumed, cancel APZC panning by setting
+        // mMultipleActionsPrevented.
         aEvent->mFlags.mMultipleActionsPrevented = true;
         return NS_OK;
       }
