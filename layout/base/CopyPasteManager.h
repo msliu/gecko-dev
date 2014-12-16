@@ -76,8 +76,8 @@ protected:
   void UpdateCaretsForSelectionMode();
 
   // Glue function
-  virtual bool GetSelectionIsCollapsed();
-  virtual int32_t GetSelectionRangeCount();
+  virtual bool SelectionIsCollapsed();
+  virtual int32_t SelectionRangeCount();
   virtual nsresult SelectWord(const nsPoint& aPoint);
   virtual void SetSelectionDragState(bool aState);
   virtual void SetSelectionDirection(bool aForward);
