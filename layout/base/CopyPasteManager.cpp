@@ -261,9 +261,9 @@ CopyPasteManager::GetSelection()
 already_AddRefed<nsFrameSelection>
 CopyPasteManager::GetFrameSelection()
 {
-  nsIContent* focusNode = GetFocusedContent();
-  if (focusNode) {
-    nsIFrame* focusFrame = focusNode->GetPrimaryFrame();
+  nsIContent* focusedContent = GetFocusedContent();
+  if (focusedContent) {
+    nsIFrame* focusFrame = focusedContent->GetPrimaryFrame();
     if (!focusFrame) {
       return nullptr;
     }
