@@ -104,13 +104,13 @@ CopyPasteManager::HideCarets()
 void
 CopyPasteManager::UpdateCarets()
 {
-  int32_t rangeCount = GetSelectionRangeCount();
+  int32_t rangeCount = SelectionRangeCount();
   if (rangeCount <= 0) {
     HideCarets();
     return;
   }
 
-  if (GetSelectionIsCollapsed()) {
+  if (SelectionIsCollapsed()) {
     mCaretMode = CaretMode::CURSOR;
     UpdateCaretsForCursorMode();
   } else {
@@ -252,10 +252,10 @@ Selection*
 CopyPasteManager::GetSelection()
 {
   nsRefPtr<nsFrameSelection> fs = GetFrameSelection();
-  if (fs) {
-    return fs->GetSelection(nsISelectionController::SELECTION_NORMAL);
+  if (!fs) {
+    return nullptr;
   }
-  return nullptr;
+  return fs->GetSelection(nsISelectionController::SELECTION_NORMAL);
 }
 
 already_AddRefed<nsFrameSelection>
@@ -277,12 +277,13 @@ CopyPasteManager::GetFrameSelection()
 
     return fs.forget();
   } else {
+    // For non-editable content
     return mPresShell->FrameSelection();
   }
 }
 
 bool
-CopyPasteManager::GetSelectionIsCollapsed()
+CopyPasteManager::SelectionIsCollapsed()
 {
   Selection* sel = GetSelection();
   if (!sel) {
@@ -293,7 +294,7 @@ CopyPasteManager::GetSelectionIsCollapsed()
 }
 
 int32_t
-CopyPasteManager::GetSelectionRangeCount()
+CopyPasteManager::SelectionRangeCount()
 {
   Selection* sel = GetSelection();
   if (!sel) {
