@@ -189,8 +189,12 @@ CopyPasteEventHub::HandleMouseUpEvent(WidgetMouseEvent* aEvent)
     case InputState::PRESS:
     case InputState::DRAG:
       if (aEvent->button == WidgetMouseEvent::eLeftButton) {
-        SetState(InputState::RELEASE);
         status = mHandler->OnRelease();
+        mType = InputType::NONE;
+        if (mState == InputState::PRESS) {
+          mHandler->OnTap(mDownPoint);
+        }
+        SetState(InputState::RELEASE);
       }
       break;
     default:
@@ -209,8 +213,9 @@ CopyPasteEventHub::HandleTouchUpEvent(WidgetTouchEvent* aEvent)
     case InputState::PRESS:
     case InputState::DRAG:
       if (aEvent->touches[0]->mIdentifier == mActiveTouchId) {
-        SetState(InputState::RELEASE);
         status = mHandler->OnRelease();
+        mType = InputType::NONE;
+        SetState(InputState::RELEASE);
       }
       break;
     default:
@@ -283,10 +288,6 @@ CopyPasteEventHub::SetState(InputState aState)
 {
   switch (aState) {
     case InputState::RELEASE:
-      mType = InputType::NONE;
-      if (mState == InputState::PRESS) {
-        mHandler->OnTap(mDownPoint);
-      }
       CancelLongTapDetector();
       break;
     case InputState::PRESS:
