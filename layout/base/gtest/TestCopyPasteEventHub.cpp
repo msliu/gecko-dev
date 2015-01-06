@@ -62,11 +62,14 @@ protected:
 };
 
 TEST_F(CopyPasteEventHubTester, TestOnPress) {
-  EXPECT_CALL(*mMockManager, OnPress(Eq(nsPoint(0, 0))))
-    .Times(1);
+  EXPECT_CALL(*mMockManager, OnPress(Eq(nsPoint(0, 0))));
 
   WidgetMouseEvent evt(true, NS_MOUSE_BUTTON_DOWN, nullptr, WidgetMouseEvent::eReal);
   evt.button = WidgetMouseEvent::eLeftButton;
+
+  EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::RELEASE);
+  EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::NONE);
+
   mMockEventHub->HandleEvent(&evt);
 
   EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::PRESS);
