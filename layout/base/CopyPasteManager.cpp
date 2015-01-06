@@ -78,6 +78,10 @@ CopyPasteManager::NotifySelectionChanged(nsIDOMDocument* aDoc,
     return NS_OK;
   }
 
+  if (aSel != GetSelection()) {
+    return NS_OK;
+  }
+
   if (!aReason) {
     return NS_OK;
   }
