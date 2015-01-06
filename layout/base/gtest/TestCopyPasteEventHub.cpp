@@ -33,9 +33,9 @@ public:
   MOCK_METHOD1(OnTap, nsEventStatus(const nsPoint&));
 };
 
-class MockGestureManager : public CopyPasteEventHub {
+class MockCopyPasteEventHub : public CopyPasteEventHub {
 public:
-  MockGestureManager(MockCopyPasteManager* aManager)
+  MockCopyPasteEventHub(MockCopyPasteManager* aManager)
     : CopyPasteEventHub(nullptr, aManager)
   { }
 
@@ -51,74 +51,74 @@ protected:
   virtual void SetUp()
   {
     gfxPrefs::GetSingleton();
-    mMockHandler = new MockCopyPasteManager();
-    mGestureManager = new MockGestureManager(mMockHandler);
+    mMockManager = new MockCopyPasteManager();
+    mMockEventHub = new MockCopyPasteEventHub(mMockManager);
 
     DefaultValue<nsEventStatus>::Set(nsEventStatus_eIgnore);
   }
 
-  nsRefPtr<MockGestureManager> mGestureManager;
-  nsRefPtr<MockCopyPasteManager> mMockHandler;
+  nsRefPtr<MockCopyPasteEventHub> mMockEventHub;
+  nsRefPtr<MockCopyPasteManager> mMockManager;
 };
 
 TEST_F(CopyPasteEventHubTester, TestOnPress) {
-  EXPECT_CALL(*mMockHandler, OnPress(Eq(nsPoint(0, 0))))
+  EXPECT_CALL(*mMockManager, OnPress(Eq(nsPoint(0, 0))))
     .Times(1);
 
   WidgetMouseEvent evt(true, NS_MOUSE_BUTTON_DOWN, nullptr, WidgetMouseEvent::eReal);
   evt.button = WidgetMouseEvent::eLeftButton;
-  mGestureManager->HandleEvent(&evt);
+  mMockEventHub->HandleEvent(&evt);
 
-  EXPECT_EQ(mGestureManager->GetState(), MockGestureManager::InputState::PRESS);
-  EXPECT_EQ(mGestureManager->GetType(), MockGestureManager::InputType::MOUSE);
+  EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::PRESS);
+  EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::MOUSE);
 }
 
 TEST_F(CopyPasteEventHubTester, TestOnDrag) {
   // Press first
-  EXPECT_CALL(*mMockHandler, OnPress(Eq(nsPoint(0, 0))))
+  EXPECT_CALL(*mMockManager, OnPress(Eq(nsPoint(0, 0))))
     .Times(1);
   WidgetMouseEvent evt(true, NS_MOUSE_BUTTON_DOWN, nullptr, WidgetMouseEvent::eReal);
   evt.button = WidgetMouseEvent::eLeftButton;
   evt.refPoint = LayoutDeviceIntPoint(0, 0);
-  mGestureManager->HandleEvent(&evt);
-  EXPECT_EQ(mGestureManager->GetState(), MockGestureManager::InputState::PRESS);
+  mMockEventHub->HandleEvent(&evt);
+  EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::PRESS);
 
   // Then drag but not exceed kMoveStartTolerancePx
-  EXPECT_CALL(*mMockHandler, OnDrag(Eq(nsPoint(100, 100))))
+  EXPECT_CALL(*mMockManager, OnDrag(Eq(nsPoint(100, 100))))
     .Times(1);
   evt.message = NS_MOUSE_MOVE;
   evt.refPoint = LayoutDeviceIntPoint(100, 100);
-  mGestureManager->HandleEvent(&evt);
-  EXPECT_EQ(mGestureManager->GetState(), MockGestureManager::InputState::PRESS);
+  mMockEventHub->HandleEvent(&evt);
+  EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::PRESS);
 
   // Then drag over kMoveStartTolerancePx
-  EXPECT_CALL(*mMockHandler, OnDrag(Eq(nsPoint(300, 300))))
+  EXPECT_CALL(*mMockManager, OnDrag(Eq(nsPoint(300, 300))))
     .Times(1);
   evt.refPoint = LayoutDeviceIntPoint(300, 300);
-  mGestureManager->HandleEvent(&evt);
-  EXPECT_EQ(mGestureManager->GetState(), MockGestureManager::InputState::DRAG);
-  EXPECT_EQ(mGestureManager->GetType(), MockGestureManager::InputType::MOUSE);
+  mMockEventHub->HandleEvent(&evt);
+  EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::DRAG);
+  EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::MOUSE);
 }
 
 TEST_F(CopyPasteEventHubTester, TestOnRelease) {
-  EXPECT_CALL(*mMockHandler, OnPress(_))
+  EXPECT_CALL(*mMockManager, OnPress(_))
     .Times(1);
 
   WidgetMouseEvent evt(true, NS_MOUSE_BUTTON_DOWN, nullptr, WidgetMouseEvent::eReal);
   evt.button = WidgetMouseEvent::eLeftButton;
-  mGestureManager->HandleEvent(&evt);
+  mMockEventHub->HandleEvent(&evt);
 
-  EXPECT_EQ(mGestureManager->GetState(), MockGestureManager::InputState::PRESS);
-  EXPECT_EQ(mGestureManager->GetType(), MockGestureManager::InputType::MOUSE);
+  EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::PRESS);
+  EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::MOUSE);
 
-  EXPECT_CALL(*mMockHandler, OnRelease())
+  EXPECT_CALL(*mMockManager, OnRelease())
     .Times(1);
-  EXPECT_CALL(*mMockHandler, OnTap(_))
+  EXPECT_CALL(*mMockManager, OnTap(_))
     .Times(1);
 
   evt.message = NS_MOUSE_BUTTON_UP;
-  mGestureManager->HandleEvent(&evt);
+  mMockEventHub->HandleEvent(&evt);
 
-  EXPECT_EQ(mGestureManager->GetState(), MockGestureManager::InputState::RELEASE);
-  EXPECT_EQ(mGestureManager->GetType(), MockGestureManager::InputType::NONE);
+  EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::RELEASE);
+  EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::NONE);
 }
