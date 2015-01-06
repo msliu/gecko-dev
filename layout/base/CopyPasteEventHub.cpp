@@ -133,7 +133,7 @@ CopyPasteEventHub::HandleMouseMoveEvent(WidgetMouseEvent* aEvent)
     case InputState::PRESS:
     case InputState::DRAG:
       {
-        nsPoint movePoint = GetEventPosition(aEvent);
+        nsPoint movePoint = GetMouseEventPosition(aEvent);
         nsPoint delta = mDownPoint - movePoint;
         if (mState == InputState::PRESS &&
             NS_hypot(delta.x, delta.y) >
@@ -163,7 +163,7 @@ CopyPasteEventHub::HandleTouchMoveEvent(WidgetTouchEvent* aEvent)
           break;
         }
 
-        nsPoint movePoint = GetEventPosition(aEvent, mActiveTouchId);
+        nsPoint movePoint = GetTouchEventPosition(aEvent, mActiveTouchId);
         nsPoint delta = mDownPoint - movePoint;
         if (mState == InputState::PRESS &&
             NS_hypot(delta.x, delta.y) >
@@ -233,7 +233,7 @@ CopyPasteEventHub::HandleMouseDownEvent(WidgetMouseEvent* aEvent)
   switch (mState) {
     case InputState::RELEASE:
       if (aEvent->button == WidgetMouseEvent::eLeftButton) {
-        nsPoint point = GetEventPosition(aEvent);
+        nsPoint point = GetMouseEventPosition(aEvent);
         mDownPoint = point;
         SetState(InputState::PRESS);
         mType = InputType::MOUSE;
@@ -256,7 +256,7 @@ CopyPasteEventHub::HandleTouchDownEvent(WidgetTouchEvent* aEvent)
     case InputState::RELEASE:
       if (mActiveTouchId == -1) {
         mActiveTouchId = aEvent->touches[0]->Identifier();
-        nsPoint point = GetEventPosition(aEvent, mActiveTouchId);
+        nsPoint point = GetTouchEventPosition(aEvent, mActiveTouchId);
         mDownPoint = point;
         SetState(InputState::PRESS);
         mType = InputType::TOUCH;
@@ -273,7 +273,7 @@ CopyPasteEventHub::HandleTouchDownEvent(WidgetTouchEvent* aEvent)
 nsEventStatus
 CopyPasteEventHub::HandleLongTapEvent(WidgetMouseEvent* aEvent)
 {
-  nsPoint point = aEvent ? GetEventPosition(aEvent) : mDownPoint;
+  nsPoint point = aEvent ? GetMouseEventPosition(aEvent) : mDownPoint;
   return mHandler->OnLongTap(point);
 }
 
@@ -408,8 +408,8 @@ CopyPasteEventHub::FireScrollEnd(nsITimer* aTimer, void* aCopyPasteEventHub)
 
 
 nsPoint
-CopyPasteEventHub::GetEventPosition(WidgetTouchEvent* aEvent,
-                                    int32_t aIdentifier)
+CopyPasteEventHub::GetTouchEventPosition(WidgetTouchEvent* aEvent,
+                                         int32_t aIdentifier)
 {
   for (size_t i = 0; i < aEvent->touches.Length(); i++) {
     if (aEvent->touches[i]->mIdentifier == aIdentifier) {
@@ -431,7 +431,7 @@ CopyPasteEventHub::GetEventPosition(WidgetTouchEvent* aEvent,
 }
 
 nsPoint
-CopyPasteEventHub::GetEventPosition(WidgetMouseEvent* aEvent)
+CopyPasteEventHub::GetMouseEventPosition(WidgetMouseEvent* aEvent)
 {
   nsIntPoint mouseIntPoint =
     LayoutDeviceIntPoint::ToUntyped(aEvent->AsGUIEvent()->refPoint);
