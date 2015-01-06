@@ -48,17 +48,16 @@ public:
 
 class CopyPasteEventHubTester : public ::testing::Test {
 protected:
-  virtual void SetUp()
+  CopyPasteEventHubTester()
+    : mMockManager(new MockCopyPasteManager())
+    , mMockEventHub(new MockCopyPasteEventHub(mMockManager))
   {
     gfxPrefs::GetSingleton();
-    mMockManager = new MockCopyPasteManager();
-    mMockEventHub = new MockCopyPasteEventHub(mMockManager);
-
     DefaultValue<nsEventStatus>::Set(nsEventStatus_eIgnore);
   }
 
-  nsRefPtr<MockCopyPasteEventHub> mMockEventHub;
   nsRefPtr<MockCopyPasteManager> mMockManager;
+  nsRefPtr<MockCopyPasteEventHub> mMockEventHub;
 };
 
 TEST_F(CopyPasteEventHubTester, TestOnPress) {
