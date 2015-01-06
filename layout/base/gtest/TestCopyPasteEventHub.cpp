@@ -23,7 +23,7 @@ using ::testing::Eq;
 class MockCopyPasteManager : public CopyPasteManager
 {
 public:
-  MockCopyPasteManager()
+  explicit MockCopyPasteManager()
     : CopyPasteManager(nullptr)
   { }
 
@@ -36,7 +36,7 @@ public:
 
 class MockCopyPasteEventHub : public CopyPasteEventHub {
 public:
-  MockCopyPasteEventHub(MockCopyPasteManager* aManager)
+  explicit MockCopyPasteEventHub(MockCopyPasteManager* aManager)
     : CopyPasteEventHub(nullptr, aManager)
   { }
 
@@ -49,7 +49,7 @@ public:
 
 class CopyPasteEventHubTester : public ::testing::Test {
 protected:
-  CopyPasteEventHubTester()
+  explicit CopyPasteEventHubTester()
     : mMockManager(new MockCopyPasteManager())
     , mMockEventHub(new MockCopyPasteEventHub(mMockManager))
   {
