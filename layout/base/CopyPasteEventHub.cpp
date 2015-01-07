@@ -12,6 +12,7 @@
 #include "nsFocusManager.h"
 #include "nsFrameSelection.h"
 #include "nsITimer.h"
+#include "prlog.h"
 
 using namespace mozilla;
 
@@ -19,6 +20,27 @@ NS_IMPL_ISUPPORTS(CopyPasteEventHub,
                   nsIReflowObserver,
                   nsIScrollObserver,
                   nsISupportsWeakReference)
+
+// Avoid redefine macros
+#undef LOG
+
+#ifdef PR_LOGGING
+static PRLogModuleInfo* gCopyPasteEventHubLogModule;
+static const char* kCopyPasteEventHubModuleName = "CopyPasteEventHub";
+#define LOG(level, message, ...)                                               \
+  PR_LOG(gCopyPasteEventHubLogModule, level,                                   \
+         ("%s (%p): %s:%d : " message "\n", kCopyPasteEventHubModuleName,      \
+          this, __FUNCTION__, __LINE__, ##__VA_ARGS__));
+#define LOG_DEBUG(...) LOG(PR_LOG_DEBUG, ##__VA_ARGS__)
+#define LOG_WARNING(...) LOG(PR_LOG_WARNING, ##__VA_ARGS__)
+#define LOG_ERROR(...) LOG(PR_LOG_ERROR, ##__VA_ARGS__)
+
+#else
+#define LOG(level, message, ...)
+#define LOG_DEBUG(...)
+#define LOG_WARNING(...)
+#define LOG_ERROR(...)
+#endif // #ifdef PR_LOGGING
 
 CopyPasteEventHub::CopyPasteEventHub(nsIPresShell* aPresShell,
                                      CopyPasteManager* aHandler)
@@ -29,6 +51,11 @@ CopyPasteEventHub::CopyPasteEventHub(nsIPresShell* aPresShell,
   , mPresShell(aPresShell)
   , mHandler(aHandler)
 {
+#ifdef PR_LOGGING
+  if (!gCopyPasteEventHubLogModule) {
+    gCopyPasteEventHubLogModule = PR_NewLogModule(kCopyPasteEventHubModuleName);
+  }
+#endif
 }
 
 nsEventStatus
