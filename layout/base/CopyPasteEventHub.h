@@ -49,13 +49,13 @@ protected:
     PRESS,
     DRAG,
     RELEASE
-  MOZ_END_ENUM_CLASS(InputState)
+  MOZ_END_NESTED_ENUM_CLASS(InputState)
 
   MOZ_BEGIN_NESTED_ENUM_CLASS(InputType, uint8_t)
     NONE,
     MOUSE,
     TOUCH
-  MOZ_END_ENUM_CLASS(InputType)
+  MOZ_END_NESTED_ENUM_CLASS(InputType)
 
   nsEventStatus HandleMouseMoveEvent(WidgetMouseEvent* aEvent);
   nsEventStatus HandleMouseUpEvent(WidgetMouseEvent* aEvent);
