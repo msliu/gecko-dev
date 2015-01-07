@@ -241,11 +241,18 @@ CopyPasteManager::OnRelease()
 nsEventStatus
 CopyPasteManager::OnLongTap(const nsPoint& aPoint)
 {
-  if (mCaretMode != CaretMode::SELECTION) {
-    SelectWord(aPoint);
+  if (mDragMode == DragMode::FIRST_CARET ||
+      mDragMode == DragMode::SECOND_CARET) {
     return nsEventStatus_eConsumeNoDefault;
   }
-  return nsEventStatus_eIgnore;
+
+  nsresult wordSelected = SelectWord(aPoint);
+
+  if (NS_FAILED(wordSelected)) {
+    return nsEventStatus_eIgnore;
+  }
+
+  return nsEventStatus_eConsumeNoDefault;
 }
 
 nsEventStatus
@@ -342,25 +349,25 @@ nsresult
 CopyPasteManager::SelectWord(const nsPoint& aPoint)
 {
   if (!mPresShell) {
-    return NS_OK;
+    return NS_ERROR_UNEXPECTED;
   }
 
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
   if (!rootFrame) {
-    return NS_OK;
+    return NS_ERROR_NOT_AVAILABLE;
   }
 
   // Find content offsets for mouse down point
   nsIFrame *ptFrame = nsLayoutUtils::GetFrameForPoint(rootFrame, aPoint,
     nsLayoutUtils::IGNORE_PAINT_SUPPRESSION | nsLayoutUtils::IGNORE_CROSS_DOC);
   if (!ptFrame) {
-    return NS_OK;
+    return NS_ERROR_FAILURE;
   }
 
   bool selectable;
   ptFrame->IsSelectable(&selectable, nullptr);
   if (!selectable) {
-    return NS_OK;
+    return NS_ERROR_FAILURE;
   }
 
   nsPoint ptInFrame = aPoint;
@@ -390,6 +397,14 @@ CopyPasteManager::SelectWord(const nsPoint& aPoint)
   nsFrame* frame = static_cast<nsFrame*>(ptFrame);
   nsresult rs = frame->SelectByTypeAtPoint(mPresShell->GetPresContext(), ptInFrame,
                                            eSelectWord, eSelectWord, 0);
+
+#ifdef DEBUG_FRAME_DUMP
+  nsCString frameTag;
+  frame->ListTag(frameTag);
+  LOG_DEBUG("Frame=%s, ptInFrame=(%d, %d)", frameTag.get(), ptInFrame.x,
+            ptInFrame.y);
+#endif
+
   SetSelectionDragState(false);
 
   // Clear maintain selection otherwise we cannot select less than a word
