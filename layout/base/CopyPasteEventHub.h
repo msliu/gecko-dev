@@ -57,6 +57,9 @@ protected:
     TOUCH
   MOZ_END_NESTED_ENUM_CLASS(InputType)
 
+  static const char* ToStr(InputState aInputState);
+  static const char* ToStr(InputType aInputType);
+
   nsEventStatus HandleMouseMoveEvent(WidgetMouseEvent* aEvent);
   nsEventStatus HandleMouseUpEvent(WidgetMouseEvent* aEvent);
   nsEventStatus HandleMouseDownEvent(WidgetMouseEvent* aEvent);
