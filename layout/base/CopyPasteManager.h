@@ -58,6 +58,9 @@ protected:
     SELECTION
   MOZ_END_NESTED_ENUM_CLASS(CaretMode)
 
+  static const char* ToStr(DragMode aDragMode);
+  static const char* ToStr(CaretMode aCaretMode);
+
   virtual ~CopyPasteManager();
 
   virtual nsEventStatus OnPress(const nsPoint& aPoint);

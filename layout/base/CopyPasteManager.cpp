@@ -46,6 +46,26 @@ const char* kCopyPasteManagerLogModuleName = "CopyPasteManager";
 #endif // #ifdef PR_LOGGING
 }
 
+/* static */ const char*
+CopyPasteManager::ToStr(DragMode aDragMode)
+{
+  switch(aDragMode) {
+  case DragMode::NONE: return "DragMode::NONE";
+  case DragMode::FIRST_CARET: return "DragMode::FIRST_CARET";
+  case DragMode::SECOND_CARET: return "DragMode::SECOND_CARET";
+  }
+}
+
+/* static */ const char*
+CopyPasteManager::ToStr(CaretMode aCaretMode)
+{
+  switch(aCaretMode) {
+  case CaretMode::NONE: return "CaretMode::NONE";
+  case CaretMode::CURSOR: return "CaretMode::CURSOR";
+  case CaretMode::SELECTION: return "CaretMode::SELECTION";
+  }
+}
+
 CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
   : mInitialized(false)
   , mDragMode(DragMode::NONE)
@@ -195,6 +215,8 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
 nsEventStatus
 CopyPasteManager::OnPress(const nsPoint& aPoint)
 {
+  LOG_DEBUG("Press in drag mode %s", ToStr(mDragMode));
+
   if (mFirstCaret->Contains(aPoint)) {
     mDragMode = DragMode::FIRST_CARET;
     mCaretCenterToDownPointOffsetY = mFirstCaret->LogicalPosition().y - aPoint.y;
@@ -217,6 +239,8 @@ CopyPasteManager::OnPress(const nsPoint& aPoint)
 nsEventStatus
 CopyPasteManager::OnDrag(const nsPoint& aPoint)
 {
+  LOG_DEBUG("Drag in drag mode %s", ToStr(mDragMode));
+
   if (mDragMode != DragMode::NONE) {
     nsPoint point = aPoint;
     point.y += mCaretCenterToDownPointOffsetY;
@@ -230,6 +254,8 @@ CopyPasteManager::OnDrag(const nsPoint& aPoint)
 nsEventStatus
 CopyPasteManager::OnRelease()
 {
+  LOG_DEBUG("Release in drag mode %s", ToStr(mDragMode));
+
   if (mDragMode != DragMode::NONE) {
     SetSelectionDragState(false);
     mDragMode = DragMode::NONE;
@@ -241,6 +267,8 @@ CopyPasteManager::OnRelease()
 nsEventStatus
 CopyPasteManager::OnLongTap(const nsPoint& aPoint)
 {
+  LOG_DEBUG("Long tap in drag mode %s", ToStr(mDragMode));
+
   if (mDragMode == DragMode::FIRST_CARET ||
       mDragMode == DragMode::SECOND_CARET) {
     return nsEventStatus_eConsumeNoDefault;
