@@ -42,6 +42,24 @@ static const char* kCopyPasteEventHubModuleName = "CopyPasteEventHub";
 #define LOG_ERROR(...)
 #endif // #ifdef PR_LOGGING
 
+/* static */ const char*
+CopyPasteEventHub::ToStr(InputState aInputState) {
+  switch(aInputState) {
+  case InputState::PRESS: return "PRESS";
+  case InputState::DRAG: return "DRAG";
+  case InputState::RELEASE: return "RELEASE";
+  }
+}
+
+/* static */ const char*
+CopyPasteEventHub::ToStr(InputType aInputType) {
+  switch(aInputType) {
+  case InputType::NONE: return "NONE";
+  case InputType::MOUSE: return "MOUSE";
+  case InputType::TOUCH: return "TOUCH";
+  }
+}
+
 CopyPasteEventHub::CopyPasteEventHub(nsIPresShell* aPresShell,
                                      CopyPasteManager* aHandler)
   : mAsyncPanZoomEnabled(false)
@@ -154,6 +172,8 @@ CopyPasteEventHub::Terminate()
 nsEventStatus
 CopyPasteEventHub::HandleMouseMoveEvent(WidgetMouseEvent* aEvent)
 {
+  LOG_DEBUG("Got a mouse move in state %s", ToStr(mState));
+
   nsEventStatus status = nsEventStatus_eIgnore;
 
   switch (mState) {
@@ -180,6 +200,8 @@ CopyPasteEventHub::HandleMouseMoveEvent(WidgetMouseEvent* aEvent)
 nsEventStatus
 CopyPasteEventHub::HandleTouchMoveEvent(WidgetTouchEvent* aEvent)
 {
+  LOG_DEBUG("Got a touch move in state %s", ToStr(mState));
+
   nsEventStatus status = nsEventStatus_eIgnore;
 
   switch (mState) {
@@ -210,6 +232,8 @@ CopyPasteEventHub::HandleTouchMoveEvent(WidgetTouchEvent* aEvent)
 nsEventStatus
 CopyPasteEventHub::HandleMouseUpEvent(WidgetMouseEvent* aEvent)
 {
+  LOG_DEBUG("Got a mouse up in state %s", ToStr(mState));
+
   nsEventStatus status = nsEventStatus_eIgnore;
 
   switch (mState) {
@@ -234,6 +258,8 @@ CopyPasteEventHub::HandleMouseUpEvent(WidgetMouseEvent* aEvent)
 nsEventStatus
 CopyPasteEventHub::HandleTouchUpEvent(WidgetTouchEvent* aEvent)
 {
+  LOG_DEBUG("Got a touch up in state %s", ToStr(mState));
+
   nsEventStatus status = nsEventStatus_eIgnore;
 
   switch (mState) {
@@ -255,6 +281,8 @@ CopyPasteEventHub::HandleTouchUpEvent(WidgetTouchEvent* aEvent)
 nsEventStatus
 CopyPasteEventHub::HandleMouseDownEvent(WidgetMouseEvent* aEvent)
 {
+  LOG_DEBUG("Got a mouse down in state %s", ToStr(mState));
+
   nsEventStatus status = nsEventStatus_eIgnore;
 
   switch (mState) {
@@ -277,6 +305,8 @@ CopyPasteEventHub::HandleMouseDownEvent(WidgetMouseEvent* aEvent)
 nsEventStatus
 CopyPasteEventHub::HandleTouchDownEvent(WidgetTouchEvent* aEvent)
 {
+  LOG_DEBUG("Got a touch down in state %s", ToStr(mState));
+
   nsEventStatus status = nsEventStatus_eIgnore;
 
   switch (mState) {
@@ -300,6 +330,8 @@ CopyPasteEventHub::HandleTouchDownEvent(WidgetTouchEvent* aEvent)
 nsEventStatus
 CopyPasteEventHub::HandleLongTapEvent(WidgetMouseEvent* aEvent)
 {
+  LOG_DEBUG("Got a long tap in state %s", ToStr(mState));
+
   nsPoint point = aEvent ? GetMouseEventPosition(aEvent) : mDownPoint;
   return mHandler->OnLongTap(point);
 }
