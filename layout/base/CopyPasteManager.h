@@ -50,13 +50,13 @@ protected:
     NONE,
     FIRST_CARET,
     SECOND_CARET
-  MOZ_END_ENUM_CLASS(DragMode)
+  MOZ_END_NESTED_ENUM_CLASS(DragMode)
 
   MOZ_BEGIN_NESTED_ENUM_CLASS(CaretMode, uint8_t)
     NONE,
     CURSOR,
     SELECTION
-  MOZ_END_ENUM_CLASS(CaretMode);
+  MOZ_END_NESTED_ENUM_CLASS(CaretMode)
 
   virtual ~CopyPasteManager();
 

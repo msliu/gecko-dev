@@ -41,7 +41,7 @@ public:
     NORMAL,
     LEFT,
     RIGHT
-  MOZ_END_ENUM_CLASS(Appearance)
+  MOZ_END_NESTED_ENUM_CLASS(Appearance)
 
   bool IsVisible() const;
   void SetAppearance(Appearance aAppearance);
