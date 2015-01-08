@@ -105,7 +105,9 @@ protected:
   // const time when we scroll. So when timer triggers, we treat it
   // as scroll end event.
   nsCOMPtr<nsITimer> mScrollEndDetectorTimer;
-  nsPoint mDownPoint;
+
+  // Last mouse button down event or touch start event point.
+  nsPoint mLastPressEventPoint;
 
   static const int32_t kScrollEndTimerDelay = 300;
   static const int32_t kMoveStartTolerancePx = 5;

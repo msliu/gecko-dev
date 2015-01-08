@@ -181,7 +181,7 @@ CopyPasteEventHub::HandleMouseMoveEvent(WidgetMouseEvent* aEvent)
     case InputState::DRAG:
       {
         nsPoint movePoint = GetMouseEventPosition(aEvent);
-        nsPoint delta = mDownPoint - movePoint;
+        nsPoint delta = mLastPressEventPoint - movePoint;
         if (mState == InputState::PRESS &&
             NS_hypot(delta.x, delta.y) >
               nsPresContext::AppUnitsPerCSSPixel() * kMoveStartTolerancePx) {
@@ -213,7 +213,7 @@ CopyPasteEventHub::HandleTouchMoveEvent(WidgetTouchEvent* aEvent)
         }
 
         nsPoint movePoint = GetTouchEventPosition(aEvent, mActiveTouchId);
-        nsPoint delta = mDownPoint - movePoint;
+        nsPoint delta = mLastPressEventPoint - movePoint;
         if (mState == InputState::PRESS &&
             NS_hypot(delta.x, delta.y) >
               nsPresContext::AppUnitsPerCSSPixel() * kMoveStartTolerancePx) {
@@ -243,7 +243,7 @@ CopyPasteEventHub::HandleMouseUpEvent(WidgetMouseEvent* aEvent)
         status = mHandler->OnRelease();
         mType = InputType::NONE;
         if (mState == InputState::PRESS) {
-          mHandler->OnTap(mDownPoint);
+          mHandler->OnTap(mLastPressEventPoint);
         }
         SetState(InputState::RELEASE);
       }
@@ -270,7 +270,7 @@ CopyPasteEventHub::HandleTouchUpEvent(WidgetTouchEvent* aEvent)
         mActiveTouchId = kInvalidTouchId;
         mType = InputType::NONE;
         if (mState == InputState::PRESS) {
-          mHandler->OnTap(mDownPoint);
+          mHandler->OnTap(mLastPressEventPoint);
         }
         SetState(InputState::RELEASE);
       }
@@ -293,7 +293,7 @@ CopyPasteEventHub::HandleMouseDownEvent(WidgetMouseEvent* aEvent)
     case InputState::RELEASE:
       if (aEvent->button == WidgetMouseEvent::eLeftButton) {
         nsPoint point = GetMouseEventPosition(aEvent);
-        mDownPoint = point;
+        mLastPressEventPoint = point;
         SetState(InputState::PRESS);
         mType = InputType::MOUSE;
         status = mHandler->OnPress(point);
@@ -318,7 +318,7 @@ CopyPasteEventHub::HandleTouchDownEvent(WidgetTouchEvent* aEvent)
       if (mActiveTouchId == kInvalidTouchId) {
         mActiveTouchId = aEvent->touches[0]->Identifier();
         nsPoint point = GetTouchEventPosition(aEvent, mActiveTouchId);
-        mDownPoint = point;
+        mLastPressEventPoint = point;
         SetState(InputState::PRESS);
         mType = InputType::TOUCH;
         status = mHandler->OnPress(point);
@@ -336,7 +336,7 @@ CopyPasteEventHub::HandleLongTapEvent(WidgetMouseEvent* aEvent)
 {
   LOG_DEBUG("Got a long tap in state %s", ToStr(mState));
 
-  nsPoint point = aEvent ? GetMouseEventPosition(aEvent) : mDownPoint;
+  nsPoint point = aEvent ? GetMouseEventPosition(aEvent) : mLastPressEventPoint;
   return mHandler->OnLongTap(point);
 }
 
