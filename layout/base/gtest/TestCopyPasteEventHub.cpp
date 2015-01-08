@@ -13,6 +13,7 @@
 #include "gfxPrefs.h"
 #include "mozilla/BasicEvents.h"
 #include "mozilla/MouseEvents.h"
+#include "mozilla/TouchEvents.h"
 
 using namespace mozilla;
 using ::testing::_;
@@ -43,6 +44,7 @@ public:
 
   CopyPasteEventHub::InputType GetType() { return mType; }
   CopyPasteEventHub::InputState GetState() { return mState; }
+  int32_t GetActiveTouchId() { return mActiveTouchId; }
 
   typedef CopyPasteEventHub::InputState InputState;
   typedef CopyPasteEventHub::InputType InputType;
@@ -62,7 +64,7 @@ protected:
   nsRefPtr<MockCopyPasteEventHub> mMockEventHub;
 };
 
-TEST_F(CopyPasteEventHubTester, TestOnPress) {
+TEST_F(CopyPasteEventHubTester, TestMouseEventOnPress) {
   EXPECT_CALL(*mMockManager, OnPress(Eq(nsPoint(0, 0))));
 
   WidgetMouseEvent evt(true, NS_MOUSE_BUTTON_DOWN, nullptr, WidgetMouseEvent::eReal);
@@ -75,6 +77,29 @@ TEST_F(CopyPasteEventHubTester, TestOnPress) {
 
   EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::PRESS);
   EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::MOUSE);
+}
+
+TEST_F(CopyPasteEventHubTester, TestTouchEventOnPress) {
+  EXPECT_CALL(*mMockManager, OnPress(Eq(nsPoint(0, 0))));
+
+  WidgetTouchEvent evt(true, NS_TOUCH_START, nullptr);
+  int32_t identifier = 0;
+  nsIntPoint point(0, 0);
+  nsIntPoint radius(19, 19);
+  float rotationAngle = 0;
+  float force = 1;
+  evt.touches.AppendElement(new dom::Touch(identifier, point, radius,
+                                           rotationAngle, force));
+
+  EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::RELEASE);
+  EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::NONE);
+  EXPECT_EQ(mMockEventHub->GetActiveTouchId(), -1);
+
+  mMockEventHub->HandleEvent(&evt);
+
+  EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::PRESS);
+  EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::TOUCH);
+  EXPECT_EQ(mMockEventHub->GetActiveTouchId(), identifier);
 }
 
 TEST_F(CopyPasteEventHubTester, TestOnDrag) {
@@ -105,7 +130,7 @@ TEST_F(CopyPasteEventHubTester, TestOnDrag) {
   EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::MOUSE);
 }
 
-TEST_F(CopyPasteEventHubTester, TestOnRelease) {
+TEST_F(CopyPasteEventHubTester, TestMouseEventOnRelease) {
   {
     InSequence dummy;
     EXPECT_CALL(*mMockManager, OnPress(_));
@@ -125,4 +150,35 @@ TEST_F(CopyPasteEventHubTester, TestOnRelease) {
 
   EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::RELEASE);
   EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::NONE);
+}
+
+TEST_F(CopyPasteEventHubTester, TestTouchEventOnRelease) {
+  {
+    InSequence dummy;
+    EXPECT_CALL(*mMockManager, OnPress(_));
+    EXPECT_CALL(*mMockManager, OnRelease());
+    EXPECT_CALL(*mMockManager, OnTap(_));
+  }
+
+  WidgetTouchEvent evt(true, NS_TOUCH_START, nullptr);
+  int32_t identifier = 0;
+  nsIntPoint point(0, 0);
+  nsIntPoint radius(19, 19);
+  float rotationAngle = 0;
+  float force = 1;
+  evt.touches.AppendElement(new dom::Touch(identifier, point, radius,
+                                           rotationAngle, force));
+
+  mMockEventHub->HandleEvent(&evt);
+
+  EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::PRESS);
+  EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::TOUCH);
+  EXPECT_EQ(mMockEventHub->GetActiveTouchId(), identifier);
+
+  evt.message = NS_TOUCH_END;
+  mMockEventHub->HandleEvent(&evt);
+
+  EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::RELEASE);
+  EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::NONE);
+  EXPECT_EQ(mMockEventHub->GetActiveTouchId(), -1);
 }
