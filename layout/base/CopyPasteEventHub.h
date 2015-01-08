@@ -40,8 +40,8 @@ public:
 
   // nsIScrollObserver
   virtual void ScrollPositionChanged() MOZ_OVERRIDE;
-  virtual void AsyncPanZoomStarted(const mozilla::CSSIntPoint aScrollPos) MOZ_OVERRIDE;
-  virtual void AsyncPanZoomStopped(const mozilla::CSSIntPoint aScrollPos) MOZ_OVERRIDE;
+  virtual void AsyncPanZoomStarted(const CSSIntPoint aScrollPos) MOZ_OVERRIDE;
+  virtual void AsyncPanZoomStopped(const CSSIntPoint aScrollPos) MOZ_OVERRIDE;
 
 protected:
   virtual ~CopyPasteEventHub() {}
