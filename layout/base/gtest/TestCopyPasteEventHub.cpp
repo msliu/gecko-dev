@@ -122,13 +122,13 @@ TEST_F(CopyPasteEventHubTester, TestOnDrag) {
   mMockEventHub->HandleEvent(&evt);
   EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::PRESS);
 
-  // Then drag but not exceed kMoveStartTolerancePx
+  // Then drag without exceeding the threshold
   evt.message = NS_MOUSE_MOVE;
   evt.refPoint = LayoutDeviceIntPoint(x2, y2);
   mMockEventHub->HandleEvent(&evt);
   EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::PRESS);
 
-  // Then drag over kMoveStartTolerancePx
+  // Then drag over the threshold
   evt.refPoint = LayoutDeviceIntPoint(x3, y3);
   mMockEventHub->HandleEvent(&evt);
   EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::DRAG);

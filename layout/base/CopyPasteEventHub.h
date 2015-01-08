@@ -73,6 +73,9 @@ protected:
   nsPoint GetMouseEventPosition(WidgetMouseEvent* aEvent);
   void SetState(InputState aState);
 
+  bool IsDistanceExceededDragThreshold(const nsPoint& aPoint1,
+                                       const nsPoint& aPoint2);
+
   /**
    * Detecting long tap using timer
    */
@@ -110,7 +113,7 @@ protected:
   nsPoint mLastPressEventPoint;
 
   static const int32_t kScrollEndTimerDelay = 300;
-  static const int32_t kMoveStartTolerancePx = 5;
+  static const int32_t kMinDragDistanceInPixel = 5;
   static const int32_t kInvalidTouchId = -1;
 };
 
