@@ -265,7 +265,7 @@ CopyPasteEventHub::HandleTouchUpEvent(WidgetTouchEvent* aEvent)
   switch (mState) {
     case InputState::PRESS:
     case InputState::DRAG:
-      if (aEvent->touches[0]->mIdentifier == mActiveTouchId) {
+      if (aEvent->touches[0]->Identifier() == mActiveTouchId) {
         status = mHandler->OnRelease();
         mActiveTouchId = kInvalidTouchId;
         mType = InputType::NONE;
@@ -472,7 +472,7 @@ CopyPasteEventHub::GetTouchEventPosition(WidgetTouchEvent* aEvent,
                                          int32_t aIdentifier)
 {
   for (size_t i = 0; i < aEvent->touches.Length(); i++) {
-    if (aEvent->touches[i]->mIdentifier == aIdentifier) {
+    if (aEvent->touches[i]->Identifier() == aIdentifier) {
       nsIntPoint touchIntPoint = aEvent->touches[i]->mRefPoint;
 
       // Return dev pixel directly, only used for gtest.
