@@ -286,7 +286,9 @@ CopyPasteManager::OnLongTap(const nsPoint& aPoint)
 nsEventStatus
 CopyPasteManager::OnTap(const nsPoint& aPoint)
 {
-  return nsEventStatus_eIgnore;
+  LOG_DEBUG("Tap in drag mode %s", ToStr(mDragMode));
+
+  return nsEventStatus_eConsumeNoDefault;
 }
 
 void

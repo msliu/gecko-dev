@@ -269,6 +269,9 @@ CopyPasteEventHub::HandleTouchUpEvent(WidgetTouchEvent* aEvent)
         status = mHandler->OnRelease();
         mActiveTouchId = -1;
         mType = InputType::NONE;
+        if (mState == InputState::PRESS) {
+          mHandler->OnTap(mDownPoint);
+        }
         SetState(InputState::RELEASE);
       }
       break;
