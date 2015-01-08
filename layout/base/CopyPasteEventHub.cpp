@@ -341,6 +341,12 @@ CopyPasteEventHub::HandleLongTapEvent(WidgetMouseEvent* aEvent)
 }
 
 void
+CopyPasteEventHub::HandleScrollStart()
+{
+  mHandler->OnScrollStart();
+}
+
+void
 CopyPasteEventHub::HandleScrollEnd()
 {
   mHandler->OnScrollEnd();
@@ -420,7 +426,7 @@ CopyPasteEventHub::ReflowInterruptible(DOMHighResTimeStamp aStart,
 void
 CopyPasteEventHub::AsyncPanZoomStarted(const CSSIntPoint aScrollPos)
 {
-  mHandler->OnScrollStart();
+  HandleScrollStart();
 }
 
 void
@@ -432,7 +438,7 @@ CopyPasteEventHub::AsyncPanZoomStopped(const CSSIntPoint aScrollPos)
 void
 CopyPasteEventHub::ScrollPositionChanged()
 {
-  mHandler->OnScrollStart();
+  HandleScrollStart();
   LaunchScrollEndDetector();
 }
 
