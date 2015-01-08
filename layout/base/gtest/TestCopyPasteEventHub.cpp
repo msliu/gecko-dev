@@ -104,28 +104,32 @@ TEST_F(CopyPasteEventHubTester, TestTouchEventOnPress) {
 }
 
 TEST_F(CopyPasteEventHubTester, TestOnDrag) {
+  nscoord x1 = 0, y1 = 0;
+  nscoord x2 = 100, y2 = 100;
+  nscoord x3 = 300, y3 = 300;
+
   {
     InSequence dummy;
-    EXPECT_CALL(*mMockManager, OnPress(Eq(nsPoint(0, 0))));
-    EXPECT_CALL(*mMockManager, OnDrag(Eq(nsPoint(100, 100))));
-    EXPECT_CALL(*mMockManager, OnDrag(Eq(nsPoint(300, 300))));
+    EXPECT_CALL(*mMockManager, OnPress(Eq(nsPoint(x1, y1))));
+    EXPECT_CALL(*mMockManager, OnDrag(Eq(nsPoint(x2, y2))));
+    EXPECT_CALL(*mMockManager, OnDrag(Eq(nsPoint(x3, y3))));
   }
 
   // Press first
   WidgetMouseEvent evt(true, NS_MOUSE_BUTTON_DOWN, nullptr, WidgetMouseEvent::eReal);
   evt.button = WidgetMouseEvent::eLeftButton;
-  evt.refPoint = LayoutDeviceIntPoint(0, 0);
+  evt.refPoint = LayoutDeviceIntPoint(x1, y1);
   mMockEventHub->HandleEvent(&evt);
   EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::PRESS);
 
   // Then drag but not exceed kMoveStartTolerancePx
   evt.message = NS_MOUSE_MOVE;
-  evt.refPoint = LayoutDeviceIntPoint(100, 100);
+  evt.refPoint = LayoutDeviceIntPoint(x2, y2);
   mMockEventHub->HandleEvent(&evt);
   EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::PRESS);
 
   // Then drag over kMoveStartTolerancePx
-  evt.refPoint = LayoutDeviceIntPoint(300, 300);
+  evt.refPoint = LayoutDeviceIntPoint(x3, y3);
   mMockEventHub->HandleEvent(&evt);
   EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::DRAG);
   EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::MOUSE);
