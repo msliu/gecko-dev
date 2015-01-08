@@ -99,14 +99,14 @@ CopyPasteEventHub::HandleEvent(WidgetEvent* aEvent)
 
   switch (aEvent->message) {
     case NS_TOUCH_START:
-      status = HandleTouchDownEvent(aEvent->AsTouchEvent());
+      status = HandleTouchStartEvent(aEvent->AsTouchEvent());
       break;
     case NS_MOUSE_BUTTON_DOWN:
       status = HandleMouseDownEvent(aEvent->AsMouseEvent());
       break;
     case NS_TOUCH_END:
     case NS_TOUCH_CANCEL:
-      status = HandleTouchUpEvent(aEvent->AsTouchEvent());
+      status = HandleTouchEndEvent(aEvent->AsTouchEvent());
       break;
     case NS_MOUSE_BUTTON_UP:
       status = HandleMouseUpEvent(aEvent->AsMouseEvent());
@@ -256,7 +256,7 @@ CopyPasteEventHub::HandleMouseUpEvent(WidgetMouseEvent* aEvent)
 }
 
 nsEventStatus
-CopyPasteEventHub::HandleTouchUpEvent(WidgetTouchEvent* aEvent)
+CopyPasteEventHub::HandleTouchEndEvent(WidgetTouchEvent* aEvent)
 {
   LOG_DEBUG("Got a touch up in state %s", ToStr(mState));
 
@@ -307,7 +307,7 @@ CopyPasteEventHub::HandleMouseDownEvent(WidgetMouseEvent* aEvent)
 }
 
 nsEventStatus
-CopyPasteEventHub::HandleTouchDownEvent(WidgetTouchEvent* aEvent)
+CopyPasteEventHub::HandleTouchStartEvent(WidgetTouchEvent* aEvent)
 {
   LOG_DEBUG("Got a touch down in state %s", ToStr(mState));
 
