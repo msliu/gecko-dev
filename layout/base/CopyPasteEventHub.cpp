@@ -147,6 +147,9 @@ CopyPasteEventHub::Init()
   docShell->AddWeakScrollObserver(this);
 
   mDocShell = static_cast<nsDocShell*>(docShell);
+
+  mLongTapDetectorTimer = do_CreateInstance("@mozilla.org/timer;1");
+  mScrollEndDetectorTimer = do_CreateInstance("@mozilla.org/timer;1");
 }
 
 void
@@ -160,12 +163,9 @@ CopyPasteEventHub::Terminate()
 
   if (mLongTapDetectorTimer) {
     mLongTapDetectorTimer->Cancel();
-    mLongTapDetectorTimer = nullptr;
   }
-
   if (mScrollEndDetectorTimer) {
     mScrollEndDetectorTimer->Cancel();
-    mScrollEndDetectorTimer = nullptr;
   }
 }
 
@@ -371,13 +371,10 @@ CopyPasteEventHub::LaunchLongTapDetector()
   }
 
   if (!mLongTapDetectorTimer) {
-    mLongTapDetectorTimer = do_CreateInstance("@mozilla.org/timer;1");
+    return;
   }
 
-  MOZ_ASSERT(mLongTapDetectorTimer);
-  CancelLongTapDetector();
   int32_t longTapDelay = gfxPrefs::UiClickHoldContextMenusDelay();
-
   mLongTapDetectorTimer->InitWithFuncCallback(FireLongTap,
                                               this,
                                               longTapDelay,
@@ -398,13 +395,10 @@ CopyPasteEventHub::CancelLongTapDetector()
   mLongTapDetectorTimer->Cancel();
 }
 
-/* static */void
+/* static */ void
 CopyPasteEventHub::FireLongTap(nsITimer* aTimer, void* aCopyPasteEventHub)
 {
   CopyPasteEventHub* self = static_cast<CopyPasteEventHub*>(aCopyPasteEventHub);
-  NS_PRECONDITION(aTimer == self->mLongTapDetectorTimer,
-                  "Unexpected timer");
-
   self->HandleLongTapEvent(nullptr);
 }
 
@@ -439,19 +433,19 @@ void
 CopyPasteEventHub::ScrollPositionChanged()
 {
   mHandler->OnScrollStart();
-  if (!mAsyncPanZoomEnabled) {
-    LaunchScrollEndDetector();
-  }
+  LaunchScrollEndDetector();
 }
 
 void
 CopyPasteEventHub::LaunchScrollEndDetector()
 {
-  if (!mScrollEndDetectorTimer) {
-    mScrollEndDetectorTimer = do_CreateInstance("@mozilla.org/timer;1");
+  if (mAsyncPanZoomEnabled) {
+    return;
   }
 
-  MOZ_ASSERT(mScrollEndDetectorTimer);
+  if (!mScrollEndDetectorTimer) {
+    return;
+  }
 
   mScrollEndDetectorTimer->InitWithFuncCallback(FireScrollEnd,
                                                 this,
@@ -459,13 +453,10 @@ CopyPasteEventHub::LaunchScrollEndDetector()
                                                 nsITimer::TYPE_ONE_SHOT);
 }
 
-/* static */void
+/* static */ void
 CopyPasteEventHub::FireScrollEnd(nsITimer* aTimer, void* aCopyPasteEventHub)
 {
   CopyPasteEventHub* self = static_cast<CopyPasteEventHub*>(aCopyPasteEventHub);
-  NS_PRECONDITION(aTimer == self->mScrollEndDetectorTimer,
-                  "Unexpected timer");
-
   self->HandleScrollEnd();
 }
 
