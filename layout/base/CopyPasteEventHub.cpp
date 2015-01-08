@@ -424,13 +424,13 @@ CopyPasteEventHub::ReflowInterruptible(DOMHighResTimeStamp aStart,
 }
 
 void
-CopyPasteEventHub::AsyncPanZoomStarted(const mozilla::CSSIntPoint aScrollPos)
+CopyPasteEventHub::AsyncPanZoomStarted(const CSSIntPoint aScrollPos)
 {
   mHandler->OnScrollStart();
 }
 
 void
-CopyPasteEventHub::AsyncPanZoomStopped(const mozilla::CSSIntPoint aScrollPos)
+CopyPasteEventHub::AsyncPanZoomStopped(const CSSIntPoint aScrollPos)
 {
   HandleScrollEnd();
 }
