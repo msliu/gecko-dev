@@ -103,6 +103,7 @@ CopyPasteManager::Terminate()
   }
 
   mCopyPasteEventHub->Terminate();
+  mInitialized = false;
 }
 
 CopyPasteManager::~CopyPasteManager()
