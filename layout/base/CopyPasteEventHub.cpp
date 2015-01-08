@@ -181,10 +181,8 @@ CopyPasteEventHub::HandleMouseMoveEvent(WidgetMouseEvent* aEvent)
     case InputState::DRAG:
       {
         nsPoint movePoint = GetMouseEventPosition(aEvent);
-        nsPoint delta = mLastPressEventPoint - movePoint;
         if (mState == InputState::PRESS &&
-            NS_hypot(delta.x, delta.y) >
-              nsPresContext::AppUnitsPerCSSPixel() * kMoveStartTolerancePx) {
+            IsDistanceExceededDragThreshold(mLastPressEventPoint, movePoint)) {
           SetState(InputState::DRAG);
         }
         status = mHandler->OnDrag(movePoint);
@@ -213,10 +211,8 @@ CopyPasteEventHub::HandleTouchMoveEvent(WidgetTouchEvent* aEvent)
         }
 
         nsPoint movePoint = GetTouchEventPosition(aEvent, mActiveTouchId);
-        nsPoint delta = mLastPressEventPoint - movePoint;
         if (mState == InputState::PRESS &&
-            NS_hypot(delta.x, delta.y) >
-              nsPresContext::AppUnitsPerCSSPixel() * kMoveStartTolerancePx) {
+            IsDistanceExceededDragThreshold(mLastPressEventPoint, movePoint)) {
           SetState(InputState::DRAG);
         }
         status = mHandler->OnDrag(movePoint);
@@ -367,6 +363,16 @@ CopyPasteEventHub::SetState(InputState aState)
       break;
   }
   mState = aState;
+}
+
+
+bool
+CopyPasteEventHub::IsDistanceExceededDragThreshold(const nsPoint& aPoint1,
+                                                   const nsPoint& aPoint2)
+{
+  nsPoint delta = aPoint1 - aPoint2;
+  return NS_hypot(delta.x, delta.y) >
+    nsPresContext::AppUnitsPerCSSPixel() * kMinDragDistanceInPixel;
 }
 
 void
