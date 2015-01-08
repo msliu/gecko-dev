@@ -67,6 +67,7 @@ protected:
   nsEventStatus HandleTouchMoveEvent(WidgetTouchEvent* aEvent);
   nsEventStatus HandleTouchUpEvent(WidgetTouchEvent* aEvent);
   nsEventStatus HandleTouchDownEvent(WidgetTouchEvent* aEvent);
+  void HandleScrollStart();
   void HandleScrollEnd();
   nsPoint GetTouchEventPosition(WidgetTouchEvent* aEvent, int32_t aIdentifier);
   nsPoint GetMouseEventPosition(WidgetMouseEvent* aEvent);
