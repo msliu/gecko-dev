@@ -267,6 +267,7 @@ CopyPasteEventHub::HandleTouchUpEvent(WidgetTouchEvent* aEvent)
     case InputState::DRAG:
       if (aEvent->touches[0]->mIdentifier == mActiveTouchId) {
         status = mHandler->OnRelease();
+        mActiveTouchId = -1;
         mType = InputType::NONE;
         SetState(InputState::RELEASE);
       }
