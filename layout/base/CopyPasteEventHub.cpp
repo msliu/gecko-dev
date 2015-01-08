@@ -65,7 +65,7 @@ CopyPasteEventHub::CopyPasteEventHub(nsIPresShell* aPresShell,
   : mAsyncPanZoomEnabled(false)
   , mState(InputState::RELEASE)
   , mType(InputType::NONE)
-  , mActiveTouchId(-1)
+  , mActiveTouchId(kInvalidTouchId)
   , mPresShell(aPresShell)
   , mHandler(aHandler)
 {
@@ -208,7 +208,7 @@ CopyPasteEventHub::HandleTouchMoveEvent(WidgetTouchEvent* aEvent)
     case InputState::PRESS:
     case InputState::DRAG:
       {
-        if (mActiveTouchId == -1) {
+        if (mActiveTouchId == kInvalidTouchId) {
           break;
         }
 
@@ -267,7 +267,7 @@ CopyPasteEventHub::HandleTouchUpEvent(WidgetTouchEvent* aEvent)
     case InputState::DRAG:
       if (aEvent->touches[0]->mIdentifier == mActiveTouchId) {
         status = mHandler->OnRelease();
-        mActiveTouchId = -1;
+        mActiveTouchId = kInvalidTouchId;
         mType = InputType::NONE;
         if (mState == InputState::PRESS) {
           mHandler->OnTap(mDownPoint);
@@ -315,7 +315,7 @@ CopyPasteEventHub::HandleTouchDownEvent(WidgetTouchEvent* aEvent)
 
   switch (mState) {
     case InputState::RELEASE:
-      if (mActiveTouchId == -1) {
+      if (mActiveTouchId == kInvalidTouchId) {
         mActiveTouchId = aEvent->touches[0]->Identifier();
         nsPoint point = GetTouchEventPosition(aEvent, mActiveTouchId);
         mDownPoint = point;

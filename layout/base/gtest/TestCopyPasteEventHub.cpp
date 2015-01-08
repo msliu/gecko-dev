@@ -44,7 +44,8 @@ public:
 
   CopyPasteEventHub::InputType GetType() { return mType; }
   CopyPasteEventHub::InputState GetState() { return mState; }
-  int32_t GetActiveTouchId() { return mActiveTouchId; }
+  int32_t ActiveTouchId() { return mActiveTouchId; }
+  static int32_t InvalidTouchId() { return CopyPasteEventHub::kInvalidTouchId; }
 
   typedef CopyPasteEventHub::InputState InputState;
   typedef CopyPasteEventHub::InputType InputType;
@@ -93,13 +94,13 @@ TEST_F(CopyPasteEventHubTester, TestTouchEventOnPress) {
 
   EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::RELEASE);
   EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::NONE);
-  EXPECT_EQ(mMockEventHub->GetActiveTouchId(), -1);
+  EXPECT_EQ(mMockEventHub->ActiveTouchId(), MockCopyPasteEventHub::InvalidTouchId());
 
   mMockEventHub->HandleEvent(&evt);
 
   EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::PRESS);
   EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::TOUCH);
-  EXPECT_EQ(mMockEventHub->GetActiveTouchId(), identifier);
+  EXPECT_EQ(mMockEventHub->ActiveTouchId(), identifier);
 }
 
 TEST_F(CopyPasteEventHubTester, TestOnDrag) {
@@ -173,12 +174,12 @@ TEST_F(CopyPasteEventHubTester, TestTouchEventOnRelease) {
 
   EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::PRESS);
   EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::TOUCH);
-  EXPECT_EQ(mMockEventHub->GetActiveTouchId(), identifier);
+  EXPECT_EQ(mMockEventHub->ActiveTouchId(), identifier);
 
   evt.message = NS_TOUCH_END;
   mMockEventHub->HandleEvent(&evt);
 
   EXPECT_EQ(mMockEventHub->GetState(), MockCopyPasteEventHub::InputState::RELEASE);
   EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::NONE);
-  EXPECT_EQ(mMockEventHub->GetActiveTouchId(), -1);
+  EXPECT_EQ(mMockEventHub->ActiveTouchId(), MockCopyPasteEventHub::InvalidTouchId());
 }
