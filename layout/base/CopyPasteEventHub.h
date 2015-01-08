@@ -108,6 +108,7 @@ protected:
 
   static const int32_t kScrollEndTimerDelay = 300;
   static const int32_t kMoveStartTolerancePx = 5;
+  static const int32_t kInvalidTouchId = -1;
 };
 
 MOZ_FINISH_NESTED_ENUM_CLASS(CopyPasteEventHub::InputState)
