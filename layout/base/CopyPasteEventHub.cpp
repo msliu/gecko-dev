@@ -288,11 +288,10 @@ CopyPasteEventHub::HandleMouseDownEvent(WidgetMouseEvent* aEvent)
   switch (mState) {
     case InputState::RELEASE:
       if (aEvent->button == WidgetMouseEvent::eLeftButton) {
-        nsPoint point = GetMouseEventPosition(aEvent);
-        mLastPressEventPoint = point;
+        nsPoint mLastPressEventPoint = GetMouseEventPosition(aEvent);
         SetState(InputState::PRESS);
         mType = InputType::MOUSE;
-        status = mHandler->OnPress(point);
+        status = mHandler->OnPress(mLastPressEventPoint);
       }
       break;
     default:
@@ -313,11 +312,10 @@ CopyPasteEventHub::HandleTouchStartEvent(WidgetTouchEvent* aEvent)
     case InputState::RELEASE:
       if (mActiveTouchId == kInvalidTouchId) {
         mActiveTouchId = aEvent->touches[0]->Identifier();
-        nsPoint point = GetTouchEventPosition(aEvent, mActiveTouchId);
-        mLastPressEventPoint = point;
+        nsPoint mLastPressEventPoint = GetTouchEventPosition(aEvent, mActiveTouchId);
         SetState(InputState::PRESS);
         mType = InputType::TOUCH;
-        status = mHandler->OnPress(point);
+        status = mHandler->OnPress(mLastPressEventPoint);
       }
       break;
     default:
