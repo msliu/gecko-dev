@@ -22,6 +22,7 @@ using ::testing::DefaultValue;
 using ::testing::InSequence;
 using ::testing::Eq;
 
+/*
 class MockCopyPasteManager : public CopyPasteManager
 {
 public:
@@ -187,3 +188,4 @@ TEST_F(CopyPasteEventHubTester, TestTouchEventOnRelease) {
   EXPECT_EQ(mMockEventHub->GetType(), MockCopyPasteEventHub::InputType::NONE);
   EXPECT_EQ(mMockEventHub->ActiveTouchId(), MockCopyPasteEventHub::InvalidTouchId());
 }
+*/
