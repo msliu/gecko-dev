@@ -53,6 +53,7 @@ CopyPasteManager::ToStr(DragMode aDragMode)
   case DragMode::NONE: return "DragMode::NONE";
   case DragMode::FIRST_CARET: return "DragMode::FIRST_CARET";
   case DragMode::SECOND_CARET: return "DragMode::SECOND_CARET";
+  default: return "";
   }
 }
 
@@ -63,6 +64,7 @@ CopyPasteManager::ToStr(CaretMode aCaretMode)
   case CaretMode::NONE: return "CaretMode::NONE";
   case CaretMode::CURSOR: return "CaretMode::CURSOR";
   case CaretMode::SELECTION: return "CaretMode::SELECTION";
+  default: return "";
   }
 }
 

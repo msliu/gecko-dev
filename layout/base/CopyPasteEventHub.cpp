@@ -48,6 +48,7 @@ CopyPasteEventHub::ToStr(InputState aInputState) {
   case InputState::PRESS: return "PRESS";
   case InputState::DRAG: return "DRAG";
   case InputState::RELEASE: return "RELEASE";
+  default: return "";
   }
 }
 
@@ -57,6 +58,7 @@ CopyPasteEventHub::ToStr(InputType aInputType) {
   case InputType::NONE: return "NONE";
   case InputType::MOUSE: return "MOUSE";
   case InputType::TOUCH: return "TOUCH";
+  default: return "";
   }
 }
 
