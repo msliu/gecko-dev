@@ -14,7 +14,7 @@
 #include "nsITimer.h"
 #include "prlog.h"
 
-using namespace mozilla;
+namespace mozilla {
 
 NS_IMPL_ISUPPORTS(CopyPasteEventHub,
                   nsIReflowObserver,
@@ -63,105 +63,233 @@ CopyPasteEventHub::ToStr(InputType aInputType) {
 }
 
 //
-// Implementation of methods in base state class
+// Base class for all states
 //
-
-CopyPasteEventHub::State::State(CopyPasteEventHub* aCopyPasteEventHub)
-  : mCopyPasteEventHub(aCopyPasteEventHub)
-{
-}
-
-CopyPasteEventHub::State::~State()
-{
-
-}
-
-nsEventStatus
-CopyPasteEventHub::State::OnPress(const nsPoint& aPoint)
-{
-  return nsEventStatus_eIgnore;
-}
-
-nsEventStatus
-CopyPasteEventHub::State::OnMove(const nsPoint& aPoint)
-{
-  return nsEventStatus_eIgnore;
-}
-
-nsEventStatus
-CopyPasteEventHub::State::OnRelease()
-{
-  return nsEventStatus_eIgnore;
-}
-
-nsEventStatus
-CopyPasteEventHub::State::OnLongTap(const nsPoint& aPoint)
-{
-  return nsEventStatus_eIgnore;
-}
-
-nsEventStatus
-CopyPasteEventHub::State::OnTap(const nsPoint& aPoint)
-{
-  return nsEventStatus_eIgnore;
-}
-
-nsEventStatus
-CopyPasteEventHub::State::OnScrollStart()
-{
-  return nsEventStatus_eIgnore;
-}
-
-nsEventStatus
-CopyPasteEventHub::State::OnScrollEnd()
-{
-  return nsEventStatus_eIgnore;
-}
-
-nsEventStatus
-CopyPasteEventHub::State::OnBlur()
-{
-  return nsEventStatus_eIgnore;
-}
-
-//
-// No Action State
-//
-class CopyPasteEventHub::NoActionState : public CopyPasteEventHub::State
+class CopyPasteEventHub::State
 {
 public:
-  NoActionState(CopyPasteEventHub* aCopyPasteEventHub)
-    : State(aCopyPasteEventHub) {}
-
-  ~NoActionState() {}
-
-  virtual nsEventStatus OnPress(const nsPoint& aPoint) MOZ_OVERRIDE
-  {
-    return nsEventStatus_eIgnore;
-  }
+  virtual nsEventStatus OnPress(CopyPasteEventHub* aContext, const nsPoint& aPoint);
+  virtual nsEventStatus OnMove(CopyPasteEventHub* aContext, const nsPoint& aPoint);
+  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext);
+  virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext, const nsPoint& aPoint);
+  virtual nsEventStatus OnScrollStart(CopyPasteEventHub* aContext);
+  virtual nsEventStatus OnScrollEnd(CopyPasteEventHub* aContext);
+  virtual nsEventStatus OnBlur(CopyPasteEventHub* aContext);
 };
 
 //
-// Press State
+// NoActionState
 //
-class CopyPasteEventHub::PressState : public CopyPasteEventHub::State
+class CopyPasteEventHub::NoActionState: public CopyPasteEventHub::State
 {
 public:
-  PressState(CopyPasteEventHub* aCopyPasteEventHub)
-    : State(aCopyPasteEventHub) {}
-
-  ~PressState() {}
-
-  virtual nsEventStatus OnPress(const nsPoint& aPoint) MOZ_OVERRIDE
+  static NoActionState* Singleton()
   {
-    return nsEventStatus_eIgnore;
+    static NoActionState singleton;
+    return &singleton;
   }
+
+  virtual nsEventStatus OnPress(CopyPasteEventHub* aContext,
+                                const nsPoint& aPoint) MOZ_OVERRIDE;
 };
+
+//
+// PressState
+//
+class CopyPasteEventHub::PressState: public CopyPasteEventHub::State
+{
+public:
+  static PressState* Singleton()
+  {
+    static PressState singleton;
+    return &singleton;
+  }
+
+  virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
+                               const nsPoint& aPoint) MOZ_OVERRIDE;
+  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+};
+
+//
+// DragState
+//
+class CopyPasteEventHub::DragState: public CopyPasteEventHub::State
+{
+public:
+  static DragState* Singleton()
+  {
+    static DragState singleton;
+    return &singleton;
+  }
+
+  virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
+                               const nsPoint& aPoint) MOZ_OVERRIDE;
+  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+};
+
+//
+// WaitLongTapState
+//
+class CopyPasteEventHub::WaitLongTapState: public CopyPasteEventHub::State
+{
+public:
+  static WaitLongTapState* Singleton()
+  {
+    static WaitLongTapState singleton;
+    return &singleton;
+  }
+
+  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+  virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
+                                  const nsPoint& aPoint) MOZ_OVERRIDE;
+};
+
+//
+// Implementation of all state functions
+//
+nsEventStatus
+CopyPasteEventHub::State::OnPress(CopyPasteEventHub* aContext, const nsPoint& aPoint)
+{
+  return nsEventStatus_eIgnore;
+}
+
+nsEventStatus
+CopyPasteEventHub::State::OnMove(CopyPasteEventHub* aContext, const nsPoint& aPoint)
+{
+  return nsEventStatus_eIgnore;
+}
+
+nsEventStatus
+CopyPasteEventHub::State::OnRelease(CopyPasteEventHub* aContext)
+{
+  return nsEventStatus_eIgnore;
+}
+
+nsEventStatus
+CopyPasteEventHub::State::OnLongTap(CopyPasteEventHub* aContext, const nsPoint& aPoint)
+{
+  return nsEventStatus_eIgnore;
+}
+
+nsEventStatus
+CopyPasteEventHub::State::OnScrollStart(CopyPasteEventHub* aContext)
+{
+  return nsEventStatus_eIgnore;
+}
+
+nsEventStatus
+CopyPasteEventHub::State::OnScrollEnd(CopyPasteEventHub* aContext)
+{
+  return nsEventStatus_eIgnore;
+}
+
+nsEventStatus
+CopyPasteEventHub::State::OnBlur(CopyPasteEventHub* aContext)
+{
+  return nsEventStatus_eIgnore;
+}
+
+nsEventStatus
+CopyPasteEventHub::NoActionState::OnPress(CopyPasteEventHub* aContext,
+                                          const nsPoint& aPoint)
+{
+  nsEventStatus rv = aContext->mHandler->OnPress(aPoint);
+
+  if (rv == nsEventStatus_eIgnore) {
+    aContext->LaunchLongTapDetector();
+    aContext->SetState(WaitLongTapState::Singleton());
+  } else {
+    aContext->SetState(PressState::Singleton());
+  }
+
+  aContext->mLastPressEventPoint = aPoint;
+
+  return rv;
+}
+
+nsEventStatus
+CopyPasteEventHub::PressState::OnMove(CopyPasteEventHub* aContext,
+                                      const nsPoint& aPoint)
+{
+  nsEventStatus rv = nsEventStatus_eIgnore;
+
+  if (aContext->IsDistanceExceededDragThreshold(aContext->mLastPressEventPoint,
+                                                aPoint)) {
+    rv = aContext->mHandler->OnDrag(aPoint);
+    aContext->SetState(DragState::Singleton());
+  }
+
+  return rv;
+}
+
+nsEventStatus
+CopyPasteEventHub::PressState::OnRelease(CopyPasteEventHub* aContext)
+{
+  nsEventStatus rv = aContext->mHandler->OnRelease();
+
+  if (rv == nsEventStatus_eConsumeNoDefault) {
+    rv = aContext->mHandler->OnTap(aContext->mLastPressEventPoint);
+  }
+
+  return rv;
+}
+
+nsEventStatus
+CopyPasteEventHub::DragState::OnMove(CopyPasteEventHub* aContext,
+                                      const nsPoint& aPoint)
+{
+  nsEventStatus rv = nsEventStatus_eIgnore;
+
+  if (aContext->IsDistanceExceededDragThreshold(aContext->mLastPressEventPoint,
+                                                aPoint)) {
+    rv = aContext->mHandler->OnDrag(aPoint);
+  }
+
+  return rv;
+}
+
+nsEventStatus
+CopyPasteEventHub::DragState::OnRelease(CopyPasteEventHub* aContext)
+{
+  nsEventStatus rv = aContext->mHandler->OnRelease();
+
+  aContext->SetState(NoActionState::Singleton());
+
+  return rv;
+}
+
+nsEventStatus
+CopyPasteEventHub::WaitLongTapState::OnRelease(CopyPasteEventHub* aContext)
+{
+  nsEventStatus rv = aContext->mHandler->OnRelease();
+
+  aContext->CancelLongTapDetector();
+  aContext->SetState(NoActionState::Singleton());
+
+  return rv;
+}
+
+nsEventStatus
+CopyPasteEventHub::WaitLongTapState::OnLongTap(CopyPasteEventHub* aContext,
+                                               const nsPoint& aPoint)
+{
+  nsEventStatus rv = aContext->mHandler->OnLongTap(aContext->mLastPressEventPoint);
+
+  aContext->SetState(NoActionState::Singleton());
+
+  return rv;
+}
+
+void
+CopyPasteEventHub::SetState(State* aState)
+{
+  mState = aState;
+}
 
 CopyPasteEventHub::CopyPasteEventHub(nsIPresShell* aPresShell,
                                      CopyPasteManager* aHandler)
   : mAsyncPanZoomEnabled(false)
-  , mState(MakeUnique<NoActionState>(this))
+  , mState(NoActionState::Singleton())
   , mInputState(InputState::RELEASE)
   , mType(InputType::NONE)
   , mActiveTouchId(kInvalidTouchId)
@@ -232,6 +360,7 @@ CopyPasteEventHub::HandleEvent(WidgetEvent* aEvent)
   case eTouchEventClass:
     status = HandleTouchEvent(aEvent->AsTouchEvent());
     break;
+
   default:
     break;
   }
@@ -252,20 +381,19 @@ CopyPasteEventHub::HandleMouseEvent(WidgetMouseEvent* aEvent)
 
   switch (aEvent->message) {
   case NS_MOUSE_BUTTON_DOWN:
-    mLastPressEventPoint = point;
-    rv = mState->OnPress(point);
+    rv = mState->OnPress(this, point);
     break;
 
   case NS_MOUSE_MOVE:
-    rv = mState->OnMove(point);
+    rv = mState->OnMove(this, point);
     break;
 
   case NS_MOUSE_BUTTON_UP:
-    rv = mState->OnRelease();
+    rv = mState->OnRelease(this);
     break;
 
   case NS_MOUSE_MOZLONGTAP:
-    rv = mState->OnLongTap(point);
+    rv = mState->OnLongTap(this, point);
     break;
 
   default:
@@ -284,16 +412,16 @@ CopyPasteEventHub::HandleTouchEvent(WidgetTouchEvent* aEvent)
 
   switch (aEvent->message) {
   case NS_TOUCH_START:
-    rv = mState->OnPress(point);
+    rv = mState->OnPress(this, point);
     break;
 
   case NS_TOUCH_MOVE:
-    rv = mState->OnMove(point);
+    rv = mState->OnMove(this, point);
     break;
 
   case NS_TOUCH_END:
   case NS_TOUCH_CANCEL:
-    rv = mState->OnRelease();
+    rv = mState->OnRelease(this);
     break;
 
   default:
@@ -645,3 +773,5 @@ CopyPasteEventHub::GetMouseEventPosition(WidgetMouseEvent* aEvent)
                                                       mouseIntPoint,
                                                       rootFrame);
 }
+
+} // namespace mozilla

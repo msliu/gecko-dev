@@ -48,34 +48,18 @@ public:
 protected:
   virtual ~CopyPasteEventHub() {}
 
-  class State
-  {
-  public:
-    explicit State(CopyPasteEventHub* aCopyPasteEventHub);
-    virtual ~State() = 0;
-
-    virtual nsEventStatus OnPress(const nsPoint& aPoint);
-    virtual nsEventStatus OnMove(const nsPoint& aPoint);
-    virtual nsEventStatus OnRelease();
-    virtual nsEventStatus OnLongTap(const nsPoint& aPoint);
-    virtual nsEventStatus OnTap(const nsPoint& aPoint);
-    virtual nsEventStatus OnScrollStart();
-    virtual nsEventStatus OnScrollEnd();
-    virtual nsEventStatus OnBlur();
-
-  protected:
-    CopyPasteEventHub* mCopyPasteEventHub;
-  };
-
+  // Base state and concrete states
+  class State;
   class NoActionState;
   class PressState;
   class DragState;
   class WaitLongTapState;
   class ScrollState;
 
+  void SetState(State* aState);
+
   nsEventStatus HandleMouseEvent(WidgetMouseEvent* aEvent);
   nsEventStatus HandleTouchEvent(WidgetTouchEvent* aEvent);
-  void SetState(UniquePtr<State> aState);
 
   MOZ_BEGIN_NESTED_ENUM_CLASS(InputState, uint8_t)
     PRESS,
@@ -121,7 +105,7 @@ protected:
   // True if AsyncPanZoom is enabled
   bool mAsyncPanZoomEnabled;
 
-  UniquePtr<State> mState;
+  State* mState;
 
   InputState mInputState;
   InputType mType;
