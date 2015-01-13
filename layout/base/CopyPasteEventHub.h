@@ -17,6 +17,7 @@
 #include "nsWeakReference.h"
 #include "mozilla/EventForwards.h"
 #include "mozilla/WeakPtr.h"
+#include "mozilla/UniquePtr.h"
 
 class nsDocShell;
 class nsIPresShell;
@@ -31,9 +32,10 @@ class CopyPasteEventHub : public nsIReflowObserver,
 {
 public:
   CopyPasteEventHub(nsIPresShell* aPresShell, CopyPasteManager* aHandler);
-  nsEventStatus HandleEvent(WidgetEvent* aEvent);
   virtual void Init();
   virtual void Terminate();
+
+  nsEventStatus HandleEvent(WidgetEvent* aEvent);
 
   NS_DECL_ISUPPORTS
   NS_DECL_NSIREFLOWOBSERVER
@@ -45,6 +47,36 @@ public:
 
 protected:
   virtual ~CopyPasteEventHub() {}
+
+  class State
+  {
+  public:
+    explicit State(CopyPasteEventHub* aCopyPasteEventHub);
+    virtual ~State() = 0;
+
+    virtual nsEventStatus OnPress(const nsPoint& aPoint);
+    virtual nsEventStatus OnMove(const nsPoint& aPoint);
+    virtual nsEventStatus OnRelease();
+    virtual nsEventStatus OnLongTap(const nsPoint& aPoint);
+    virtual nsEventStatus OnTap(const nsPoint& aPoint);
+    virtual nsEventStatus OnScrollStart();
+    virtual nsEventStatus OnScrollEnd();
+    virtual nsEventStatus OnBlur();
+
+  protected:
+    CopyPasteEventHub* mCopyPasteEventHub;
+  };
+
+  class NoActionState;
+  class PressState;
+  class DragState;
+  class WaitLongTapState;
+  class ScrollState;
+
+  nsEventStatus HandleMouseEvent(WidgetMouseEvent* aEvent);
+  nsEventStatus HandleTouchEvent(WidgetTouchEvent* aEvent);
+  void SetState(UniquePtr<State> aState);
+
   MOZ_BEGIN_NESTED_ENUM_CLASS(InputState, uint8_t)
     PRESS,
     DRAG,
@@ -89,7 +121,9 @@ protected:
   // True if AsyncPanZoom is enabled
   bool mAsyncPanZoomEnabled;
 
-  InputState mState;
+  UniquePtr<State> mState;
+
+  InputState mInputState;
   InputType mType;
 
   // For filter multitouch event
