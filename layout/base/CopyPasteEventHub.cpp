@@ -62,10 +62,107 @@ CopyPasteEventHub::ToStr(InputType aInputType) {
   }
 }
 
+//
+// Implementation of methods in base state class
+//
+
+CopyPasteEventHub::State::State(CopyPasteEventHub* aCopyPasteEventHub)
+  : mCopyPasteEventHub(aCopyPasteEventHub)
+{
+}
+
+CopyPasteEventHub::State::~State()
+{
+
+}
+
+nsEventStatus
+CopyPasteEventHub::State::OnPress(const nsPoint& aPoint)
+{
+  return nsEventStatus_eIgnore;
+}
+
+nsEventStatus
+CopyPasteEventHub::State::OnMove(const nsPoint& aPoint)
+{
+  return nsEventStatus_eIgnore;
+}
+
+nsEventStatus
+CopyPasteEventHub::State::OnRelease()
+{
+  return nsEventStatus_eIgnore;
+}
+
+nsEventStatus
+CopyPasteEventHub::State::OnLongTap(const nsPoint& aPoint)
+{
+  return nsEventStatus_eIgnore;
+}
+
+nsEventStatus
+CopyPasteEventHub::State::OnTap(const nsPoint& aPoint)
+{
+  return nsEventStatus_eIgnore;
+}
+
+nsEventStatus
+CopyPasteEventHub::State::OnScrollStart()
+{
+  return nsEventStatus_eIgnore;
+}
+
+nsEventStatus
+CopyPasteEventHub::State::OnScrollEnd()
+{
+  return nsEventStatus_eIgnore;
+}
+
+nsEventStatus
+CopyPasteEventHub::State::OnBlur()
+{
+  return nsEventStatus_eIgnore;
+}
+
+//
+// No Action State
+//
+class CopyPasteEventHub::NoActionState : public CopyPasteEventHub::State
+{
+public:
+  NoActionState(CopyPasteEventHub* aCopyPasteEventHub)
+    : State(aCopyPasteEventHub) {}
+
+  ~NoActionState() {}
+
+  virtual nsEventStatus OnPress(const nsPoint& aPoint) MOZ_OVERRIDE
+  {
+    return nsEventStatus_eIgnore;
+  }
+};
+
+//
+// Press State
+//
+class CopyPasteEventHub::PressState : public CopyPasteEventHub::State
+{
+public:
+  PressState(CopyPasteEventHub* aCopyPasteEventHub)
+    : State(aCopyPasteEventHub) {}
+
+  ~PressState() {}
+
+  virtual nsEventStatus OnPress(const nsPoint& aPoint) MOZ_OVERRIDE
+  {
+    return nsEventStatus_eIgnore;
+  }
+};
+
 CopyPasteEventHub::CopyPasteEventHub(nsIPresShell* aPresShell,
                                      CopyPasteManager* aHandler)
   : mAsyncPanZoomEnabled(false)
-  , mState(InputState::RELEASE)
+  , mState(MakeUnique<NoActionState>(this))
+  , mInputState(InputState::RELEASE)
   , mType(InputType::NONE)
   , mActiveTouchId(kInvalidTouchId)
   , mPresShell(aPresShell)
@@ -76,55 +173,6 @@ CopyPasteEventHub::CopyPasteEventHub(nsIPresShell* aPresShell,
     gCopyPasteEventHubLogModule = PR_NewLogModule(kCopyPasteEventHubModuleName);
   }
 #endif
-}
-
-nsEventStatus
-CopyPasteEventHub::HandleEvent(WidgetEvent* aEvent)
-{
-  switch (aEvent->message) {
-    case NS_MOUSE_BUTTON_UP:
-    case NS_MOUSE_MOVE:
-      if (mType != InputType::MOUSE) {
-        return nsEventStatus_eIgnore;
-      }
-      break;
-    case NS_TOUCH_END:
-    case NS_TOUCH_MOVE:
-    case NS_TOUCH_CANCEL:
-      if (mType != InputType::TOUCH) {
-        return nsEventStatus_eIgnore;
-      }
-      break;
-  }
-
-  nsEventStatus status = nsEventStatus_eIgnore;
-
-  switch (aEvent->message) {
-    case NS_TOUCH_START:
-      status = HandleTouchStartEvent(aEvent->AsTouchEvent());
-      break;
-    case NS_MOUSE_BUTTON_DOWN:
-      status = HandleMouseDownEvent(aEvent->AsMouseEvent());
-      break;
-    case NS_TOUCH_END:
-    case NS_TOUCH_CANCEL:
-      status = HandleTouchEndEvent(aEvent->AsTouchEvent());
-      break;
-    case NS_MOUSE_BUTTON_UP:
-      status = HandleMouseUpEvent(aEvent->AsMouseEvent());
-      break;
-    case NS_TOUCH_MOVE:
-      status = HandleTouchMoveEvent(aEvent->AsTouchEvent());
-      break;
-    case NS_MOUSE_MOVE:
-      status = HandleMouseMoveEvent(aEvent->AsMouseEvent());
-      break;
-    case NS_MOUSE_MOZLONGTAP:
-      status = HandleLongTapEvent(aEvent->AsMouseEvent());
-      break;
-  }
-
-  return status;
 }
 
 void
@@ -172,18 +220,102 @@ CopyPasteEventHub::Terminate()
 }
 
 nsEventStatus
+CopyPasteEventHub::HandleEvent(WidgetEvent* aEvent)
+{
+  nsEventStatus status = nsEventStatus_eIgnore;
+
+  switch (aEvent->mClass) {
+  case eMouseEventClass:
+    status = HandleMouseEvent(aEvent->AsMouseEvent());
+    break;
+
+  case eTouchEventClass:
+    status = HandleTouchEvent(aEvent->AsTouchEvent());
+    break;
+  default:
+    break;
+  }
+
+  return status;
+}
+
+nsEventStatus
+CopyPasteEventHub::HandleMouseEvent(WidgetMouseEvent* aEvent)
+{
+  nsEventStatus rv = nsEventStatus_eIgnore;
+
+  if (aEvent->button != WidgetMouseEvent::eLeftButton) {
+    return rv;
+  }
+
+  nsPoint point = GetMouseEventPosition(aEvent);
+
+  switch (aEvent->message) {
+  case NS_MOUSE_BUTTON_DOWN:
+    mLastPressEventPoint = point;
+    rv = mState->OnPress(point);
+    break;
+
+  case NS_MOUSE_MOVE:
+    rv = mState->OnMove(point);
+    break;
+
+  case NS_MOUSE_BUTTON_UP:
+    rv = mState->OnRelease();
+    break;
+
+  case NS_MOUSE_MOZLONGTAP:
+    rv = mState->OnLongTap(point);
+    break;
+
+  default:
+    break;
+  }
+
+  return rv;
+}
+
+nsEventStatus
+CopyPasteEventHub::HandleTouchEvent(WidgetTouchEvent* aEvent)
+{
+  nsEventStatus rv = nsEventStatus_eIgnore;
+
+  nsPoint point = GetTouchEventPosition(aEvent, mActiveTouchId);
+
+  switch (aEvent->message) {
+  case NS_TOUCH_START:
+    rv = mState->OnPress(point);
+    break;
+
+  case NS_TOUCH_MOVE:
+    rv = mState->OnMove(point);
+    break;
+
+  case NS_TOUCH_END:
+  case NS_TOUCH_CANCEL:
+    rv = mState->OnRelease();
+    break;
+
+  default:
+    break;
+  }
+
+  return rv;
+}
+
+nsEventStatus
 CopyPasteEventHub::HandleMouseMoveEvent(WidgetMouseEvent* aEvent)
 {
-  LOG_DEBUG("Got a mouse move in state %s", ToStr(mState));
+  LOG_DEBUG("Got a mouse move in state %s", ToStr(mInputState));
 
   nsEventStatus status = nsEventStatus_eIgnore;
 
-  switch (mState) {
+  switch (mInputState) {
     case InputState::PRESS:
     case InputState::DRAG:
       {
         nsPoint movePoint = GetMouseEventPosition(aEvent);
-        if (mState == InputState::PRESS &&
+        if (mInputState == InputState::PRESS &&
             IsDistanceExceededDragThreshold(mLastPressEventPoint, movePoint)) {
           SetState(InputState::DRAG);
         }
@@ -200,11 +332,11 @@ CopyPasteEventHub::HandleMouseMoveEvent(WidgetMouseEvent* aEvent)
 nsEventStatus
 CopyPasteEventHub::HandleTouchMoveEvent(WidgetTouchEvent* aEvent)
 {
-  LOG_DEBUG("Got a touch move in state %s", ToStr(mState));
+  LOG_DEBUG("Got a touch move in state %s", ToStr(mInputState));
 
   nsEventStatus status = nsEventStatus_eIgnore;
 
-  switch (mState) {
+  switch (mInputState) {
     case InputState::PRESS:
     case InputState::DRAG:
       {
@@ -213,7 +345,7 @@ CopyPasteEventHub::HandleTouchMoveEvent(WidgetTouchEvent* aEvent)
         }
 
         nsPoint movePoint = GetTouchEventPosition(aEvent, mActiveTouchId);
-        if (mState == InputState::PRESS &&
+        if (mInputState == InputState::PRESS &&
             IsDistanceExceededDragThreshold(mLastPressEventPoint, movePoint)) {
           SetState(InputState::DRAG);
         }
@@ -230,17 +362,17 @@ CopyPasteEventHub::HandleTouchMoveEvent(WidgetTouchEvent* aEvent)
 nsEventStatus
 CopyPasteEventHub::HandleMouseUpEvent(WidgetMouseEvent* aEvent)
 {
-  LOG_DEBUG("Got a mouse up in state %s", ToStr(mState));
+  LOG_DEBUG("Got a mouse up in state %s", ToStr(mInputState));
 
   nsEventStatus status = nsEventStatus_eIgnore;
 
-  switch (mState) {
+  switch (mInputState) {
     case InputState::PRESS:
     case InputState::DRAG:
       if (aEvent->button == WidgetMouseEvent::eLeftButton) {
         status = mHandler->OnRelease();
         mType = InputType::NONE;
-        if (mState == InputState::PRESS) {
+        if (mInputState == InputState::PRESS) {
           mHandler->OnTap(mLastPressEventPoint);
         }
         SetState(InputState::RELEASE);
@@ -256,18 +388,18 @@ CopyPasteEventHub::HandleMouseUpEvent(WidgetMouseEvent* aEvent)
 nsEventStatus
 CopyPasteEventHub::HandleTouchEndEvent(WidgetTouchEvent* aEvent)
 {
-  LOG_DEBUG("Got a touch up in state %s", ToStr(mState));
+  LOG_DEBUG("Got a touch up in state %s", ToStr(mInputState));
 
   nsEventStatus status = nsEventStatus_eIgnore;
 
-  switch (mState) {
+  switch (mInputState) {
     case InputState::PRESS:
     case InputState::DRAG:
       if (aEvent->touches[0]->Identifier() == mActiveTouchId) {
         status = mHandler->OnRelease();
         mActiveTouchId = kInvalidTouchId;
         mType = InputType::NONE;
-        if (mState == InputState::PRESS) {
+        if (mInputState == InputState::PRESS) {
           mHandler->OnTap(mLastPressEventPoint);
         }
         SetState(InputState::RELEASE);
@@ -283,11 +415,11 @@ CopyPasteEventHub::HandleTouchEndEvent(WidgetTouchEvent* aEvent)
 nsEventStatus
 CopyPasteEventHub::HandleMouseDownEvent(WidgetMouseEvent* aEvent)
 {
-  LOG_DEBUG("Got a mouse down in state %s", ToStr(mState));
+  LOG_DEBUG("Got a mouse down in state %s", ToStr(mInputState));
 
   nsEventStatus status = nsEventStatus_eIgnore;
 
-  switch (mState) {
+  switch (mInputState) {
     case InputState::RELEASE:
       if (aEvent->button == WidgetMouseEvent::eLeftButton) {
         nsPoint mLastPressEventPoint = GetMouseEventPosition(aEvent);
@@ -306,11 +438,11 @@ CopyPasteEventHub::HandleMouseDownEvent(WidgetMouseEvent* aEvent)
 nsEventStatus
 CopyPasteEventHub::HandleTouchStartEvent(WidgetTouchEvent* aEvent)
 {
-  LOG_DEBUG("Got a touch down in state %s", ToStr(mState));
+  LOG_DEBUG("Got a touch down in state %s", ToStr(mInputState));
 
   nsEventStatus status = nsEventStatus_eIgnore;
 
-  switch (mState) {
+  switch (mInputState) {
     case InputState::RELEASE:
       if (mActiveTouchId == kInvalidTouchId) {
         mActiveTouchId = aEvent->touches[0]->Identifier();
@@ -330,7 +462,7 @@ CopyPasteEventHub::HandleTouchStartEvent(WidgetTouchEvent* aEvent)
 nsEventStatus
 CopyPasteEventHub::HandleLongTapEvent(WidgetMouseEvent* aEvent)
 {
-  LOG_DEBUG("Got a long tap in state %s", ToStr(mState));
+  LOG_DEBUG("Got a long tap in state %s", ToStr(mInputState));
 
   nsPoint point = aEvent ? GetMouseEventPosition(aEvent) : mLastPressEventPoint;
   return mHandler->OnLongTap(point);
@@ -362,7 +494,7 @@ CopyPasteEventHub::SetState(InputState aState)
       CancelLongTapDetector();
       break;
   }
-  mState = aState;
+  mInputState = aState;
 }
 
 
