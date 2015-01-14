@@ -110,8 +110,6 @@ protected:
   InputState mInputState;
   InputType mType;
 
-  // For filter multitouch event
-  int32_t mActiveTouchId;
   nsIPresShell* mPresShell;
   CopyPasteManager* mHandler;
   WeakPtr<nsDocShell> mDocShell;
@@ -129,10 +127,12 @@ protected:
 
   // Last mouse button down event or touch start event point.
   nsPoint mLastPressEventPoint;
+  int32_t mActiveTouchId;   // For filter multitouch event
 
   static const int32_t kScrollEndTimerDelay = 300;
   static const int32_t kMinDragDistanceInPixel = 5;
   static const int32_t kInvalidTouchId = -1;
+  static const int32_t kDefaultTouchId = 0; // For mouse event
 };
 
 MOZ_FINISH_NESTED_ENUM_CLASS(CopyPasteEventHub::InputState)
