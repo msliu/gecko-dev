@@ -39,6 +39,9 @@ public:
   virtual void Terminate();
   virtual nsEventStatus HandleEvent(WidgetEvent* aEvent);
 
+  void UpdateCarets();
+  void HideCarets();
+
   NS_DECL_ISUPPORTS
   NS_DECL_NSISELECTIONLISTENER
 
@@ -71,9 +74,6 @@ protected:
   virtual void OnScrollStart();
   virtual void OnScrollEnd();
   virtual void OnReflow();
-
-  void UpdateCarets();
-  void HideCarets();
 
   void UpdateCaretsForCursorMode();
   void UpdateCaretsForSelectionMode();
