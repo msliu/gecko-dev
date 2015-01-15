@@ -64,8 +64,7 @@ protected:
   nsPoint GetTouchEventPosition(WidgetTouchEvent* aEvent, int32_t aIdentifier);
   nsPoint GetMouseEventPosition(WidgetMouseEvent* aEvent);
 
-  bool IsDistanceExceededDragThreshold(const nsPoint& aPoint1,
-                                       const nsPoint& aPoint2);
+  bool MoveDistanceIsLarge(const nsPoint& aPoint);
 
   /**
    * Detecting long tap using timer
@@ -98,11 +97,13 @@ protected:
   nsCOMPtr<nsITimer> mScrollEndDetectorTimer;
 
   // Last mouse button down event or touch start event point.
-  nsPoint mLastPressEventPoint;
-  int32_t mActiveTouchId;   // For filter multitouch event
+  nsPoint mPressPoint;
+
+  // For filter multitouch event
+  int32_t mActiveTouchId;
 
   static const int32_t kScrollEndTimerDelay = 300;
-  static const int32_t kMinDragDistanceInPixel = 5;
+  static const int32_t kMoveStartToleranceInPixel = 5;
   static const int32_t kInvalidTouchId = -1;
   static const int32_t kDefaultTouchId = 0; // For mouse event
 };
