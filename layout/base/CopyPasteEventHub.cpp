@@ -16,10 +16,8 @@
 
 namespace mozilla {
 
-NS_IMPL_ISUPPORTS(CopyPasteEventHub,
-                  nsIReflowObserver,
-                  nsIScrollObserver,
-                  nsISupportsWeakReference)
+NS_IMPL_ISUPPORTS(CopyPasteEventHub, nsIReflowObserver, nsIScrollObserver,
+                  nsISupportsWeakReference);
 
 // Avoid redefine macros
 #undef LOG
@@ -216,7 +214,7 @@ CopyPasteEventHub::NoActionState::OnPress(CopyPasteEventHub* aContext,
     aContext->SetState(PressState::Singleton());
   }
 
-  aContext->mLastPressEventPoint = aPoint;
+  aContext->mPressPoint = aPoint;
   aContext->mActiveTouchId = aTouchId;
 
   return rv;
@@ -243,8 +241,7 @@ CopyPasteEventHub::NoActionState::OnScrolling(CopyPasteEventHub* aContext)
 void
 CopyPasteEventHub::NoActionState::Enter(CopyPasteEventHub* aContex)
 {
-  aContex->mLastPressEventPoint =
-    nsPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE);
+  aContex->mPressPoint = nsPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE);
   aContex->mActiveTouchId = kInvalidTouchId;
 }
 
@@ -254,8 +251,7 @@ CopyPasteEventHub::PressState::OnMove(CopyPasteEventHub* aContext,
 {
   nsEventStatus rv = nsEventStatus_eIgnore;
 
-  if (aContext->IsDistanceExceededDragThreshold(aContext->mLastPressEventPoint,
-                                                aPoint)) {
+  if (aContext->MoveDistanceIsLarge(aPoint)) {
     rv = aContext->mHandler->OnDrag(aPoint);
     aContext->SetState(DragState::Singleton());
   }
@@ -269,7 +265,7 @@ CopyPasteEventHub::PressState::OnRelease(CopyPasteEventHub* aContext)
   nsEventStatus rv = aContext->mHandler->OnRelease();
 
   if (rv == nsEventStatus_eConsumeNoDefault) {
-    rv = aContext->mHandler->OnTap(aContext->mLastPressEventPoint);
+    rv = aContext->mHandler->OnTap(aContext->mPressPoint);
   }
 
   aContext->SetState(NoActionState::Singleton());
@@ -279,12 +275,11 @@ CopyPasteEventHub::PressState::OnRelease(CopyPasteEventHub* aContext)
 
 nsEventStatus
 CopyPasteEventHub::DragState::OnMove(CopyPasteEventHub* aContext,
-                                      const nsPoint& aPoint)
+                                     const nsPoint& aPoint)
 {
   nsEventStatus rv = nsEventStatus_eIgnore;
 
-  if (aContext->IsDistanceExceededDragThreshold(aContext->mLastPressEventPoint,
-                                                aPoint)) {
+  if (aContext->MoveDistanceIsLarge(aPoint)) {
     rv = aContext->mHandler->OnDrag(aPoint);
   }
 
@@ -315,7 +310,7 @@ nsEventStatus
 CopyPasteEventHub::WaitLongTapState::OnLongTap(CopyPasteEventHub* aContext,
                                                const nsPoint& aPoint)
 {
-  nsEventStatus rv = aContext->mHandler->OnLongTap(aContext->mLastPressEventPoint);
+  nsEventStatus rv = aContext->mHandler->OnLongTap(aContext->mPressPoint);
 
   aContext->SetState(NoActionState::Singleton());
 
@@ -370,7 +365,7 @@ CopyPasteEventHub::CopyPasteEventHub(nsIPresShell* aPresShell,
   , mState(nullptr)
   , mPresShell(aPresShell)
   , mHandler(aHandler)
-  , mLastPressEventPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE)
+  , mPressPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE)
   , mActiveTouchId(kInvalidTouchId)
 {
 #ifdef PR_LOGGING
@@ -515,12 +510,11 @@ CopyPasteEventHub::HandleTouchEvent(WidgetTouchEvent* aEvent)
 }
 
 bool
-CopyPasteEventHub::IsDistanceExceededDragThreshold(const nsPoint& aPoint1,
-                                                   const nsPoint& aPoint2)
+CopyPasteEventHub::MoveDistanceIsLarge(const nsPoint& aPoint)
 {
-  nsPoint delta = aPoint1 - aPoint2;
+  nsPoint delta = aPoint - mPressPoint;
   return NS_hypot(delta.x, delta.y) >
-    nsPresContext::AppUnitsPerCSSPixel() * kMinDragDistanceInPixel;
+         nsPresContext::AppUnitsPerCSSPixel() * kMoveStartToleranceInPixel;
 }
 
 void
@@ -559,7 +553,7 @@ CopyPasteEventHub::CancelLongTapDetector()
 CopyPasteEventHub::FireLongTap(nsITimer* aTimer, void* aCopyPasteEventHub)
 {
   CopyPasteEventHub* self = static_cast<CopyPasteEventHub*>(aCopyPasteEventHub);
-  self->mState->OnLongTap(self, self->mLastPressEventPoint);
+  self->mState->OnLongTap(self, self->mPressPoint);
 }
 
 NS_IMETHODIMP
