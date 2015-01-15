@@ -53,6 +53,7 @@ static NS_DEFINE_CID(kFrameTraversalCID, NS_FRAMETRAVERSAL_CID);
 #include "nsCaret.h"
 #include "TouchCaret.h"
 #include "SelectionCarets.h"
+#include "CopyPasteEventHub.h"
 #include "CopyPasteManager.h"
 
 #include "mozilla/MouseEvents.h"
