@@ -89,6 +89,9 @@ public:
   virtual void OnBlur(CopyPasteEventHub* aContext);
   virtual void Enter(CopyPasteEventHub* aContext);
   virtual void Leave(CopyPasteEventHub* aContext);
+
+protected:
+  State() {}
 };
 
 //
