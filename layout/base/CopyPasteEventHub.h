@@ -61,33 +61,8 @@ protected:
   nsEventStatus HandleMouseEvent(WidgetMouseEvent* aEvent);
   nsEventStatus HandleTouchEvent(WidgetTouchEvent* aEvent);
 
-  MOZ_BEGIN_NESTED_ENUM_CLASS(InputState, uint8_t)
-    PRESS,
-    DRAG,
-    RELEASE
-  MOZ_END_NESTED_ENUM_CLASS(InputState)
-
-  MOZ_BEGIN_NESTED_ENUM_CLASS(InputType, uint8_t)
-    NONE,
-    MOUSE,
-    TOUCH
-  MOZ_END_NESTED_ENUM_CLASS(InputType)
-
-  static const char* ToStr(InputState aInputState);
-  static const char* ToStr(InputType aInputType);
-
-  nsEventStatus HandleMouseMoveEvent(WidgetMouseEvent* aEvent);
-  nsEventStatus HandleMouseUpEvent(WidgetMouseEvent* aEvent);
-  nsEventStatus HandleMouseDownEvent(WidgetMouseEvent* aEvent);
-  nsEventStatus HandleLongTapEvent(WidgetMouseEvent* aEvent);
-  nsEventStatus HandleTouchMoveEvent(WidgetTouchEvent* aEvent);
-  nsEventStatus HandleTouchEndEvent(WidgetTouchEvent* aEvent);
-  nsEventStatus HandleTouchStartEvent(WidgetTouchEvent* aEvent);
-  void HandleScrollStart();
-  void HandleScrollEnd();
   nsPoint GetTouchEventPosition(WidgetTouchEvent* aEvent, int32_t aIdentifier);
   nsPoint GetMouseEventPosition(WidgetMouseEvent* aEvent);
-  void SetState(InputState aState);
 
   bool IsDistanceExceededDragThreshold(const nsPoint& aPoint1,
                                        const nsPoint& aPoint2);
@@ -106,9 +81,6 @@ protected:
   bool mAsyncPanZoomEnabled;
 
   State* mState;
-
-  InputState mInputState;
-  InputType mType;
 
   nsIPresShell* mPresShell;
   CopyPasteManager* mHandler;
@@ -134,9 +106,6 @@ protected:
   static const int32_t kInvalidTouchId = -1;
   static const int32_t kDefaultTouchId = 0; // For mouse event
 };
-
-MOZ_FINISH_NESTED_ENUM_CLASS(CopyPasteEventHub::InputState)
-MOZ_FINISH_NESTED_ENUM_CLASS(CopyPasteEventHub::InputType)
 
 } // namespace mozilla
 
