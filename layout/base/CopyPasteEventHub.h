@@ -8,7 +8,6 @@
 #define CopyPasteEventHub_h__
 
 #include "nsCOMPtr.h"
-#include "nsDocShell.h"
 #include "nsIReflowObserver.h"
 #include "nsIScrollObserver.h"
 #include "nsISelectionListener.h"
@@ -46,7 +45,7 @@ public:
   virtual void AsyncPanZoomStopped(const CSSIntPoint aScrollPos) MOZ_OVERRIDE;
 
 protected:
-  virtual ~CopyPasteEventHub() {}
+  virtual ~CopyPasteEventHub();
 
   // Base state and concrete states
   class State;

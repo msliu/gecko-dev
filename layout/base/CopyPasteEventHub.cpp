@@ -9,6 +9,7 @@
 #include "CopyPasteManager.h"
 #include "gfxPrefs.h"
 #include "mozilla/TouchEvents.h"
+#include "nsDocShell.h"
 #include "nsFocusManager.h"
 #include "nsFrameSelection.h"
 #include "nsITimer.h"
@@ -373,6 +374,10 @@ CopyPasteEventHub::CopyPasteEventHub(nsIPresShell* aPresShell,
 #endif
 
   SetState(NoActionState::Singleton());
+}
+
+CopyPasteEventHub::~CopyPasteEventHub()
+{
 }
 
 void
