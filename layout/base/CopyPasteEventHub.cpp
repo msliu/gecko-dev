@@ -279,9 +279,7 @@ CopyPasteEventHub::DragState::OnMove(CopyPasteEventHub* aContext,
 {
   nsEventStatus rv = nsEventStatus_eIgnore;
 
-  if (aContext->MoveDistanceIsLarge(aPoint)) {
-    rv = aContext->mHandler->OnDrag(aPoint);
-  }
+  rv = aContext->mHandler->OnDrag(aPoint);
 
   return rv;
 }
