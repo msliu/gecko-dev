@@ -68,10 +68,15 @@ CopyPasteEventHub::ToStr(InputType aInputType) {
 class CopyPasteEventHub::State
 {
 public:
-  #define CLASS_NAME(classname) \
-    virtual const char* Name() { return #classname; }
+#define IMPL_STATE_UTILITIES(aClassName)                                       \
+  virtual const char* Name() { return #aClassName; }                           \
+  static aClassName* Singleton()                                               \
+  {                                                                            \
+    static aClassName singleton;                                               \
+    return &singleton;                                                         \
+  }
 
-  CLASS_NAME(PressState)
+  virtual const char* Name() { return ""; }
 
   virtual nsEventStatus OnPress(CopyPasteEventHub* aContext, const nsPoint& aPoint,
                                 int32_t aTouchId);
@@ -89,16 +94,10 @@ public:
 //
 // NoActionState
 //
-class CopyPasteEventHub::NoActionState: public CopyPasteEventHub::State
+class CopyPasteEventHub::NoActionState : public CopyPasteEventHub::State
 {
 public:
-  CLASS_NAME(NoActionState)
-
-  static NoActionState* Singleton()
-  {
-    static NoActionState singleton;
-    return &singleton;
-  }
+  IMPL_STATE_UTILITIES(NoActionState)
 
   virtual nsEventStatus OnPress(CopyPasteEventHub* aContext,
                                 const nsPoint& aPoint,
@@ -114,13 +113,7 @@ public:
 class CopyPasteEventHub::PressState: public CopyPasteEventHub::State
 {
 public:
-  CLASS_NAME(PressState)
-
-  static PressState* Singleton()
-  {
-    static PressState singleton;
-    return &singleton;
-  }
+  IMPL_STATE_UTILITIES(PressState)
 
   virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
                                const nsPoint& aPoint) MOZ_OVERRIDE;
@@ -133,13 +126,7 @@ public:
 class CopyPasteEventHub::DragState: public CopyPasteEventHub::State
 {
 public:
-  CLASS_NAME(DragState)
-
-  static DragState* Singleton()
-  {
-    static DragState singleton;
-    return &singleton;
-  }
+  IMPL_STATE_UTILITIES(DragState)
 
   virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
                                const nsPoint& aPoint) MOZ_OVERRIDE;
@@ -152,13 +139,7 @@ public:
 class CopyPasteEventHub::WaitLongTapState: public CopyPasteEventHub::State
 {
 public:
-  CLASS_NAME(WaitLongTapState)
-
-  static WaitLongTapState* Singleton()
-  {
-    static WaitLongTapState singleton;
-    return &singleton;
-  }
+  IMPL_STATE_UTILITIES(WaitLongTapState)
 
   virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
@@ -170,16 +151,10 @@ public:
 //
 // ScrollState
 //
-class CopyPasteEventHub::ScrollState: public CopyPasteEventHub::State
+class CopyPasteEventHub::ScrollState : public CopyPasteEventHub::State
 {
 public:
-  CLASS_NAME(ScrollState)
-
-  static ScrollState* Singleton()
-  {
-    static ScrollState singleton;
-    return &singleton;
-  }
+  IMPL_STATE_UTILITIES(ScrollState)
 
   virtual void OnScrollEnd(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
@@ -218,37 +193,31 @@ CopyPasteEventHub::State::OnLongTap(CopyPasteEventHub* aContext,
 void
 CopyPasteEventHub::State::OnScrollStart(CopyPasteEventHub* aContext)
 {
-
 }
 
 void
 CopyPasteEventHub::State::OnScrollEnd(CopyPasteEventHub* aContext)
 {
-
 }
 
 void
 CopyPasteEventHub::State::OnScrolling(CopyPasteEventHub* aContext)
 {
-
 }
 
 void
 CopyPasteEventHub::State::OnBlur(CopyPasteEventHub* aContext)
 {
-
 }
 
 void
 CopyPasteEventHub::State::Enter(CopyPasteEventHub* aContext)
 {
-
 }
 
 void
 CopyPasteEventHub::State::Leave(CopyPasteEventHub* aContext)
 {
-
 }
 
 nsEventStatus
