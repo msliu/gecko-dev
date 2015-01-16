@@ -52,8 +52,8 @@ protected:
   // Base state and concrete states
   class State;
   class NoActionState;
-  class PressState;
-  class DragState;
+  class PressCaretState;
+  class DragCaretState;
   class WaitLongTapState;
   class ScrollState;
 

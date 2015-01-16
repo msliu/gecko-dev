@@ -91,12 +91,12 @@ public:
 };
 
 //
-// PressState
+// PressCaretState
 //
-class CopyPasteEventHub::PressState : public CopyPasteEventHub::State
+class CopyPasteEventHub::PressCaretState : public CopyPasteEventHub::State
 {
 public:
-  IMPL_STATE_UTILITIES(PressState)
+  IMPL_STATE_UTILITIES(PressCaretState)
 
   virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
                                const nsPoint& aPoint) MOZ_OVERRIDE;
@@ -104,12 +104,12 @@ public:
 };
 
 //
-// DragState
+// DragCaretState
 //
-class CopyPasteEventHub::DragState : public CopyPasteEventHub::State
+class CopyPasteEventHub::DragCaretState : public CopyPasteEventHub::State
 {
 public:
-  IMPL_STATE_UTILITIES(DragState)
+  IMPL_STATE_UTILITIES(DragCaretState)
 
   virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
                                const nsPoint& aPoint) MOZ_OVERRIDE;
@@ -213,7 +213,7 @@ CopyPasteEventHub::NoActionState::OnPress(CopyPasteEventHub* aContext,
   if (rv == nsEventStatus_eIgnore) {
     aContext->SetState(WaitLongTapState::Singleton());
   } else {
-    aContext->SetState(PressState::Singleton());
+    aContext->SetState(PressCaretState::Singleton());
   }
 
   aContext->mPressPoint = aPoint;
@@ -248,21 +248,21 @@ CopyPasteEventHub::NoActionState::Enter(CopyPasteEventHub* aContex)
 }
 
 nsEventStatus
-CopyPasteEventHub::PressState::OnMove(CopyPasteEventHub* aContext,
-                                      const nsPoint& aPoint)
+CopyPasteEventHub::PressCaretState::OnMove(CopyPasteEventHub* aContext,
+                                           const nsPoint& aPoint)
 {
   nsEventStatus rv = nsEventStatus_eIgnore;
 
   if (aContext->MoveDistanceIsLarge(aPoint)) {
     rv = aContext->mHandler->OnDrag(aPoint);
-    aContext->SetState(DragState::Singleton());
+    aContext->SetState(DragCaretState::Singleton());
   }
 
   return rv;
 }
 
 nsEventStatus
-CopyPasteEventHub::PressState::OnRelease(CopyPasteEventHub* aContext)
+CopyPasteEventHub::PressCaretState::OnRelease(CopyPasteEventHub* aContext)
 {
   nsEventStatus rv = aContext->mHandler->OnRelease();
 
@@ -276,8 +276,8 @@ CopyPasteEventHub::PressState::OnRelease(CopyPasteEventHub* aContext)
 }
 
 nsEventStatus
-CopyPasteEventHub::DragState::OnMove(CopyPasteEventHub* aContext,
-                                     const nsPoint& aPoint)
+CopyPasteEventHub::DragCaretState::OnMove(CopyPasteEventHub* aContext,
+                                          const nsPoint& aPoint)
 {
   nsEventStatus rv = nsEventStatus_eIgnore;
 
@@ -287,7 +287,7 @@ CopyPasteEventHub::DragState::OnMove(CopyPasteEventHub* aContext,
 }
 
 nsEventStatus
-CopyPasteEventHub::DragState::OnRelease(CopyPasteEventHub* aContext)
+CopyPasteEventHub::DragCaretState::OnRelease(CopyPasteEventHub* aContext)
 {
   nsEventStatus rv = aContext->mHandler->OnRelease();
 
