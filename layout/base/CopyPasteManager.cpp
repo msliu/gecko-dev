@@ -20,7 +20,7 @@ using namespace mozilla::dom;
 
 typedef AccessibleCaret::Appearance Appearance;
 
-NS_IMPL_ISUPPORTS(CopyPasteManager, nsISelectionListener)
+NS_IMPL_ISUPPORTS0(CopyPasteManager)
 
 namespace
 {
@@ -123,9 +123,9 @@ CopyPasteManager::HandleEvent(WidgetEvent* aEvent)
 }
 
 nsresult
-CopyPasteManager::NotifySelectionChanged(nsIDOMDocument* aDoc,
-                                         nsISelection* aSel,
-                                         int16_t aReason)
+CopyPasteManager::OnSelectionChanged(nsIDOMDocument* aDoc,
+                                     nsISelection* aSel,
+                                     int16_t aReason)
 {
   if (!mInitialized) {
     return NS_OK;
@@ -690,3 +690,9 @@ CopyPasteManager::DragCaret(const nsPoint &aMovePoint)
   return nsEventStatus_eConsumeNoDefault;
 }
 
+already_AddRefed<CopyPasteEventHub>
+CopyPasteManager::GetCopyPasteEventHub() const
+{
+  nsRefPtr<CopyPasteEventHub> copyPasteEventHub = mCopyPasteEventHub;
+  return copyPasteEventHub.forget();
+}

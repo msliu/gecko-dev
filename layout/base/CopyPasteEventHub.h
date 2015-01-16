@@ -27,6 +27,7 @@ class CopyPasteManager;
 
 class CopyPasteEventHub : public nsIReflowObserver,
                           public nsIScrollObserver,
+                          public nsISelectionListener,
                           public nsSupportsWeakReference
 {
 public:
@@ -38,6 +39,7 @@ public:
 
   NS_DECL_ISUPPORTS
   NS_DECL_NSIREFLOWOBSERVER
+  NS_DECL_NSISELECTIONLISTENER
 
   // nsIScrollObserver
   virtual void ScrollPositionChanged() MOZ_OVERRIDE;
