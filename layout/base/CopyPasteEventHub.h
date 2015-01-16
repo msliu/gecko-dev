@@ -31,7 +31,7 @@ class CopyPasteEventHub : public nsIReflowObserver,
                           public nsSupportsWeakReference
 {
 public:
-  CopyPasteEventHub(nsIPresShell* aPresShell, CopyPasteManager* aHandler);
+  CopyPasteEventHub(nsIPresShell* aPresShell);
   virtual void Init();
   virtual void Terminate();
 
@@ -77,13 +77,17 @@ protected:
   void LaunchScrollEndDetector();
   static void FireScrollEnd(nsITimer* aTimer, void* aCopyPasteEventHub);
 
+  bool mInitialized;
+
   // True if AsyncPanZoom is enabled
   bool mAsyncPanZoomEnabled;
 
   State* mState;
 
   nsIPresShell* mPresShell;
-  CopyPasteManager* mHandler;
+
+  UniquePtr<CopyPasteManager> mHandler;
+
   WeakPtr<nsDocShell> mDocShell;
 
   // This timer is used for detecting long tap fire. If content process

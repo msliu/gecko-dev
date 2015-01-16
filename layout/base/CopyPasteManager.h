@@ -31,20 +31,14 @@ class Selection;
 class AccessibleCaret;
 class CopyPasteEventHub;
 
-class CopyPasteManager : public nsISupports
+class CopyPasteManager
 {
 public:
   explicit CopyPasteManager(nsIPresShell* aPresShell);
-  virtual void Init();
-  virtual void Terminate();
-  virtual nsEventStatus HandleEvent(WidgetEvent* aEvent);
+  virtual ~CopyPasteManager();
 
   void UpdateCarets();
   void HideCarets();
-
-  already_AddRefed<CopyPasteEventHub> GetCopyPasteEventHub() const;
-
-  NS_DECL_ISUPPORTS
 
 protected:
   /**
@@ -64,8 +58,6 @@ protected:
 
   static const char* ToStr(DragMode aDragMode);
   static const char* ToStr(CaretMode aCaretMode);
-
-  virtual ~CopyPasteManager();
 
   virtual nsEventStatus OnPress(const nsPoint& aPoint);
   virtual nsEventStatus OnDrag(const nsPoint& aPoint);
@@ -102,14 +94,12 @@ protected:
    */
   bool CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffsets);
 
-  bool mInitialized;
   DragMode mDragMode;
   CaretMode mCaretMode;
   nscoord mCaretCenterToDownPointOffsetY;
   nsIPresShell* mPresShell;
   UniquePtr<AccessibleCaret> mFirstCaret;
   UniquePtr<AccessibleCaret> mSecondCaret;
-  nsRefPtr<CopyPasteEventHub> mCopyPasteEventHub;
 
   static const int32_t kAutoScrollTimerDelay = 30;
   friend class CopyPasteEventHub;

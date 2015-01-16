@@ -78,7 +78,7 @@
 #include "nsCaret.h"
 #include "TouchCaret.h"
 #include "SelectionCarets.h"
-#include "CopyPasteManager.h"
+#include "CopyPasteEventHub.h"
 #include "nsIDOMHTMLDocument.h"
 #include "nsFrameManager.h"
 #include "nsXPCOM.h"
@@ -919,7 +919,7 @@ PresShell::Init(nsIDocument* aDocument,
   }
 
   if (AccessibleCaretEnabled()) {
-    mCopyPasteManager = new CopyPasteManager(this);
+    mCopyPasteEventHub = new CopyPasteEventHub(this);
   }
 
   NS_ADDREF(mSelection = new nsFrameSelection());
@@ -1190,9 +1190,9 @@ PresShell::Destroy()
     mSelectionCarets = nullptr;
   }
 
-  if (mCopyPasteManager) {
-    mCopyPasteManager->Terminate();
-    mCopyPasteManager = nullptr;
+  if (mCopyPasteEventHub) {
+    mCopyPasteEventHub->Terminate();
+    mCopyPasteEventHub = nullptr;
   }
 
   // release our pref style sheet, if we have one still
@@ -1940,8 +1940,8 @@ PresShell::Initialize(nscoord aWidth, nscoord aHeight)
     }
 
     // Initialize after nsCanvasFrame is created.
-    if (mCopyPasteManager) {
-      mCopyPasteManager->Init();
+    if (mCopyPasteEventHub) {
+      mCopyPasteEventHub->Init();
     }
 
     // nsAutoScriptBlocker going out of scope may have killed us too
@@ -2251,10 +2251,10 @@ already_AddRefed<SelectionCarets> PresShell::GetSelectionCarets() const
   return selectionCaret.forget();
 }
 
-already_AddRefed<CopyPasteManager> PresShell::GetCopyPasteManager() const
+already_AddRefed<CopyPasteEventHub> PresShell::GetCopyPasteEventHub() const
 {
-  nsRefPtr<CopyPasteManager> copyPasteManager = mCopyPasteManager;
-  return copyPasteManager.forget();
+  nsRefPtr<CopyPasteEventHub> copyPasteEventHub = mCopyPasteEventHub;
+  return copyPasteEventHub.forget();
 }
 
 void PresShell::SetCaret(nsCaret *aNewCaret)
@@ -7278,10 +7278,10 @@ PresShell::HandleEvent(nsIFrame* aFrame,
     nsCOMPtr<nsIPresShell> presShell =
       retargetEventDoc ? retargetEventDoc->GetShell() : nullptr;
 
-    nsRefPtr<CopyPasteManager> copyPasteManager =
-      presShell ? presShell->GetCopyPasteManager() : nullptr;
-    if (copyPasteManager) {
-      *aEventStatus = copyPasteManager->HandleEvent(aEvent);
+    nsRefPtr<CopyPasteEventHub> copyPasteEventHub =
+      presShell ? presShell->GetCopyPasteEventHub() : nullptr;
+    if (copyPasteEventHub) {
+      *aEventStatus = copyPasteEventHub->HandleEvent(aEvent);
       if (*aEventStatus == nsEventStatus_eConsumeNoDefault) {
         // If the event is consumed, cancel APZC panning by setting
         // mMultipleActionsPrevented.
