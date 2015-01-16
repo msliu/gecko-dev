@@ -181,13 +181,13 @@ CopyPasteManager::OnPress(const nsPoint& aPoint)
   if (mFirstCaret->Contains(aPoint)) {
     mDragMode = DragMode::FIRST_CARET;
     mCaretCenterToDownPointOffsetY = mFirstCaret->LogicalPosition().y - aPoint.y;
-    SetSelectionDirection(false);
+    SetSelectionDirection(eDirPrevious);
     SetSelectionDragState(true);
     return nsEventStatus_eConsumeNoDefault;
   } else if (mSecondCaret->Contains(aPoint)) {
     mDragMode = DragMode::SECOND_CARET;
     mCaretCenterToDownPointOffsetY = mSecondCaret->LogicalPosition().y - aPoint.y;
-    SetSelectionDirection(true);
+    SetSelectionDirection(eDirNext);
     SetSelectionDragState(true);
     return nsEventStatus_eConsumeNoDefault;
   } else {
@@ -416,11 +416,11 @@ CopyPasteManager::SetSelectionDragState(bool aState)
 }
 
 void
-CopyPasteManager::SetSelectionDirection(bool aForward)
+CopyPasteManager::SetSelectionDirection(nsDirection aDir)
 {
   nsRefPtr<dom::Selection> selection = GetSelection();
   if (selection) {
-    selection->SetDirection(aForward ? eDirNext : eDirPrevious);
+    selection->SetDirection(aDir);
   }
 }
 
