@@ -824,9 +824,12 @@ nsFrameSelection::Init(nsIPresShell *aShell, nsIContent *aLimiter)
 
   nsRefPtr<CopyPasteManager> copyPasteManager = mShell->GetCopyPasteManager();
   if (copyPasteManager) {
-    int8_t index = GetIndexFromSelectionType(nsISelectionController::SELECTION_NORMAL);
-    if (mDomSelections[index]) {
-      mDomSelections[index]->AddSelectionListener(copyPasteManager);
+    nsRefPtr<CopyPasteEventHub> copyPasteEventHub = copyPasteManager->GetCopyPasteEventHub();
+    if (copyPasteEventHub) {
+      int8_t index = GetIndexFromSelectionType(nsISelectionController::SELECTION_NORMAL);
+      if (mDomSelections[index]) {
+        mDomSelections[index]->AddSelectionListener(copyPasteEventHub);
+      }
     }
   }
 }

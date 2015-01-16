@@ -13,12 +13,13 @@
 #include "nsFocusManager.h"
 #include "nsFrameSelection.h"
 #include "nsITimer.h"
+#include "nsPresContext.h"
 #include "prlog.h"
 
 namespace mozilla {
 
 NS_IMPL_ISUPPORTS(CopyPasteEventHub, nsIReflowObserver, nsIScrollObserver,
-                  nsISupportsWeakReference);
+                  nsISelectionListener, nsISupportsWeakReference);
 
 // Avoid redefine macros
 #undef LOG
@@ -616,6 +617,13 @@ CopyPasteEventHub::FireScrollEnd(nsITimer* aTimer, void* aCopyPasteEventHub)
   self->mState->OnScrollEnd(self);
 }
 
+nsresult
+CopyPasteEventHub::NotifySelectionChanged(nsIDOMDocument* aDoc,
+                                          nsISelection* aSel,
+                                          int16_t aReason)
+{
+  return mHandler->OnSelectionChanged(aDoc, aSel, aReason);
+}
 
 nsPoint
 CopyPasteEventHub::GetTouchEventPosition(WidgetTouchEvent* aEvent,
