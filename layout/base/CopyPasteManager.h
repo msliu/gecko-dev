@@ -31,7 +31,7 @@ class Selection;
 class AccessibleCaret;
 class CopyPasteEventHub;
 
-class CopyPasteManager : public nsISelectionListener
+class CopyPasteManager : public nsISupports
 {
 public:
   explicit CopyPasteManager(nsIPresShell* aPresShell);
@@ -42,8 +42,9 @@ public:
   void UpdateCarets();
   void HideCarets();
 
+  already_AddRefed<CopyPasteEventHub> GetCopyPasteEventHub() const;
+
   NS_DECL_ISUPPORTS
-  NS_DECL_NSISELECTIONLISTENER
 
 protected:
   /**
@@ -74,6 +75,9 @@ protected:
   virtual void OnScrollStart();
   virtual void OnScrollEnd();
   virtual void OnReflow();
+  virtual nsresult OnSelectionChanged(nsIDOMDocument* aDoc,
+                                      nsISelection* aSel,
+                                      int16_t aReason);
 
   void UpdateCaretsForCursorMode();
   void UpdateCaretsForSelectionMode();
