@@ -31,8 +31,8 @@ class CopyPasteEventHub : public nsIReflowObserver,
                           public nsSupportsWeakReference
 {
 public:
-  CopyPasteEventHub(nsIPresShell* aPresShell);
-  virtual void Init();
+  explicit CopyPasteEventHub();
+  virtual void Init(nsIPresShell* aPresShell);
   virtual void Terminate();
 
   nsEventStatus HandleEvent(WidgetEvent* aEvent);
@@ -51,12 +51,24 @@ protected:
 
   // Base state and concrete states
   class State;
-  class NoActionState;
-  class PressCaretState;
-  class DragCaretState;
-  class WaitLongTapState;
-  class ScrollState;
 
+#define NS_DECL_STATE_CLASS_GETTER(aClassName)                                 \
+  class aClassName;                                                            \
+  static State* aClassName();
+
+#define NS_IMPL_STATE_CLASS_GETTER(aClassName)                                 \
+  CopyPasteEventHub::State* CopyPasteEventHub::aClassName()                    \
+  {                                                                            \
+    return CopyPasteEventHub::aClassName::Singleton();                         \
+  }
+
+  NS_DECL_STATE_CLASS_GETTER(NoActionState)
+  NS_DECL_STATE_CLASS_GETTER(PressCaretState)
+  NS_DECL_STATE_CLASS_GETTER(DragCaretState)
+  NS_DECL_STATE_CLASS_GETTER(WaitLongTapState)
+  NS_DECL_STATE_CLASS_GETTER(ScrollState)
+
+  State* GetState();
   void SetState(State* aState);
 
   nsEventStatus HandleMouseEvent(WidgetMouseEvent* aEvent);

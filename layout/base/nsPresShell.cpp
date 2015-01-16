@@ -912,7 +912,7 @@ PresShell::Init(nsIDocument* aDocument,
   }
 
   if (AccessibleCaretEnabled()) {
-    mCopyPasteEventHub = new CopyPasteEventHub(this);
+    mCopyPasteEventHub = new CopyPasteEventHub();
   }
 
   mSelection = new nsFrameSelection();
@@ -1934,7 +1934,7 @@ PresShell::Initialize(nscoord aWidth, nscoord aHeight)
 
     // Initialize after nsCanvasFrame is created.
     if (mCopyPasteEventHub) {
-      mCopyPasteEventHub->Init();
+      mCopyPasteEventHub->Init(this);
     }
 
     // nsAutoScriptBlocker going out of scope may have killed us too

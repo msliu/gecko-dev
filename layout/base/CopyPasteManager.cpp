@@ -69,8 +69,6 @@ CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
   , mCaretMode(CaretMode::NONE)
   , mCaretCenterToDownPointOffsetY(0)
   , mPresShell(aPresShell)
-  , mFirstCaret(MakeUnique<AccessibleCaret>(mPresShell))
-  , mSecondCaret(MakeUnique<AccessibleCaret>(mPresShell))
 {
 #ifdef PR_LOGGING
   if (!gCopyPasteManagerLogModule) {
@@ -78,6 +76,11 @@ CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
       PR_NewLogModule(kCopyPasteManagerLogModuleName);
   }
 #endif
+
+  if (mPresShell) {
+    mFirstCaret = MakeUnique<AccessibleCaret>(mPresShell);
+    mSecondCaret = MakeUnique<AccessibleCaret>(mPresShell);
+  }
 }
 
 CopyPasteManager::~CopyPasteManager()
@@ -173,28 +176,28 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
   }
 }
 
-nsEventStatus
-CopyPasteManager::OnPress(const nsPoint& aPoint)
+nsresult
+CopyPasteManager::PressCaret(const nsPoint& aPoint)
 {
-  LOG_DEBUG("Press in drag mode %s", ToStr(mDragMode));
+  nsresult rv = NS_ERROR_FAILURE;
 
   if (mFirstCaret->Contains(aPoint)) {
     mDragMode = DragMode::FIRST_CARET;
     mCaretCenterToDownPointOffsetY = mFirstCaret->LogicalPosition().y - aPoint.y;
     SetSelectionDirection(eDirPrevious);
     SetSelectionDragState(true);
-    return nsEventStatus_eConsumeNoDefault;
+    rv = NS_OK;
   } else if (mSecondCaret->Contains(aPoint)) {
     mDragMode = DragMode::SECOND_CARET;
     mCaretCenterToDownPointOffsetY = mSecondCaret->LogicalPosition().y - aPoint.y;
     SetSelectionDirection(eDirNext);
     SetSelectionDragState(true);
-    return nsEventStatus_eConsumeNoDefault;
+    rv = NS_OK;
   } else {
     mDragMode = DragMode::NONE;
   }
 
-  return nsEventStatus_eIgnore;
+  return rv;
 }
 
 nsEventStatus

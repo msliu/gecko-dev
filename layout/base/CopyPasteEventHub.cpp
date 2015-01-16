@@ -58,11 +58,13 @@ public:
 
   virtual const char* Name() { return ""; }
 
-  virtual nsEventStatus OnPress(CopyPasteEventHub* aContext, const nsPoint& aPoint,
-                                int32_t aTouchId);
-  virtual nsEventStatus OnMove(CopyPasteEventHub* aContext, const nsPoint& aPoint);
+  virtual nsEventStatus OnPress(CopyPasteEventHub* aContext,
+                                const nsPoint& aPoint, int32_t aTouchId);
+  virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
+                               const nsPoint& aPoint);
   virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext);
-  virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext, const nsPoint& aPoint);
+  virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
+                                  const nsPoint& aPoint);
   virtual void OnScrollStart(CopyPasteEventHub* aContext);
   virtual void OnScrollEnd(CopyPasteEventHub* aContext);
   virtual void OnScrolling(CopyPasteEventHub* aContex);
@@ -208,12 +210,13 @@ CopyPasteEventHub::NoActionState::OnPress(CopyPasteEventHub* aContext,
                                           const nsPoint& aPoint,
                                           int32_t aTouchId)
 {
-  nsEventStatus rv = aContext->mHandler->OnPress(aPoint);
+  nsEventStatus rv = nsEventStatus_eIgnore;
 
-  if (rv == nsEventStatus_eIgnore) {
-    aContext->SetState(WaitLongTapState::Singleton());
-  } else {
+  if (NS_SUCCEEDED(aContext->mHandler->PressCaret(aPoint))) {
     aContext->SetState(PressCaretState::Singleton());
+    rv = nsEventStatus_eConsumeNoDefault;
+  } else {
+    aContext->SetState(WaitLongTapState::Singleton());
   }
 
   aContext->mPressPoint = aPoint;
@@ -342,6 +345,12 @@ CopyPasteEventHub::ScrollState::Enter(CopyPasteEventHub* aContext)
   aContext->LaunchScrollEndDetector();
 }
 
+CopyPasteEventHub::State*
+CopyPasteEventHub::GetState()
+{
+  return mState;
+}
+
 void
 CopyPasteEventHub::SetState(State* aState)
 {
@@ -359,11 +368,20 @@ CopyPasteEventHub::SetState(State* aState)
   }
 }
 
-CopyPasteEventHub::CopyPasteEventHub(nsIPresShell* aPresShell)
+//
+// Implementation of CopyPasteEventHub
+//
+NS_IMPL_STATE_CLASS_GETTER(NoActionState)
+NS_IMPL_STATE_CLASS_GETTER(PressCaretState)
+NS_IMPL_STATE_CLASS_GETTER(DragCaretState)
+NS_IMPL_STATE_CLASS_GETTER(WaitLongTapState)
+NS_IMPL_STATE_CLASS_GETTER(ScrollState)
+
+CopyPasteEventHub::CopyPasteEventHub()
   : mInitialized(false)
   , mAsyncPanZoomEnabled(false)
   , mState(nullptr)
-  , mPresShell(aPresShell)
+  , mPresShell(nullptr)
   , mPressPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE)
   , mActiveTouchId(kInvalidTouchId)
 {
@@ -372,6 +390,8 @@ CopyPasteEventHub::CopyPasteEventHub(nsIPresShell* aPresShell)
     gCopyPasteEventHubLogModule = PR_NewLogModule(kCopyPasteEventHubModuleName);
   }
 #endif
+
+  SetState(NoActionState::Singleton());
 }
 
 CopyPasteEventHub::~CopyPasteEventHub()
@@ -379,11 +399,13 @@ CopyPasteEventHub::~CopyPasteEventHub()
 }
 
 void
-CopyPasteEventHub::Init()
+CopyPasteEventHub::Init(nsIPresShell* aPresShell)
 {
-  if (!mPresShell->GetCanvasFrame()) {
+  if (!aPresShell || !aPresShell->GetCanvasFrame()) {
     return;
   }
+
+  mPresShell = aPresShell;
 
   nsPresContext* presContext = mPresShell->GetPresContext();
   MOZ_ASSERT(presContext, "PresContext should be given in PresShell::Init()");
@@ -404,7 +426,6 @@ CopyPasteEventHub::Init()
   mLongTapDetectorTimer = do_CreateInstance("@mozilla.org/timer;1");
   mScrollEndDetectorTimer = do_CreateInstance("@mozilla.org/timer;1");
 
-  SetState(NoActionState::Singleton());
   mHandler = MakeUnique<CopyPasteManager>(mPresShell);
 
   mInitialized = true;
