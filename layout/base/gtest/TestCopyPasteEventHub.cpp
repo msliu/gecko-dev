@@ -7,7 +7,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "nsIFrame.h"
 #include "CopyPasteEventHub.h"
 #include "CopyPasteManager.h"
 #include "gfxPrefs.h"
@@ -15,12 +14,103 @@
 #include "mozilla/MouseEvents.h"
 #include "mozilla/TouchEvents.h"
 
-using namespace mozilla;
-using ::testing::_;
 using ::testing::AtLeast;
 using ::testing::DefaultValue;
-using ::testing::InSequence;
 using ::testing::Eq;
+using ::testing::InSequence;
+using ::testing::Return;
+using ::testing::_;
+
+namespace mozilla
+{
+
+class MockCopyPasteManager : public CopyPasteManager
+{
+public:
+  using CopyPasteManager::CopyPasteManager;
+
+  MOCK_METHOD1(PressCaret, nsresult(const nsPoint& aPoint));
+};
+
+class MockCopyPasteEventHub : public CopyPasteEventHub
+{
+public:
+  using CopyPasteEventHub::State;
+  using CopyPasteEventHub::NoActionState;
+  using CopyPasteEventHub::PressCaretState;
+  using CopyPasteEventHub::DragCaretState;
+  using CopyPasteEventHub::WaitLongTapState;
+  using CopyPasteEventHub::ScrollState;
+  using CopyPasteEventHub::GetState;
+
+  explicit MockCopyPasteEventHub() : CopyPasteEventHub()
+  {
+    mHandler = MakeUnique<MockCopyPasteManager>(nullptr);
+    mInitialized = true;
+  }
+
+  MockCopyPasteManager* GetMockCopyPasteManager()
+  {
+    return reinterpret_cast<MockCopyPasteManager*>(mHandler.get());
+  }
+};
+
+class CopyPasteEventHubTester : public ::testing::Test
+{
+public:
+  explicit CopyPasteEventHubTester() : mHub(new MockCopyPasteEventHub())
+  {
+    DefaultValue<nsresult>::Set(NS_OK);
+    EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::NoActionState());
+  }
+
+  UniquePtr<WidgetMouseEvent> CreateMouseEvent(uint32_t aMessage, nscoord aX,
+                                               nscoord aY)
+  {
+    UniquePtr<WidgetMouseEvent> event = MakeUnique<WidgetMouseEvent>(
+      true, aMessage, nullptr, WidgetMouseEvent::eReal);
+
+    event->button = WidgetMouseEvent::eLeftButton;
+    event->refPoint = LayoutDeviceIntPoint(aX, aY);
+
+    return event;
+  }
+
+  void HandleEventAndCheckState(UniquePtr<WidgetEvent> aEvent,
+                                MockCopyPasteEventHub::State* aExpectedState)
+  {
+    mHub->HandleEvent(aEvent.get());
+    EXPECT_EQ(mHub->GetState(), aExpectedState);
+  }
+
+  nsRefPtr<MockCopyPasteEventHub> mHub;
+};
+
+TEST_F(CopyPasteEventHubTester, TestMousePressReleaseNotOnCaret)
+{
+  EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+    .WillRepeatedly(Return(NS_ERROR_FAILURE));
+
+  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_DOWN, 0, 0),
+                           MockCopyPasteEventHub::WaitLongTapState());
+
+  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_UP, 0, 0),
+                           MockCopyPasteEventHub::NoActionState());
+}
+
+TEST_F(CopyPasteEventHubTester, TestMousePressReleaseOnCaret)
+{
+  EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+    .WillRepeatedly(Return(NS_OK));
+
+  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_DOWN, 0, 0),
+                           MockCopyPasteEventHub::PressCaretState());
+
+  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_UP, 0, 0),
+                           MockCopyPasteEventHub::NoActionState());
+}
+
+}; // namespace mozilla
 
 /*
 class MockCopyPasteManager : public CopyPasteManager
