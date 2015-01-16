@@ -359,12 +359,11 @@ CopyPasteEventHub::SetState(State* aState)
   }
 }
 
-CopyPasteEventHub::CopyPasteEventHub(nsIPresShell* aPresShell,
-                                     CopyPasteManager* aHandler)
-  : mAsyncPanZoomEnabled(false)
+CopyPasteEventHub::CopyPasteEventHub(nsIPresShell* aPresShell)
+  : mInitialized(false)
+  , mAsyncPanZoomEnabled(false)
   , mState(nullptr)
   , mPresShell(aPresShell)
-  , mHandler(aHandler)
   , mPressPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE)
   , mActiveTouchId(kInvalidTouchId)
 {
@@ -373,8 +372,6 @@ CopyPasteEventHub::CopyPasteEventHub(nsIPresShell* aPresShell,
     gCopyPasteEventHubLogModule = PR_NewLogModule(kCopyPasteEventHubModuleName);
   }
 #endif
-
-  SetState(NoActionState::Singleton());
 }
 
 CopyPasteEventHub::~CopyPasteEventHub()
@@ -384,7 +381,7 @@ CopyPasteEventHub::~CopyPasteEventHub()
 void
 CopyPasteEventHub::Init()
 {
-  if (!mPresShell) {
+  if (!mPresShell->GetCanvasFrame()) {
     return;
   }
 
@@ -406,6 +403,11 @@ CopyPasteEventHub::Init()
 
   mLongTapDetectorTimer = do_CreateInstance("@mozilla.org/timer;1");
   mScrollEndDetectorTimer = do_CreateInstance("@mozilla.org/timer;1");
+
+  SetState(NoActionState::Singleton());
+  mHandler = MakeUnique<CopyPasteManager>(mPresShell);
+
+  mInitialized = true;
 }
 
 void
@@ -420,15 +422,23 @@ CopyPasteEventHub::Terminate()
   if (mLongTapDetectorTimer) {
     mLongTapDetectorTimer->Cancel();
   }
+
   if (mScrollEndDetectorTimer) {
     mScrollEndDetectorTimer->Cancel();
   }
+
+  mHandler = nullptr;
+  mInitialized = false;
 }
 
 nsEventStatus
 CopyPasteEventHub::HandleEvent(WidgetEvent* aEvent)
 {
   nsEventStatus status = nsEventStatus_eIgnore;
+
+  if (!mInitialized) {
+    return status;
+  }
 
   switch (aEvent->mClass) {
   case eMouseEventClass:
@@ -622,6 +632,10 @@ CopyPasteEventHub::NotifySelectionChanged(nsIDOMDocument* aDoc,
                                           nsISelection* aSel,
                                           int16_t aReason)
 {
+  if (!mInitialized) {
+    return NS_OK;
+  }
+
   return mHandler->OnSelectionChanged(aDoc, aSel, aReason);
 }
 

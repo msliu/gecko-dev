@@ -15,15 +15,12 @@
 #include "nsFrame.h"
 #include "nsFrameSelection.h"
 
-using namespace mozilla;
-using namespace mozilla::dom;
+namespace mozilla {
+
+using namespace dom;
 
 typedef AccessibleCaret::Appearance Appearance;
 
-NS_IMPL_ISUPPORTS0(CopyPasteManager)
-
-namespace
-{
 // Avoid redefine macros
 #undef LOG
 
@@ -44,7 +41,6 @@ const char* kCopyPasteManagerLogModuleName = "CopyPasteManager";
 #define LOG_WARNING(...)
 #define LOG_ERROR(...)
 #endif // #ifdef PR_LOGGING
-}
 
 /* static */ const char*
 CopyPasteManager::ToStr(DragMode aDragMode)
@@ -69,11 +65,12 @@ CopyPasteManager::ToStr(CaretMode aCaretMode)
 }
 
 CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
-  : mInitialized(false)
-  , mDragMode(DragMode::NONE)
+  : mDragMode(DragMode::NONE)
   , mCaretMode(CaretMode::NONE)
   , mCaretCenterToDownPointOffsetY(0)
   , mPresShell(aPresShell)
+  , mFirstCaret(MakeUnique<AccessibleCaret>(mPresShell))
+  , mSecondCaret(MakeUnique<AccessibleCaret>(mPresShell))
 {
 #ifdef PR_LOGGING
   if (!gCopyPasteManagerLogModule) {
@@ -83,43 +80,8 @@ CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
 #endif
 }
 
-void
-CopyPasteManager::Init()
-{
-  if (!mPresShell->GetCanvasFrame()) {
-    return;
-  }
-
-  mFirstCaret = MakeUnique<AccessibleCaret>(mPresShell);
-  mSecondCaret = MakeUnique<AccessibleCaret>(mPresShell);
-  mCopyPasteEventHub = new CopyPasteEventHub(mPresShell, this);
-  mCopyPasteEventHub->Init();
-  mInitialized = true;
-}
-
-void
-CopyPasteManager::Terminate()
-{
-  if (!mInitialized) {
-    return;
-  }
-
-  mCopyPasteEventHub->Terminate();
-  mInitialized = false;
-}
-
 CopyPasteManager::~CopyPasteManager()
 {
-}
-
-nsEventStatus
-CopyPasteManager::HandleEvent(WidgetEvent* aEvent)
-{
-  if (!mInitialized) {
-    return nsEventStatus_eIgnore;
-  }
-
-  return mCopyPasteEventHub->HandleEvent(aEvent);
 }
 
 nsresult
@@ -127,10 +89,6 @@ CopyPasteManager::OnSelectionChanged(nsIDOMDocument* aDoc,
                                      nsISelection* aSel,
                                      int16_t aReason)
 {
-  if (!mInitialized) {
-    return NS_OK;
-  }
-
   if (aSel != GetSelection()) {
     return NS_OK;
   }
@@ -690,9 +648,4 @@ CopyPasteManager::DragCaret(const nsPoint &aMovePoint)
   return nsEventStatus_eConsumeNoDefault;
 }
 
-already_AddRefed<CopyPasteEventHub>
-CopyPasteManager::GetCopyPasteEventHub() const
-{
-  nsRefPtr<CopyPasteEventHub> copyPasteEventHub = mCopyPasteEventHub;
-  return copyPasteEventHub.forget();
-}
+} // namespace mozilla

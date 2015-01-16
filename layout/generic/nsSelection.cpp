@@ -822,14 +822,11 @@ nsFrameSelection::Init(nsIPresShell *aShell, nsIContent *aLimiter)
     }
   }
 
-  nsRefPtr<CopyPasteManager> copyPasteManager = mShell->GetCopyPasteManager();
-  if (copyPasteManager) {
-    nsRefPtr<CopyPasteEventHub> copyPasteEventHub = copyPasteManager->GetCopyPasteEventHub();
-    if (copyPasteEventHub) {
-      int8_t index = GetIndexFromSelectionType(nsISelectionController::SELECTION_NORMAL);
-      if (mDomSelections[index]) {
-        mDomSelections[index]->AddSelectionListener(copyPasteEventHub);
-      }
+  nsRefPtr<CopyPasteEventHub> copyPasteEventHub = mShell->GetCopyPasteEventHub();
+  if (copyPasteEventHub) {
+    int8_t index = GetIndexFromSelectionType(nsISelectionController::SELECTION_NORMAL);
+    if (mDomSelections[index]) {
+      mDomSelections[index]->AddSelectionListener(copyPasteEventHub);
     }
   }
 }
@@ -3236,6 +3233,12 @@ nsFrameSelection::DisconnectFromPresShell()
   if (selectionCarets) {
     int8_t index = GetIndexFromSelectionType(nsISelectionController::SELECTION_NORMAL);
     mDomSelections[index]->RemoveSelectionListener(selectionCarets);
+  }
+
+  nsRefPtr<CopyPasteEventHub> copyPasteEventHub = mShell->GetCopyPasteEventHub();
+  if (copyPasteEventHub) {
+    int8_t index = GetIndexFromSelectionType(nsISelectionController::SELECTION_NORMAL);
+    mDomSelections[index]->RemoveSelectionListener(copyPasteEventHub);
   }
 
   StopAutoScrollTimer();
