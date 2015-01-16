@@ -59,7 +59,7 @@ protected:
   static const char* ToStr(DragMode aDragMode);
   static const char* ToStr(CaretMode aCaretMode);
 
-  virtual nsEventStatus OnPress(const nsPoint& aPoint);
+  virtual nsresult PressCaret(const nsPoint& aPoint);
   virtual nsEventStatus OnDrag(const nsPoint& aPoint);
   virtual nsEventStatus OnRelease();
   virtual nsEventStatus OnLongTap(const nsPoint& aPoint);
