@@ -48,7 +48,7 @@ static const char* kCopyPasteEventHubModuleName = "CopyPasteEventHub";
 class CopyPasteEventHub::State
 {
 public:
-#define IMPL_STATE_UTILITIES(aClassName)                                       \
+#define NS_IMPL_STATE_UTILITIES(aClassName)                                    \
   virtual const char* Name() { return #aClassName; }                           \
   static aClassName* Singleton()                                               \
   {                                                                            \
@@ -82,7 +82,7 @@ protected:
 class CopyPasteEventHub::NoActionState : public CopyPasteEventHub::State
 {
 public:
-  IMPL_STATE_UTILITIES(NoActionState)
+  NS_IMPL_STATE_UTILITIES(NoActionState)
 
   virtual nsEventStatus OnPress(CopyPasteEventHub* aContext,
                                 const nsPoint& aPoint,
@@ -98,7 +98,7 @@ public:
 class CopyPasteEventHub::PressCaretState : public CopyPasteEventHub::State
 {
 public:
-  IMPL_STATE_UTILITIES(PressCaretState)
+  NS_IMPL_STATE_UTILITIES(PressCaretState)
 
   virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
                                const nsPoint& aPoint) MOZ_OVERRIDE;
@@ -111,7 +111,7 @@ public:
 class CopyPasteEventHub::DragCaretState : public CopyPasteEventHub::State
 {
 public:
-  IMPL_STATE_UTILITIES(DragCaretState)
+  NS_IMPL_STATE_UTILITIES(DragCaretState)
 
   virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
                                const nsPoint& aPoint) MOZ_OVERRIDE;
@@ -124,7 +124,7 @@ public:
 class CopyPasteEventHub::WaitLongTapState : public CopyPasteEventHub::State
 {
 public:
-  IMPL_STATE_UTILITIES(WaitLongTapState)
+  NS_IMPL_STATE_UTILITIES(WaitLongTapState)
 
   virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
@@ -139,7 +139,7 @@ public:
 class CopyPasteEventHub::ScrollState : public CopyPasteEventHub::State
 {
 public:
-  IMPL_STATE_UTILITIES(ScrollState)
+  NS_IMPL_STATE_UTILITIES(ScrollState)
 
   virtual void OnScrollEnd(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
