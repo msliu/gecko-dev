@@ -241,10 +241,10 @@ CopyPasteEventHub::NoActionState::OnScrolling(CopyPasteEventHub* aContext)
 }
 
 void
-CopyPasteEventHub::NoActionState::Enter(CopyPasteEventHub* aContex)
+CopyPasteEventHub::NoActionState::Enter(CopyPasteEventHub* aContext)
 {
-  aContex->mPressPoint = nsPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE);
-  aContex->mActiveTouchId = kInvalidTouchId;
+  aContext->mPressPoint = nsPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE);
+  aContext->mActiveTouchId = kInvalidTouchId;
 }
 
 nsEventStatus
@@ -318,15 +318,15 @@ CopyPasteEventHub::WaitLongTapState::OnLongTap(CopyPasteEventHub* aContext,
 }
 
 void
-CopyPasteEventHub::WaitLongTapState::Enter(CopyPasteEventHub* aContex)
+CopyPasteEventHub::WaitLongTapState::Enter(CopyPasteEventHub* aContext)
 {
-  aContex->LaunchLongTapDetector();
+  aContext->LaunchLongTapDetector();
 }
 
 void
-CopyPasteEventHub::WaitLongTapState::Leave(CopyPasteEventHub* aContex)
+CopyPasteEventHub::WaitLongTapState::Leave(CopyPasteEventHub* aContext)
 {
-  aContex->CancelLongTapDetector();
+  aContext->CancelLongTapDetector();
 }
 
 void
