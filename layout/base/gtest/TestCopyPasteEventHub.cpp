@@ -77,10 +77,12 @@ public:
   }
 
   void HandleEventAndCheckState(UniquePtr<WidgetEvent> aEvent,
-                                MockCopyPasteEventHub::State* aExpectedState)
+                                MockCopyPasteEventHub::State* aExpectedState,
+                                nsEventStatus aExpectedEventStatus)
   {
-    mHub->HandleEvent(aEvent.get());
+    nsEventStatus rv = mHub->HandleEvent(aEvent.get());
     EXPECT_EQ(mHub->GetState(), aExpectedState);
+    EXPECT_EQ(rv, aExpectedEventStatus);
   }
 
   nsRefPtr<MockCopyPasteEventHub> mHub;
@@ -92,10 +94,12 @@ TEST_F(CopyPasteEventHubTester, TestMousePressReleaseNotOnCaret)
     .WillRepeatedly(Return(NS_ERROR_FAILURE));
 
   HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_DOWN, 0, 0),
-                           MockCopyPasteEventHub::WaitLongTapState());
+                           MockCopyPasteEventHub::WaitLongTapState(),
+                           nsEventStatus_eIgnore);
 
   HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_UP, 0, 0),
-                           MockCopyPasteEventHub::NoActionState());
+                           MockCopyPasteEventHub::NoActionState(),
+                           nsEventStatus_eIgnore);
 }
 
 TEST_F(CopyPasteEventHubTester, TestMousePressReleaseOnCaret)
@@ -104,10 +108,12 @@ TEST_F(CopyPasteEventHubTester, TestMousePressReleaseOnCaret)
     .WillRepeatedly(Return(NS_OK));
 
   HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_DOWN, 0, 0),
-                           MockCopyPasteEventHub::PressCaretState());
+                           MockCopyPasteEventHub::PressCaretState(),
+                           nsEventStatus_eConsumeNoDefault);
 
   HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_UP, 0, 0),
-                           MockCopyPasteEventHub::NoActionState());
+                           MockCopyPasteEventHub::NoActionState(),
+                           nsEventStatus_eConsumeNoDefault);
 }
 
 }; // namespace mozilla
