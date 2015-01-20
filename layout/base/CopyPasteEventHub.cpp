@@ -269,17 +269,12 @@ CopyPasteEventHub::PressCaretState::OnMove(CopyPasteEventHub* aContext,
 nsEventStatus
 CopyPasteEventHub::PressCaretState::OnRelease(CopyPasteEventHub* aContext)
 {
-  nsEventStatus rv = nsEventStatus_eIgnore;
-
-  if (NS_SUCCEEDED(aContext->mHandler->ReleaseCaret())) {
-    if (NS_SUCCEEDED(aContext->mHandler->TapCaret(aContext->mPressPoint))) {
-      rv = nsEventStatus_eConsumeNoDefault;
-    }
-  }
-
+  aContext->mHandler->ReleaseCaret();
+  aContext->mHandler->TapCaret(aContext->mPressPoint);
   aContext->SetState(NoActionState::Singleton());
 
-  return rv;
+  // We should always consume the event since we've pressed on the caret.
+  return nsEventStatus_eConsumeNoDefault;
 }
 
 nsEventStatus
