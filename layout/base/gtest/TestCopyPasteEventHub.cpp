@@ -30,6 +30,8 @@ public:
   using CopyPasteManager::CopyPasteManager;
 
   MOCK_METHOD1(PressCaret, nsresult(const nsPoint& aPoint));
+  MOCK_METHOD1(DragCaret, nsresult(const nsPoint& aPoint));
+  MOCK_METHOD0(ReleaseCaret, nsresult());
 };
 
 class MockCopyPasteEventHub : public CopyPasteEventHub
@@ -112,6 +114,55 @@ TEST_F(CopyPasteEventHubTester, TestMousePressReleaseOnCaret)
                            nsEventStatus_eConsumeNoDefault);
 
   HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_UP, 0, 0),
+                           MockCopyPasteEventHub::NoActionState(),
+                           nsEventStatus_eConsumeNoDefault);
+}
+
+TEST_F(CopyPasteEventHubTester, TestMousePressDragReleaseOnCaret)
+{
+  nscoord x0 = 0, y0 = 0;
+  nscoord x1 = 100, y1 = 100;
+  nscoord x2 = 300, y2 = 300;
+  nscoord x3 = 400, y3 = 400;
+
+  {
+    InSequence dummy;
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+      .WillOnce(Return(NS_OK));
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), DragCaret(_))
+      .Times(2) // two valid drag operations
+      .WillRepeatedly(Return(NS_OK));
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), ReleaseCaret())
+      .WillOnce(Return(NS_OK));
+  }
+
+  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_DOWN, x0, y0),
+                           MockCopyPasteEventHub::PressCaretState(),
+                           nsEventStatus_eConsumeNoDefault);
+
+  // A small move with the distance between (x0, y0) and (x1, y1) below the
+  // tolerance value.
+  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_MOVE, x1, y1),
+                           MockCopyPasteEventHub::PressCaretState(),
+                           nsEventStatus_eConsumeNoDefault);
+
+  // A large move forms a valid drag since the distance between (x0, y0) and
+  // (x2, y2) is above the tolerance value.
+  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_MOVE, x2, y2),
+                           MockCopyPasteEventHub::DragCaretState(),
+                           nsEventStatus_eConsumeNoDefault);
+
+  // Also a valid drag since the distance between (x0, y0) and (x3, y3) above
+  // the tolerance value even if the distance between (x2, y2) and (x3, y3) is
+  // below the tolerance value.
+  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_MOVE, x3, y3),
+                           MockCopyPasteEventHub::DragCaretState(),
+                           nsEventStatus_eConsumeNoDefault);
+
+  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_UP, x2, y2),
                            MockCopyPasteEventHub::NoActionState(),
                            nsEventStatus_eConsumeNoDefault);
 }
