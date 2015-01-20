@@ -32,6 +32,7 @@ public:
   MOCK_METHOD1(PressCaret, nsresult(const nsPoint& aPoint));
   MOCK_METHOD1(DragCaret, nsresult(const nsPoint& aPoint));
   MOCK_METHOD0(ReleaseCaret, nsresult());
+  MOCK_METHOD1(TapCaret, nsresult(const nsPoint& aPoint));
 };
 
 class MockCopyPasteEventHub : public CopyPasteEventHub
@@ -106,8 +107,15 @@ TEST_F(CopyPasteEventHubTester, TestMousePressReleaseNotOnCaret)
 
 TEST_F(CopyPasteEventHubTester, TestMousePressReleaseOnCaret)
 {
-  EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
-    .WillRepeatedly(Return(NS_OK));
+  {
+    InSequence dummy;
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+      .WillOnce(Return(NS_OK));
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), ReleaseCaret());
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), TapCaret(_));
+  }
 
   HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_DOWN, 0, 0),
                            MockCopyPasteEventHub::PressCaretState(),
