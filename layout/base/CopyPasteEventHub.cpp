@@ -411,7 +411,7 @@ CopyPasteEventHub::~CopyPasteEventHub()
 void
 CopyPasteEventHub::Init(nsIPresShell* aPresShell)
 {
-  if (!aPresShell || !aPresShell->GetCanvasFrame()) {
+  if (mInitialized || !aPresShell || !aPresShell->GetCanvasFrame()) {
     return;
   }
 
@@ -444,6 +444,10 @@ CopyPasteEventHub::Init(nsIPresShell* aPresShell)
 void
 CopyPasteEventHub::Terminate()
 {
+  if (!mInitialized) {
+    return;
+  }
+
   nsRefPtr<nsDocShell> docShell(mDocShell.get());
   if (docShell) {
     docShell->RemoveWeakReflowObserver(this);
