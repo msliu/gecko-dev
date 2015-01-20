@@ -62,8 +62,8 @@ protected:
   virtual nsresult PressCaret(const nsPoint& aPoint);
   virtual nsresult DragCaret(const nsPoint& aPoint);
   virtual nsresult ReleaseCaret();
-  virtual nsEventStatus OnLongTap(const nsPoint& aPoint);
   virtual nsresult TapCaret(const nsPoint& aPoint);
+  virtual nsresult SelectWordOrShortcut(const nsPoint& aPoint);
   virtual void OnScrollStart();
   virtual void OnScrollEnd();
   virtual void OnReflow();

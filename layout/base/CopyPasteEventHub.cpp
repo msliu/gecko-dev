@@ -309,7 +309,11 @@ nsEventStatus
 CopyPasteEventHub::WaitLongTapState::OnLongTap(CopyPasteEventHub* aContext,
                                                const nsPoint& aPoint)
 {
-  nsEventStatus rv = aContext->mHandler->OnLongTap(aContext->mPressPoint);
+  nsEventStatus rv = nsEventStatus_eIgnore;
+
+  if (NS_SUCCEEDED(aContext->mHandler->SelectWordOrShortcut(aPoint))) {
+    rv = nsEventStatus_eConsumeNoDefault;
+  }
 
   aContext->SetState(NoActionState::Singleton());
 
