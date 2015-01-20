@@ -200,32 +200,30 @@ CopyPasteManager::PressCaret(const nsPoint& aPoint)
   return rv;
 }
 
-nsEventStatus
-CopyPasteManager::OnDrag(const nsPoint& aPoint)
+nsresult
+CopyPasteManager::DragCaret(const nsPoint& aPoint)
 {
-  LOG_DEBUG("Drag in drag mode %s", ToStr(mDragMode));
-
-  if (mDragMode != DragMode::NONE) {
-    nsPoint point = aPoint;
-    point.y += mCaretCenterToDownPointOffsetY;
-    DragCaret(point);
-    UpdateCarets();
-    return nsEventStatus_eConsumeNoDefault;
+  if (mDragMode == DragMode::NONE) {
+    return NS_ERROR_UNEXPECTED;
   }
-  return nsEventStatus_eIgnore;
+
+  nsPoint point = aPoint;
+  point.y += mCaretCenterToDownPointOffsetY;
+  DragCaretInternal(point);
+  UpdateCarets();
+  return NS_OK;
 }
 
-nsEventStatus
-CopyPasteManager::OnRelease()
+nsresult
+CopyPasteManager::ReleaseCaret()
 {
-  LOG_DEBUG("Release in drag mode %s", ToStr(mDragMode));
-
-  if (mDragMode != DragMode::NONE) {
-    SetSelectionDragState(false);
-    mDragMode = DragMode::NONE;
-    return nsEventStatus_eConsumeNoDefault;
+  if (mDragMode == DragMode::NONE) {
+    return NS_ERROR_UNEXPECTED;
   }
-  return nsEventStatus_eIgnore;
+
+  SetSelectionDragState(false);
+  mDragMode = DragMode::NONE;
+  return NS_OK;
 }
 
 nsEventStatus
@@ -247,12 +245,16 @@ CopyPasteManager::OnLongTap(const nsPoint& aPoint)
   return nsEventStatus_eConsumeNoDefault;
 }
 
-nsEventStatus
-CopyPasteManager::OnTap(const nsPoint& aPoint)
+nsresult
+CopyPasteManager::TapCaret(const nsPoint& aPoint)
 {
-  LOG_DEBUG("Tap in drag mode %s", ToStr(mDragMode));
+  nsresult rv = NS_ERROR_FAILURE;
 
-  return nsEventStatus_eConsumeNoDefault;
+  if (mCaretMode == CaretMode::CURSOR && mDragMode == DragMode::FIRST_CARET) {
+    rv = NS_OK;
+  }
+
+  return rv;
 }
 
 void
@@ -568,7 +570,7 @@ CopyPasteManager::CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffse
 }
 
 nsEventStatus
-CopyPasteManager::DragCaret(const nsPoint &aMovePoint)
+CopyPasteManager::DragCaretInternal(const nsPoint &aMovePoint)
 {
   if (!mPresShell) {
     return nsEventStatus_eConsumeNoDefault;

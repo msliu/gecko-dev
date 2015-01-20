@@ -60,10 +60,10 @@ protected:
   static const char* ToStr(CaretMode aCaretMode);
 
   virtual nsresult PressCaret(const nsPoint& aPoint);
-  virtual nsEventStatus OnDrag(const nsPoint& aPoint);
-  virtual nsEventStatus OnRelease();
+  virtual nsresult DragCaret(const nsPoint& aPoint);
+  virtual nsresult ReleaseCaret();
   virtual nsEventStatus OnLongTap(const nsPoint& aPoint);
-  virtual nsEventStatus OnTap(const nsPoint& aPoint);
+  virtual nsresult TapCaret(const nsPoint& aPoint);
   virtual void OnScrollStart();
   virtual void OnScrollEnd();
   virtual void OnReflow();
@@ -81,7 +81,7 @@ protected:
   virtual void SetSelectionDragState(bool aState);
   virtual void SetSelectionDirection(nsDirection aDir);
   virtual nsIFrame* FindFirstNodeWithFrame(bool aBackward, int* aOutOffset);
-  virtual nsEventStatus DragCaret(const nsPoint &aMovePoint);
+  virtual nsEventStatus DragCaretInternal(const nsPoint &aMovePoint);
 
   // Utility functions
   dom::Selection* GetSelection();

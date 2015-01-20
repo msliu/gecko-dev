@@ -257,8 +257,10 @@ CopyPasteEventHub::PressCaretState::OnMove(CopyPasteEventHub* aContext,
   nsEventStatus rv = nsEventStatus_eIgnore;
 
   if (aContext->MoveDistanceIsLarge(aPoint)) {
-    rv = aContext->mHandler->OnDrag(aPoint);
-    aContext->SetState(DragCaretState::Singleton());
+    if (NS_SUCCEEDED(aContext->mHandler->DragCaret(aPoint))) {
+      aContext->SetState(DragCaretState::Singleton());
+      rv = nsEventStatus_eConsumeNoDefault;
+    }
   }
 
   return rv;
@@ -267,10 +269,12 @@ CopyPasteEventHub::PressCaretState::OnMove(CopyPasteEventHub* aContext,
 nsEventStatus
 CopyPasteEventHub::PressCaretState::OnRelease(CopyPasteEventHub* aContext)
 {
-  nsEventStatus rv = aContext->mHandler->OnRelease();
+  nsEventStatus rv = nsEventStatus_eIgnore;
 
-  if (rv == nsEventStatus_eConsumeNoDefault) {
-    rv = aContext->mHandler->OnTap(aContext->mPressPoint);
+  if (NS_SUCCEEDED(aContext->mHandler->ReleaseCaret())) {
+    if (NS_SUCCEEDED(aContext->mHandler->TapCaret(aContext->mPressPoint))) {
+      rv = nsEventStatus_eConsumeNoDefault;
+    }
   }
 
   aContext->SetState(NoActionState::Singleton());
@@ -284,7 +288,9 @@ CopyPasteEventHub::DragCaretState::OnMove(CopyPasteEventHub* aContext,
 {
   nsEventStatus rv = nsEventStatus_eIgnore;
 
-  rv = aContext->mHandler->OnDrag(aPoint);
+  if (NS_SUCCEEDED(aContext->mHandler->DragCaret(aPoint))) {
+    rv = nsEventStatus_eConsumeNoDefault;
+  }
 
   return rv;
 }
@@ -292,7 +298,11 @@ CopyPasteEventHub::DragCaretState::OnMove(CopyPasteEventHub* aContext,
 nsEventStatus
 CopyPasteEventHub::DragCaretState::OnRelease(CopyPasteEventHub* aContext)
 {
-  nsEventStatus rv = aContext->mHandler->OnRelease();
+  nsEventStatus rv = nsEventStatus_eIgnore;
+
+  if (NS_SUCCEEDED(aContext->mHandler->ReleaseCaret())) {
+    rv = nsEventStatus_eConsumeNoDefault;
+  }
 
   aContext->SetState(NoActionState::Singleton());
 
@@ -302,7 +312,7 @@ CopyPasteEventHub::DragCaretState::OnRelease(CopyPasteEventHub* aContext)
 nsEventStatus
 CopyPasteEventHub::WaitLongTapState::OnRelease(CopyPasteEventHub* aContext)
 {
-  nsEventStatus rv = aContext->mHandler->OnRelease();
+  nsEventStatus rv = nsEventStatus_eIgnore;
 
   aContext->SetState(NoActionState::Singleton());
 
