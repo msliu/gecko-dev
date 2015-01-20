@@ -254,16 +254,14 @@ nsEventStatus
 CopyPasteEventHub::PressCaretState::OnMove(CopyPasteEventHub* aContext,
                                            const nsPoint& aPoint)
 {
-  nsEventStatus rv = nsEventStatus_eIgnore;
-
   if (aContext->MoveDistanceIsLarge(aPoint)) {
     if (NS_SUCCEEDED(aContext->mHandler->DragCaret(aPoint))) {
       aContext->SetState(DragCaretState::Singleton());
-      rv = nsEventStatus_eConsumeNoDefault;
     }
   }
 
-  return rv;
+  // We should always consume the event since we've pressed on the caret.
+  return nsEventStatus_eConsumeNoDefault;
 }
 
 nsEventStatus
@@ -281,27 +279,20 @@ nsEventStatus
 CopyPasteEventHub::DragCaretState::OnMove(CopyPasteEventHub* aContext,
                                           const nsPoint& aPoint)
 {
-  nsEventStatus rv = nsEventStatus_eIgnore;
+  aContext->mHandler->DragCaret(aPoint);
 
-  if (NS_SUCCEEDED(aContext->mHandler->DragCaret(aPoint))) {
-    rv = nsEventStatus_eConsumeNoDefault;
-  }
-
-  return rv;
+  // We should always consume the event since we've pressed on the caret.
+  return nsEventStatus_eConsumeNoDefault;
 }
 
 nsEventStatus
 CopyPasteEventHub::DragCaretState::OnRelease(CopyPasteEventHub* aContext)
 {
-  nsEventStatus rv = nsEventStatus_eIgnore;
-
-  if (NS_SUCCEEDED(aContext->mHandler->ReleaseCaret())) {
-    rv = nsEventStatus_eConsumeNoDefault;
-  }
-
+  aContext->mHandler->ReleaseCaret();
   aContext->SetState(NoActionState::Singleton());
 
-  return rv;
+  // We should always consume the event since we've pressed on the caret.
+  return nsEventStatus_eConsumeNoDefault;
 }
 
 nsEventStatus
