@@ -226,25 +226,6 @@ CopyPasteManager::ReleaseCaret()
   return NS_OK;
 }
 
-nsEventStatus
-CopyPasteManager::OnLongTap(const nsPoint& aPoint)
-{
-  LOG_DEBUG("Long tap in drag mode %s", ToStr(mDragMode));
-
-  if (mDragMode == DragMode::FIRST_CARET ||
-      mDragMode == DragMode::SECOND_CARET) {
-    return nsEventStatus_eConsumeNoDefault;
-  }
-
-  nsresult wordSelected = SelectWord(aPoint);
-
-  if (NS_FAILED(wordSelected)) {
-    return nsEventStatus_eIgnore;
-  }
-
-  return nsEventStatus_eConsumeNoDefault;
-}
-
 nsresult
 CopyPasteManager::TapCaret(const nsPoint& aPoint)
 {
@@ -255,6 +236,13 @@ CopyPasteManager::TapCaret(const nsPoint& aPoint)
   }
 
   return rv;
+}
+
+nsresult
+CopyPasteManager::SelectWordOrShortcut(const nsPoint& aPoint)
+{
+  // TODO: Handle shortcut mode
+  return SelectWord(aPoint);
 }
 
 void

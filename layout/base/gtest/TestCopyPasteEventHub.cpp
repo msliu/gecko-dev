@@ -33,6 +33,7 @@ public:
   MOCK_METHOD1(DragCaret, nsresult(const nsPoint& aPoint));
   MOCK_METHOD0(ReleaseCaret, nsresult());
   MOCK_METHOD1(TapCaret, nsresult(const nsPoint& aPoint));
+  MOCK_METHOD1(SelectWordOrShortcut, nsresult(const nsPoint& aPoint));
 };
 
 class MockCopyPasteEventHub : public CopyPasteEventHub
@@ -179,6 +180,56 @@ TEST_F(CopyPasteEventHubTester, TestMousePressDragReleaseOnCaret)
   HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_UP, x2, y2),
                            MockCopyPasteEventHub::NoActionState(),
                            nsEventStatus_eConsumeNoDefault);
+}
+
+TEST_F(CopyPasteEventHubTester, TestLongTapWithSelectWordSuccessful)
+{
+  {
+    InSequence dummy;
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+      .WillOnce(Return(NS_ERROR_FAILURE));
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), SelectWordOrShortcut(_))
+      .WillOnce(Return(NS_OK));
+  }
+
+  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_DOWN, 0, 0),
+                           MockCopyPasteEventHub::WaitLongTapState(),
+                           nsEventStatus_eIgnore);
+
+  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_MOZLONGTAP, 0, 0),
+                           MockCopyPasteEventHub::NoActionState(),
+                           nsEventStatus_eConsumeNoDefault);
+
+  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_UP, 0, 0),
+                           MockCopyPasteEventHub::NoActionState(),
+                           nsEventStatus_eIgnore);
+}
+
+TEST_F(CopyPasteEventHubTester, TestLongTapWithSelectWordFailed)
+{
+  {
+    InSequence dummy;
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+      .WillOnce(Return(NS_ERROR_FAILURE));
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), SelectWordOrShortcut(_))
+      .WillOnce(Return(NS_ERROR_FAILURE));
+  }
+
+  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_DOWN, 0, 0),
+                           MockCopyPasteEventHub::WaitLongTapState(),
+                           nsEventStatus_eIgnore);
+
+  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_MOZLONGTAP, 0, 0),
+                           MockCopyPasteEventHub::NoActionState(),
+                           nsEventStatus_eIgnore);
+
+  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_UP, 0, 0),
+                           MockCopyPasteEventHub::NoActionState(),
+                           nsEventStatus_eIgnore);
 }
 
 }; // namespace mozilla
