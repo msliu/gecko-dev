@@ -94,7 +94,13 @@ public:
 TEST_F(CopyPasteEventHubTester, TestMousePressReleaseNotOnCaret)
 {
   EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
-    .WillRepeatedly(Return(NS_ERROR_FAILURE));
+    .WillOnce(Return(NS_ERROR_FAILURE));
+
+  EXPECT_CALL(*mHub->GetMockCopyPasteManager(), ReleaseCaret())
+    .Times(0);
+
+  EXPECT_CALL(*mHub->GetMockCopyPasteManager(), TapCaret(_))
+    .Times(0);
 
   HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_DOWN, 0, 0),
                            MockCopyPasteEventHub::WaitLongTapState(),
