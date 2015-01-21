@@ -103,6 +103,38 @@ public:
     return CreateMouseEvent(NS_MOUSE_MOZLONGTAP, aX, aY);
   }
 
+  static UniquePtr<WidgetEvent> CreateTouchEvent(uint32_t aMessage, nscoord aX,
+                                                 nscoord aY)
+  {
+    auto event = MakeUnique<WidgetTouchEvent>(true, aMessage, nullptr);
+    int32_t identifier = 0;
+    nsIntPoint point(aX, aY);
+    nsIntPoint radius(19, 19);
+    float rotationAngle = 0;
+    float force = 1;
+
+    nsRefPtr<dom::Touch> touch(
+      new dom::Touch(identifier, point, radius, rotationAngle, force));
+    event->touches.AppendElement(touch);
+
+    return Move(event);
+  }
+
+  static UniquePtr<WidgetEvent> CreateTouchPressEvent(nscoord aX, nscoord aY)
+  {
+    return CreateTouchEvent(NS_TOUCH_START, aX, aY);
+  }
+
+  static UniquePtr<WidgetEvent> CreateTouchMoveEvent(nscoord aX, nscoord aY)
+  {
+    return CreateTouchEvent(NS_TOUCH_MOVE, aX, aY);
+  }
+
+  static UniquePtr<WidgetEvent> CreateTouchReleaseEvent(nscoord aX, nscoord aY)
+  {
+    return CreateTouchEvent(NS_TOUCH_END, aX, aY);
+  }
+
   void HandleEventAndCheckState(UniquePtr<WidgetEvent> aEvent,
                                 MockCopyPasteEventHub::State* aExpectedState,
                                 nsEventStatus aExpectedEventStatus)
@@ -144,6 +176,11 @@ TEST_F(CopyPasteEventHubTester, TestMousePressReleaseNotOnCaret)
   TestPressReleaseNotOnCaret(CreateMousePressEvent, CreateMouseReleaseEvent);
 }
 
+TEST_F(CopyPasteEventHubTester, TestTouchPressReleaseNotOnCaret)
+{
+  TestPressReleaseNotOnCaret(CreateTouchPressEvent, CreateTouchReleaseEvent);
+}
+
 template <typename PressEventCreator, typename ReleaseEventCreator>
 void
 CopyPasteEventHubTester::TestPressReleaseNotOnCaret(
@@ -171,6 +208,11 @@ CopyPasteEventHubTester::TestPressReleaseNotOnCaret(
 TEST_F(CopyPasteEventHubTester, TestMousePressReleaseOnCaret)
 {
   TestPressReleaseOnCaret(CreateMousePressEvent, CreateMouseReleaseEvent);
+}
+
+TEST_F(CopyPasteEventHubTester, TestTouchPressReleaseOnCaret)
+{
+  TestPressReleaseOnCaret(CreateTouchPressEvent, CreateTouchReleaseEvent);
 }
 
 template <typename PressEventCreator, typename ReleaseEventCreator>
@@ -202,6 +244,12 @@ TEST_F(CopyPasteEventHubTester, TestMousePressMoveReleaseOnCaret)
 {
   TestPressMoveReleaseOnCaret(CreateMousePressEvent, CreateMouseMoveEvent,
                               CreateMouseReleaseEvent);
+}
+
+TEST_F(CopyPasteEventHubTester, TestTouchPressMoveReleaseOnCaret)
+{
+  TestPressMoveReleaseOnCaret(CreateTouchPressEvent, CreateTouchMoveEvent,
+                              CreateTouchReleaseEvent);
 }
 
 template <typename PressEventCreator, typename MoveEventCreator,
@@ -264,6 +312,12 @@ TEST_F(CopyPasteEventHubTester, TestMouseLongTapWithSelectWordSuccessful)
                                       CreateMouseReleaseEvent);
 }
 
+TEST_F(CopyPasteEventHubTester, TestTouchLongTapWithSelectWordSuccessful)
+{
+  TestLongTapWithSelectWordSuccessful(CreateTouchPressEvent,
+                                      CreateTouchReleaseEvent);
+}
+
 template <typename PressEventCreator, typename ReleaseEventCreator>
 void
 CopyPasteEventHubTester::TestLongTapWithSelectWordSuccessful(
@@ -297,6 +351,12 @@ TEST_F(CopyPasteEventHubTester, TestMouseLongTapWithSelectWordFailed)
 {
   TestLongTapWithSelectWordFailed(CreateMousePressEvent,
                                   CreateMouseReleaseEvent);
+}
+
+TEST_F(CopyPasteEventHubTester, TestTouchLongTapWithSelectWordFailed)
+{
+  TestLongTapWithSelectWordFailed(CreateTouchPressEvent,
+                                  CreateTouchReleaseEvent);
 }
 
 template <typename PressEventCreator, typename ReleaseEventCreator>
