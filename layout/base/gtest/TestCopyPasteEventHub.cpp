@@ -27,7 +27,10 @@ namespace mozilla
 class MockCopyPasteManager : public CopyPasteManager
 {
 public:
-  using CopyPasteManager::CopyPasteManager;
+  explicit MockCopyPasteManager(nsIPresShell* aPresShell)
+    : CopyPasteManager(aPresShell)
+  {
+  }
 
   MOCK_METHOD1(PressCaret, nsresult(const nsPoint& aPoint));
   MOCK_METHOD1(DragCaret, nsresult(const nsPoint& aPoint));
