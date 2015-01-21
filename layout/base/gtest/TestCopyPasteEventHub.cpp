@@ -71,16 +71,36 @@ public:
     EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::NoActionState());
   }
 
-  UniquePtr<WidgetMouseEvent> CreateMouseEvent(uint32_t aMessage, nscoord aX,
-                                               nscoord aY)
+  static UniquePtr<WidgetEvent> CreateMouseEvent(uint32_t aMessage, nscoord aX,
+                                                 nscoord aY)
   {
-    UniquePtr<WidgetMouseEvent> event = MakeUnique<WidgetMouseEvent>(
-      true, aMessage, nullptr, WidgetMouseEvent::eReal);
+    auto event = MakeUnique<WidgetMouseEvent>(true, aMessage, nullptr,
+                                              WidgetMouseEvent::eReal);
 
     event->button = WidgetMouseEvent::eLeftButton;
     event->refPoint = LayoutDeviceIntPoint(aX, aY);
 
-    return event;
+    return Move(event);
+  }
+
+  static UniquePtr<WidgetEvent> CreateMousePressEvent(nscoord aX, nscoord aY)
+  {
+    return CreateMouseEvent(NS_MOUSE_BUTTON_DOWN, aX, aY);
+  }
+
+  static UniquePtr<WidgetEvent> CreateMouseMoveEvent(nscoord aX, nscoord aY)
+  {
+    return CreateMouseEvent(NS_MOUSE_MOVE, aX, aY);
+  }
+
+  static UniquePtr<WidgetEvent> CreateMouseReleaseEvent(nscoord aX, nscoord aY)
+  {
+    return CreateMouseEvent(NS_MOUSE_BUTTON_UP, aX, aY);
+  }
+
+  static UniquePtr<WidgetEvent> CreateLongTapEvent(nscoord aX, nscoord aY)
+  {
+    return CreateMouseEvent(NS_MOUSE_MOZLONGTAP, aX, aY);
   }
 
   void HandleEventAndCheckState(UniquePtr<WidgetEvent> aEvent,
@@ -92,10 +112,43 @@ public:
     EXPECT_EQ(rv, aExpectedEventStatus);
   }
 
+  template <typename PressEventCreator, typename ReleaseEventCreator>
+  void TestPressReleaseNotOnCaret(PressEventCreator aPressEventCreator,
+                                  ReleaseEventCreator aReleaseEventCreator);
+
+  template <typename PressEventCreator, typename ReleaseEventCreator>
+  void TestPressReleaseOnCaret(PressEventCreator aPressEventCreator,
+                               ReleaseEventCreator aReleaseEventCreator);
+
+  template <typename PressEventCreator, typename MoveEventCreator,
+            typename ReleaseEventCreator>
+  void TestPressMoveReleaseOnCaret(PressEventCreator aPressEventCreator,
+                                   MoveEventCreator aMoveEventCreator,
+                                   ReleaseEventCreator aReleaseEventCreator);
+
+  template <typename PressEventCreator, typename ReleaseEventCreator>
+  void TestLongTapWithSelectWordSuccessful(
+    PressEventCreator aPressEventCreator,
+    ReleaseEventCreator aReleaseEventCreator);
+
+  template <typename PressEventCreator, typename ReleaseEventCreator>
+  void TestLongTapWithSelectWordFailed(
+    PressEventCreator aPressEventCreator,
+    ReleaseEventCreator aReleaseEventCreator);
+
   nsRefPtr<MockCopyPasteEventHub> mHub;
-};
+}; // class CopyPasteEventHubTester
 
 TEST_F(CopyPasteEventHubTester, TestMousePressReleaseNotOnCaret)
+{
+  TestPressReleaseNotOnCaret(CreateMousePressEvent, CreateMouseReleaseEvent);
+}
+
+template <typename PressEventCreator, typename ReleaseEventCreator>
+void
+CopyPasteEventHubTester::TestPressReleaseNotOnCaret(
+  PressEventCreator aPressEventCreator,
+  ReleaseEventCreator aReleaseEventCreator)
 {
   EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
     .WillOnce(Return(NS_ERROR_FAILURE));
@@ -106,16 +159,25 @@ TEST_F(CopyPasteEventHubTester, TestMousePressReleaseNotOnCaret)
   EXPECT_CALL(*mHub->GetMockCopyPasteManager(), TapCaret(_))
     .Times(0);
 
-  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_DOWN, 0, 0),
+  HandleEventAndCheckState(aPressEventCreator(0, 0),
                            MockCopyPasteEventHub::WaitLongTapState(),
                            nsEventStatus_eIgnore);
 
-  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_UP, 0, 0),
+  HandleEventAndCheckState(aReleaseEventCreator(0, 0),
                            MockCopyPasteEventHub::NoActionState(),
                            nsEventStatus_eIgnore);
 }
 
 TEST_F(CopyPasteEventHubTester, TestMousePressReleaseOnCaret)
+{
+  TestPressReleaseOnCaret(CreateMousePressEvent, CreateMouseReleaseEvent);
+}
+
+template <typename PressEventCreator, typename ReleaseEventCreator>
+void
+CopyPasteEventHubTester::TestPressReleaseOnCaret(
+  PressEventCreator aPressEventCreator,
+  ReleaseEventCreator aReleaseEventCreator)
 {
   {
     InSequence dummy;
@@ -127,16 +189,27 @@ TEST_F(CopyPasteEventHubTester, TestMousePressReleaseOnCaret)
     EXPECT_CALL(*mHub->GetMockCopyPasteManager(), TapCaret(_));
   }
 
-  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_DOWN, 0, 0),
+  HandleEventAndCheckState(aPressEventCreator(0, 0),
                            MockCopyPasteEventHub::PressCaretState(),
                            nsEventStatus_eConsumeNoDefault);
 
-  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_UP, 0, 0),
+  HandleEventAndCheckState(aReleaseEventCreator(0, 0),
                            MockCopyPasteEventHub::NoActionState(),
                            nsEventStatus_eConsumeNoDefault);
 }
 
-TEST_F(CopyPasteEventHubTester, TestMousePressDragReleaseOnCaret)
+TEST_F(CopyPasteEventHubTester, TestMousePressMoveReleaseOnCaret)
+{
+  TestPressMoveReleaseOnCaret(CreateMousePressEvent, CreateMouseMoveEvent,
+                              CreateMouseReleaseEvent);
+}
+
+template <typename PressEventCreator, typename MoveEventCreator,
+          typename ReleaseEventCreator>
+void
+CopyPasteEventHubTester::TestPressMoveReleaseOnCaret(
+  PressEventCreator aPressEventCreator, MoveEventCreator aMoveEventCreator,
+  ReleaseEventCreator aReleaseEventCreator)
 {
   nscoord x0 = 0, y0 = 0;
   nscoord x1 = 100, y1 = 100;
@@ -157,35 +230,45 @@ TEST_F(CopyPasteEventHubTester, TestMousePressDragReleaseOnCaret)
       .WillOnce(Return(NS_OK));
   }
 
-  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_DOWN, x0, y0),
+  HandleEventAndCheckState(aPressEventCreator(x0, y0),
                            MockCopyPasteEventHub::PressCaretState(),
                            nsEventStatus_eConsumeNoDefault);
 
   // A small move with the distance between (x0, y0) and (x1, y1) below the
   // tolerance value.
-  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_MOVE, x1, y1),
+  HandleEventAndCheckState(aMoveEventCreator(x1, y1),
                            MockCopyPasteEventHub::PressCaretState(),
                            nsEventStatus_eConsumeNoDefault);
 
   // A large move forms a valid drag since the distance between (x0, y0) and
   // (x2, y2) is above the tolerance value.
-  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_MOVE, x2, y2),
+  HandleEventAndCheckState(aMoveEventCreator(x2, y2),
                            MockCopyPasteEventHub::DragCaretState(),
                            nsEventStatus_eConsumeNoDefault);
 
   // Also a valid drag since the distance between (x0, y0) and (x3, y3) above
   // the tolerance value even if the distance between (x2, y2) and (x3, y3) is
   // below the tolerance value.
-  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_MOVE, x3, y3),
+  HandleEventAndCheckState(aMoveEventCreator(x3, y3),
                            MockCopyPasteEventHub::DragCaretState(),
                            nsEventStatus_eConsumeNoDefault);
 
-  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_UP, x2, y2),
+  HandleEventAndCheckState(aReleaseEventCreator(x3, y3),
                            MockCopyPasteEventHub::NoActionState(),
                            nsEventStatus_eConsumeNoDefault);
 }
 
-TEST_F(CopyPasteEventHubTester, TestLongTapWithSelectWordSuccessful)
+TEST_F(CopyPasteEventHubTester, TestMouseLongTapWithSelectWordSuccessful)
+{
+  TestLongTapWithSelectWordSuccessful(CreateMousePressEvent,
+                                      CreateMouseReleaseEvent);
+}
+
+template <typename PressEventCreator, typename ReleaseEventCreator>
+void
+CopyPasteEventHubTester::TestLongTapWithSelectWordSuccessful(
+  PressEventCreator aPressEventCreator,
+  ReleaseEventCreator aReleaseEventCreator)
 {
   {
     InSequence dummy;
@@ -197,20 +280,30 @@ TEST_F(CopyPasteEventHubTester, TestLongTapWithSelectWordSuccessful)
       .WillOnce(Return(NS_OK));
   }
 
-  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_DOWN, 0, 0),
+  HandleEventAndCheckState(aPressEventCreator(0, 0),
                            MockCopyPasteEventHub::WaitLongTapState(),
                            nsEventStatus_eIgnore);
 
-  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_MOZLONGTAP, 0, 0),
+  HandleEventAndCheckState(CreateLongTapEvent(0, 0),
                            MockCopyPasteEventHub::NoActionState(),
                            nsEventStatus_eConsumeNoDefault);
 
-  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_UP, 0, 0),
+  HandleEventAndCheckState(aReleaseEventCreator(0, 0),
                            MockCopyPasteEventHub::NoActionState(),
                            nsEventStatus_eIgnore);
 }
 
-TEST_F(CopyPasteEventHubTester, TestLongTapWithSelectWordFailed)
+TEST_F(CopyPasteEventHubTester, TestMouseLongTapWithSelectWordFailed)
+{
+  TestLongTapWithSelectWordFailed(CreateMousePressEvent,
+                                  CreateMouseReleaseEvent);
+}
+
+template <typename PressEventCreator, typename ReleaseEventCreator>
+void
+CopyPasteEventHubTester::TestLongTapWithSelectWordFailed(
+  PressEventCreator aPressEventCreator,
+  ReleaseEventCreator aReleaseEventCreator)
 {
   {
     InSequence dummy;
@@ -222,15 +315,15 @@ TEST_F(CopyPasteEventHubTester, TestLongTapWithSelectWordFailed)
       .WillOnce(Return(NS_ERROR_FAILURE));
   }
 
-  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_DOWN, 0, 0),
+  HandleEventAndCheckState(aPressEventCreator(0, 0),
                            MockCopyPasteEventHub::WaitLongTapState(),
                            nsEventStatus_eIgnore);
 
-  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_MOZLONGTAP, 0, 0),
+  HandleEventAndCheckState(CreateLongTapEvent(0, 0),
                            MockCopyPasteEventHub::NoActionState(),
                            nsEventStatus_eIgnore);
 
-  HandleEventAndCheckState(CreateMouseEvent(NS_MOUSE_BUTTON_UP, 0, 0),
+  HandleEventAndCheckState(aReleaseEventCreator(0, 0),
                            MockCopyPasteEventHub::NoActionState(),
                            nsEventStatus_eIgnore);
 }
