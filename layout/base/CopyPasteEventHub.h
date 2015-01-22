@@ -62,6 +62,7 @@ protected:
     return CopyPasteEventHub::aClassName::Singleton();                         \
   }
 
+  // Concrete states
   NS_DECL_STATE_CLASS_GETTER(NoActionState)
   NS_DECL_STATE_CLASS_GETTER(PressCaretState)
   NS_DECL_STATE_CLASS_GETTER(DragCaretState)
@@ -123,6 +124,40 @@ protected:
   static const int32_t kMoveStartToleranceInPixel = 5;
   static const int32_t kInvalidTouchId = -1;
   static const int32_t kDefaultTouchId = 0; // For mouse event
+};
+
+//
+// Base class for all states
+//
+class CopyPasteEventHub::State
+{
+public:
+#define NS_IMPL_STATE_UTILITIES(aClassName)                                    \
+  virtual const char* Name() const { return #aClassName; }                     \
+  static aClassName* Singleton()                                               \
+  {                                                                            \
+    static aClassName singleton;                                               \
+    return &singleton;                                                         \
+  }
+
+  virtual const char* Name() const { return ""; }
+
+  virtual nsEventStatus OnPress(CopyPasteEventHub* aContext,
+                                const nsPoint& aPoint, int32_t aTouchId);
+  virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
+                               const nsPoint& aPoint);
+  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext);
+  virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
+                                  const nsPoint& aPoint);
+  virtual void OnScrollStart(CopyPasteEventHub* aContext);
+  virtual void OnScrollEnd(CopyPasteEventHub* aContext);
+  virtual void OnScrolling(CopyPasteEventHub* aContex);
+  virtual void OnBlur(CopyPasteEventHub* aContext);
+  virtual void Enter(CopyPasteEventHub* aContext);
+  virtual void Leave(CopyPasteEventHub* aContext);
+
+protected:
+  State() {}
 };
 
 } // namespace mozilla

@@ -7,6 +7,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#include <iostream>
+
 #include "CopyPasteEventHub.h"
 #include "CopyPasteManager.h"
 #include "gfxPrefs.h"
@@ -61,6 +63,12 @@ public:
     return reinterpret_cast<MockCopyPasteManager*>(mHandler.get());
   }
 };
+
+::std::ostream& operator<<(::std::ostream& aOstream,
+                           const MockCopyPasteEventHub::State* aState)
+{
+  return aOstream << aState->Name();
+}
 
 class CopyPasteEventHubTester : public ::testing::Test
 {
