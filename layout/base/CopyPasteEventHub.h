@@ -46,11 +46,12 @@ public:
   virtual void AsyncPanZoomStarted(const CSSIntPoint aScrollPos) MOZ_OVERRIDE;
   virtual void AsyncPanZoomStopped(const CSSIntPoint aScrollPos) MOZ_OVERRIDE;
 
+  // Base state
+  class State;
+  State* GetState();
+
 protected:
   virtual ~CopyPasteEventHub();
-
-  // Base state and concrete states
-  class State;
 
 #define NS_DECL_STATE_CLASS_GETTER(aClassName)                                 \
   class aClassName;                                                            \
@@ -62,14 +63,13 @@ protected:
     return CopyPasteEventHub::aClassName::Singleton();                         \
   }
 
-  // Concrete states
+  // Concrete state getters
   NS_DECL_STATE_CLASS_GETTER(NoActionState)
   NS_DECL_STATE_CLASS_GETTER(PressCaretState)
   NS_DECL_STATE_CLASS_GETTER(DragCaretState)
   NS_DECL_STATE_CLASS_GETTER(WaitLongTapState)
   NS_DECL_STATE_CLASS_GETTER(ScrollState)
 
-  State* GetState();
   void SetState(State* aState);
 
   nsEventStatus HandleMouseEvent(WidgetMouseEvent* aEvent);

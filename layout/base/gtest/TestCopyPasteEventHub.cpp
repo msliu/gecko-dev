@@ -44,13 +44,11 @@ public:
 class MockCopyPasteEventHub : public CopyPasteEventHub
 {
 public:
-  using CopyPasteEventHub::State;
   using CopyPasteEventHub::NoActionState;
   using CopyPasteEventHub::PressCaretState;
   using CopyPasteEventHub::DragCaretState;
   using CopyPasteEventHub::WaitLongTapState;
   using CopyPasteEventHub::ScrollState;
-  using CopyPasteEventHub::GetState;
 
   explicit MockCopyPasteEventHub() : CopyPasteEventHub()
   {
