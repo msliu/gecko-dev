@@ -95,6 +95,7 @@ public:
   virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
                                   const nsPoint& aPoint) MOZ_OVERRIDE;
+  virtual void OnScrollStart(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void Leave(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
 };
@@ -284,6 +285,13 @@ CopyPasteEventHub::PressNoCaretState::OnLongTap(CopyPasteEventHub* aContext,
   aContext->SetState(aContext->NoActionState());
 
   return rv;
+}
+
+void
+CopyPasteEventHub::PressNoCaretState::OnScrollStart(CopyPasteEventHub* aContext)
+{
+  aContext->mHandler->OnScrollStart();
+  aContext->SetState(aContext->ScrollState());
 }
 
 void
