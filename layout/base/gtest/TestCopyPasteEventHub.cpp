@@ -47,7 +47,7 @@ public:
   using CopyPasteEventHub::NoActionState;
   using CopyPasteEventHub::PressCaretState;
   using CopyPasteEventHub::DragCaretState;
-  using CopyPasteEventHub::WaitLongTapState;
+  using CopyPasteEventHub::PressNoCaretState;
   using CopyPasteEventHub::ScrollState;
 
   explicit MockCopyPasteEventHub() : CopyPasteEventHub()
@@ -203,7 +203,7 @@ CopyPasteEventHubTester::TestPressReleaseNotOnCaret(
     .Times(0);
 
   HandleEventAndCheckState(aPressEventCreator(0, 0),
-                           MockCopyPasteEventHub::WaitLongTapState(),
+                           MockCopyPasteEventHub::PressNoCaretState(),
                            nsEventStatus_eIgnore);
 
   HandleEventAndCheckState(aReleaseEventCreator(0, 0),
@@ -341,7 +341,7 @@ CopyPasteEventHubTester::TestLongTapWithSelectWordSuccessful(
   }
 
   HandleEventAndCheckState(aPressEventCreator(0, 0),
-                           MockCopyPasteEventHub::WaitLongTapState(),
+                           MockCopyPasteEventHub::PressNoCaretState(),
                            nsEventStatus_eIgnore);
 
   HandleEventAndCheckState(CreateLongTapEvent(0, 0),
@@ -382,7 +382,7 @@ CopyPasteEventHubTester::TestLongTapWithSelectWordFailed(
   }
 
   HandleEventAndCheckState(aPressEventCreator(0, 0),
-                           MockCopyPasteEventHub::WaitLongTapState(),
+                           MockCopyPasteEventHub::PressNoCaretState(),
                            nsEventStatus_eIgnore);
 
   HandleEventAndCheckState(CreateLongTapEvent(0, 0),

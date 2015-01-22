@@ -85,12 +85,12 @@ public:
 };
 
 //
-// WaitLongTapState
+// PressNoCaretState
 //
-class CopyPasteEventHub::WaitLongTapState : public CopyPasteEventHub::State
+class CopyPasteEventHub::PressNoCaretState : public CopyPasteEventHub::State
 {
 public:
-  NS_IMPL_STATE_UTILITIES(WaitLongTapState)
+  NS_IMPL_STATE_UTILITIES(PressNoCaretState)
 
   virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
@@ -182,7 +182,7 @@ CopyPasteEventHub::NoActionState::OnPress(CopyPasteEventHub* aContext,
     aContext->SetState(aContext->PressCaretState());
     rv = nsEventStatus_eConsumeNoDefault;
   } else {
-    aContext->SetState(aContext->WaitLongTapState());
+    aContext->SetState(aContext->PressNoCaretState());
   }
 
   aContext->mPressPoint = aPoint;
@@ -262,7 +262,7 @@ CopyPasteEventHub::DragCaretState::OnRelease(CopyPasteEventHub* aContext)
 }
 
 nsEventStatus
-CopyPasteEventHub::WaitLongTapState::OnRelease(CopyPasteEventHub* aContext)
+CopyPasteEventHub::PressNoCaretState::OnRelease(CopyPasteEventHub* aContext)
 {
   nsEventStatus rv = nsEventStatus_eIgnore;
 
@@ -272,8 +272,8 @@ CopyPasteEventHub::WaitLongTapState::OnRelease(CopyPasteEventHub* aContext)
 }
 
 nsEventStatus
-CopyPasteEventHub::WaitLongTapState::OnLongTap(CopyPasteEventHub* aContext,
-                                               const nsPoint& aPoint)
+CopyPasteEventHub::PressNoCaretState::OnLongTap(CopyPasteEventHub* aContext,
+                                                const nsPoint& aPoint)
 {
   nsEventStatus rv = nsEventStatus_eIgnore;
 
@@ -287,13 +287,13 @@ CopyPasteEventHub::WaitLongTapState::OnLongTap(CopyPasteEventHub* aContext,
 }
 
 void
-CopyPasteEventHub::WaitLongTapState::Enter(CopyPasteEventHub* aContext)
+CopyPasteEventHub::PressNoCaretState::Enter(CopyPasteEventHub* aContext)
 {
   aContext->LaunchLongTapDetector();
 }
 
 void
-CopyPasteEventHub::WaitLongTapState::Leave(CopyPasteEventHub* aContext)
+CopyPasteEventHub::PressNoCaretState::Leave(CopyPasteEventHub* aContext)
 {
   aContext->CancelLongTapDetector();
 }
@@ -340,7 +340,7 @@ CopyPasteEventHub::SetState(State* aState)
 NS_IMPL_STATE_CLASS_GETTER(NoActionState)
 NS_IMPL_STATE_CLASS_GETTER(PressCaretState)
 NS_IMPL_STATE_CLASS_GETTER(DragCaretState)
-NS_IMPL_STATE_CLASS_GETTER(WaitLongTapState)
+NS_IMPL_STATE_CLASS_GETTER(PressNoCaretState)
 NS_IMPL_STATE_CLASS_GETTER(ScrollState)
 
 CopyPasteEventHub::CopyPasteEventHub()

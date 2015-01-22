@@ -67,7 +67,7 @@ protected:
   NS_DECL_STATE_CLASS_GETTER(NoActionState)
   NS_DECL_STATE_CLASS_GETTER(PressCaretState)
   NS_DECL_STATE_CLASS_GETTER(DragCaretState)
-  NS_DECL_STATE_CLASS_GETTER(WaitLongTapState)
+  NS_DECL_STATE_CLASS_GETTER(PressNoCaretState)
   NS_DECL_STATE_CLASS_GETTER(ScrollState)
 
   void SetState(State* aState);
