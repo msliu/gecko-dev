@@ -179,10 +179,10 @@ CopyPasteEventHub::NoActionState::OnPress(CopyPasteEventHub* aContext,
   nsEventStatus rv = nsEventStatus_eIgnore;
 
   if (NS_SUCCEEDED(aContext->mHandler->PressCaret(aPoint))) {
-    aContext->SetState(PressCaretState::Singleton());
+    aContext->SetState(aContext->PressCaretState());
     rv = nsEventStatus_eConsumeNoDefault;
   } else {
-    aContext->SetState(WaitLongTapState::Singleton());
+    aContext->SetState(aContext->WaitLongTapState());
   }
 
   aContext->mPressPoint = aPoint;
@@ -195,7 +195,7 @@ void
 CopyPasteEventHub::NoActionState::OnScrollStart(CopyPasteEventHub* aContext)
 {
   aContext->mHandler->OnScrollStart();
-  aContext->SetState(ScrollState::Singleton());
+  aContext->SetState(aContext->ScrollState());
 }
 
 void
@@ -205,7 +205,7 @@ CopyPasteEventHub::NoActionState::OnScrolling(CopyPasteEventHub* aContext)
     aContext->mHandler->UpdateCarets();
   } else {
     aContext->mHandler->OnScrollStart();
-    aContext->SetState(ScrollState::Singleton());
+    aContext->SetState(aContext->ScrollState());
   }
 }
 
@@ -222,7 +222,7 @@ CopyPasteEventHub::PressCaretState::OnMove(CopyPasteEventHub* aContext,
 {
   if (aContext->MoveDistanceIsLarge(aPoint)) {
     if (NS_SUCCEEDED(aContext->mHandler->DragCaret(aPoint))) {
-      aContext->SetState(DragCaretState::Singleton());
+      aContext->SetState(aContext->DragCaretState());
     }
   }
 
@@ -235,7 +235,7 @@ CopyPasteEventHub::PressCaretState::OnRelease(CopyPasteEventHub* aContext)
 {
   aContext->mHandler->ReleaseCaret();
   aContext->mHandler->TapCaret(aContext->mPressPoint);
-  aContext->SetState(NoActionState::Singleton());
+  aContext->SetState(aContext->NoActionState());
 
   // We should always consume the event since we've pressed on the caret.
   return nsEventStatus_eConsumeNoDefault;
@@ -255,7 +255,7 @@ nsEventStatus
 CopyPasteEventHub::DragCaretState::OnRelease(CopyPasteEventHub* aContext)
 {
   aContext->mHandler->ReleaseCaret();
-  aContext->SetState(NoActionState::Singleton());
+  aContext->SetState(aContext->NoActionState());
 
   // We should always consume the event since we've pressed on the caret.
   return nsEventStatus_eConsumeNoDefault;
@@ -266,7 +266,7 @@ CopyPasteEventHub::WaitLongTapState::OnRelease(CopyPasteEventHub* aContext)
 {
   nsEventStatus rv = nsEventStatus_eIgnore;
 
-  aContext->SetState(NoActionState::Singleton());
+  aContext->SetState(aContext->NoActionState());
 
   return rv;
 }
@@ -281,7 +281,7 @@ CopyPasteEventHub::WaitLongTapState::OnLongTap(CopyPasteEventHub* aContext,
     rv = nsEventStatus_eConsumeNoDefault;
   }
 
-  aContext->SetState(NoActionState::Singleton());
+  aContext->SetState(aContext->NoActionState());
 
   return rv;
 }
@@ -302,7 +302,7 @@ void
 CopyPasteEventHub::ScrollState::OnScrollEnd(CopyPasteEventHub* aContext)
 {
   aContext->mHandler->OnScrollEnd();
-  aContext->SetState(NoActionState::Singleton());
+  aContext->SetState(aContext->NoActionState());
 }
 
 void
@@ -357,7 +357,7 @@ CopyPasteEventHub::CopyPasteEventHub()
   }
 #endif
 
-  SetState(NoActionState::Singleton());
+  SetState(NoActionState());
 }
 
 CopyPasteEventHub::~CopyPasteEventHub()
