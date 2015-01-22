@@ -43,40 +43,6 @@ static const char* kCopyPasteEventHubModuleName = "CopyPasteEventHub";
 #endif // #ifdef PR_LOGGING
 
 //
-// Base class for all states
-//
-class CopyPasteEventHub::State
-{
-public:
-#define NS_IMPL_STATE_UTILITIES(aClassName)                                    \
-  virtual const char* Name() { return #aClassName; }                           \
-  static aClassName* Singleton()                                               \
-  {                                                                            \
-    static aClassName singleton;                                               \
-    return &singleton;                                                         \
-  }
-
-  virtual const char* Name() { return ""; }
-
-  virtual nsEventStatus OnPress(CopyPasteEventHub* aContext,
-                                const nsPoint& aPoint, int32_t aTouchId);
-  virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
-                               const nsPoint& aPoint);
-  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext);
-  virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
-                                  const nsPoint& aPoint);
-  virtual void OnScrollStart(CopyPasteEventHub* aContext);
-  virtual void OnScrollEnd(CopyPasteEventHub* aContext);
-  virtual void OnScrolling(CopyPasteEventHub* aContex);
-  virtual void OnBlur(CopyPasteEventHub* aContext);
-  virtual void Enter(CopyPasteEventHub* aContext);
-  virtual void Leave(CopyPasteEventHub* aContext);
-
-protected:
-  State() {}
-};
-
-//
 // NoActionState
 //
 class CopyPasteEventHub::NoActionState : public CopyPasteEventHub::State
