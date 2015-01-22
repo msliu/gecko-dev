@@ -8,6 +8,7 @@
 #include "gmock/gmock.h"
 
 #include <iostream>
+#include <string>
 
 #include "CopyPasteEventHub.h"
 #include "CopyPasteManager.h"
@@ -20,6 +21,7 @@ using ::testing::AtLeast;
 using ::testing::DefaultValue;
 using ::testing::Eq;
 using ::testing::InSequence;
+using ::testing::MockFunction;
 using ::testing::Return;
 using ::testing::_;
 
@@ -39,6 +41,8 @@ public:
   MOCK_METHOD0(ReleaseCaret, nsresult());
   MOCK_METHOD1(TapCaret, nsresult(const nsPoint& aPoint));
   MOCK_METHOD1(SelectWordOrShortcut, nsresult(const nsPoint& aPoint));
+  MOCK_METHOD0(OnScrollStart, void());
+  MOCK_METHOD0(OnScrollEnd, void());
 };
 
 class MockCopyPasteEventHub : public CopyPasteEventHub
@@ -59,6 +63,11 @@ public:
   MockCopyPasteManager* GetMockCopyPasteManager()
   {
     return reinterpret_cast<MockCopyPasteManager*>(mHandler.get());
+  }
+
+  void SetAsyncPanZoomEnabled(bool aEnabled)
+  {
+    mAsyncPanZoomEnabled = aEnabled;
   }
 };
 
@@ -150,6 +159,11 @@ public:
     EXPECT_EQ(rv, aExpectedEventStatus);
   }
 
+  void CheckState(MockCopyPasteEventHub::State* aExpectedState)
+  {
+    EXPECT_EQ(mHub->GetState(), aExpectedState);
+  }
+
   template <typename PressEventCreator, typename ReleaseEventCreator>
   void TestPressReleaseNotOnCaret(PressEventCreator aPressEventCreator,
                                   ReleaseEventCreator aReleaseEventCreator);
@@ -172,6 +186,12 @@ public:
   template <typename PressEventCreator, typename ReleaseEventCreator>
   void TestLongTapWithSelectWordFailed(
     PressEventCreator aPressEventCreator,
+    ReleaseEventCreator aReleaseEventCreator);
+
+  template <typename PressEventCreator, typename MoveEventCreator,
+            typename ReleaseEventCreator>
+  void TestEventDrivenAsyncPanZoomScroll(
+    PressEventCreator aPressEventCreator, MoveEventCreator aMoveEventCreator,
     ReleaseEventCreator aReleaseEventCreator);
 
   nsRefPtr<MockCopyPasteEventHub> mHub;
@@ -392,6 +412,88 @@ CopyPasteEventHubTester::TestLongTapWithSelectWordFailed(
   HandleEventAndCheckState(aReleaseEventCreator(0, 0),
                            MockCopyPasteEventHub::NoActionState(),
                            nsEventStatus_eIgnore);
+}
+
+TEST_F(CopyPasteEventHubTester, TestTouchEventDrivenAsyncPanZoomScroll)
+{
+  TestEventDrivenAsyncPanZoomScroll(CreateTouchPressEvent, CreateTouchMoveEvent,
+                                    CreateTouchReleaseEvent);
+}
+
+TEST_F(CopyPasteEventHubTester, TestMouseEventDrivenAsyncPanZoomScroll)
+{
+  TestEventDrivenAsyncPanZoomScroll(CreateMousePressEvent, CreateMouseMoveEvent,
+                                    CreateMouseReleaseEvent);
+}
+
+template <typename PressEventCreator, typename MoveEventCreator,
+          typename ReleaseEventCreator>
+void
+CopyPasteEventHubTester::TestEventDrivenAsyncPanZoomScroll(
+  PressEventCreator aPressEventCreator, MoveEventCreator aMoveEventCreator,
+  ReleaseEventCreator aReleaseEventCreator)
+{
+  MockFunction<void(::std::string aCheckPointName)> check;
+  {
+    InSequence dummy;
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+      .WillOnce(Return(NS_ERROR_FAILURE));
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), DragCaret(_))
+      .Times(0);
+
+    EXPECT_CALL(check, Call("Before scroll start"));
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollStart());
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd());
+    EXPECT_CALL(check, Call("After scroll start"));
+  }
+
+  mHub->SetAsyncPanZoomEnabled(true);
+
+  HandleEventAndCheckState(aPressEventCreator(0, 0),
+                           MockCopyPasteEventHub::PressNoCaretState(),
+                           nsEventStatus_eIgnore);
+
+  HandleEventAndCheckState(aMoveEventCreator(100, 100),
+                           MockCopyPasteEventHub::PressNoCaretState(),
+                           nsEventStatus_eIgnore);
+
+  check.Call("Before scroll start");
+
+  mHub->AsyncPanZoomStarted(CSSIntPoint(150, 150));
+  CheckState(MockCopyPasteEventHub::ScrollState());
+
+  HandleEventAndCheckState(aMoveEventCreator(160, 160),
+                           MockCopyPasteEventHub::ScrollState(),
+                           nsEventStatus_eIgnore);
+
+  mHub->ScrollPositionChanged();
+  CheckState(MockCopyPasteEventHub::ScrollState());
+
+  mHub->AsyncPanZoomStopped(CSSIntPoint(200, 200));
+  CheckState(MockCopyPasteEventHub::NoActionState());
+
+  check.Call("After scroll start");
+}
+
+TEST_F(CopyPasteEventHubTester, TestMomentumDrivenAsyncPanZoomScroll)
+{
+  {
+    InSequence dummy;
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollStart());
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd());
+  }
+
+  mHub->AsyncPanZoomStarted(CSSIntPoint(150, 150));
+  CheckState(MockCopyPasteEventHub::ScrollState());
+
+  mHub->ScrollPositionChanged();
+  CheckState(MockCopyPasteEventHub::ScrollState());
+
+  mHub->AsyncPanZoomStopped(CSSIntPoint(200, 200));
+  CheckState(MockCopyPasteEventHub::NoActionState());
 }
 
 }; // namespace mozilla
