@@ -69,10 +69,12 @@ protected:
   NS_DECL_STATE_CLASS_GETTER(DragCaretState)
   NS_DECL_STATE_CLASS_GETTER(PressNoCaretState)
   NS_DECL_STATE_CLASS_GETTER(ScrollState)
+  NS_DECL_STATE_CLASS_GETTER(PostScrollState)
 
   void SetState(State* aState);
 
   nsEventStatus HandleMouseEvent(WidgetMouseEvent* aEvent);
+  nsEventStatus HandleWheelEvent(WidgetWheelEvent* aEvent);
   nsEventStatus HandleTouchEvent(WidgetTouchEvent* aEvent);
 
   nsPoint GetTouchEventPosition(WidgetTouchEvent* aEvent, int32_t aIdentifier);
@@ -87,7 +89,8 @@ protected:
   void CancelLongTapDetector();
   static void FireLongTap(nsITimer* aTimer, void* aCopyPasteEventHub);
 
-  void LaunchScrollEndDetector();
+  void LaunchScrollEndInjector();
+  void CancelScrollEndInjector();
   static void FireScrollEnd(nsITimer* aTimer, void* aCopyPasteEventHub);
 
   bool mInitialized;
@@ -108,11 +111,8 @@ protected:
   // timer to detect long tap.
   nsCOMPtr<nsITimer> mLongTapDetectorTimer;
 
-  // This timer is used for detecting scroll end. We don't have
-  // scroll end event now, so we will fire this event with a
-  // const time when we scroll. So when timer triggers, we treat it
-  // as scroll end event.
-  nsCOMPtr<nsITimer> mScrollEndDetectorTimer;
+  // Use this timer for injecting a simulated scroll end.
+  nsCOMPtr<nsITimer> mScrollEndInjectorTimer;
 
   // Last mouse button down event or touch start event point.
   nsPoint mPressPoint;

@@ -31,15 +31,19 @@ static const char* kCopyPasteEventHubModuleName = "CopyPasteEventHub";
   PR_LOG(gCopyPasteEventHubLogModule, level,                                   \
          ("%s (%p): %s:%d : " message "\n", kCopyPasteEventHubModuleName,      \
           this, __FUNCTION__, __LINE__, ##__VA_ARGS__));
-#define LOG_DEBUG(...) LOG(PR_LOG_DEBUG, ##__VA_ARGS__)
-#define LOG_WARNING(...) LOG(PR_LOG_WARNING, ##__VA_ARGS__)
+#define LOG_ALWAYS(...) LOG(PR_LOG_ALWAYS, ##__VA_ARGS__)
 #define LOG_ERROR(...) LOG(PR_LOG_ERROR, ##__VA_ARGS__)
+#define LOG_WARNING(...) LOG(PR_LOG_WARNING, ##__VA_ARGS__)
+#define LOG_DEBUG(...) LOG(PR_LOG_DEBUG, ##__VA_ARGS__)
+#define LOG_DEBUG_VERBOSE(...) LOG(PR_LOG_DEBUG + 1, ##__VA_ARGS__)
 
 #else
 #define LOG(level, message, ...)
-#define LOG_DEBUG(...)
-#define LOG_WARNING(...)
+#define LOG_ALWAYS(...)
 #define LOG_ERROR(...)
+#define LOG_WARNING(...)
+#define LOG_DEBUG(...)
+#define LOG_DEBUG_VERBOSE(...)
 #endif // #ifdef PR_LOGGING
 
 //
@@ -54,8 +58,7 @@ public:
                                 const nsPoint& aPoint,
                                 int32_t aTouchId) MOZ_OVERRIDE;
   virtual void OnScrollStart(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
-  virtual void OnScrolling(CopyPasteEventHub* aContex) MOZ_OVERRIDE;
-  virtual void Enter(CopyPasteEventHub* aContex) MOZ_OVERRIDE;
+  virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
 };
 
 //
@@ -109,7 +112,25 @@ public:
   NS_IMPL_STATE_UTILITIES(ScrollState)
 
   virtual void OnScrollEnd(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+};
+
+//
+// PostScrollState: In this state, we are waiting for another APZ start, press
+// event, or momentum wheel scroll.
+//
+class CopyPasteEventHub::PostScrollState : public CopyPasteEventHub::State
+{
+public:
+  NS_IMPL_STATE_UTILITIES(PostScrollState)
+
+  virtual nsEventStatus OnPress(CopyPasteEventHub* aContext,
+                                const nsPoint& aPoint,
+                                int32_t aTouchId) MOZ_OVERRIDE;
+  virtual void OnScrollStart(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+  virtual void OnScrollEnd(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+  virtual void OnScrolling(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+  virtual void Leave(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
 };
 
 //
@@ -197,17 +218,6 @@ CopyPasteEventHub::NoActionState::OnScrollStart(CopyPasteEventHub* aContext)
 {
   aContext->mHandler->OnScrollStart();
   aContext->SetState(aContext->ScrollState());
-}
-
-void
-CopyPasteEventHub::NoActionState::OnScrolling(CopyPasteEventHub* aContext)
-{
-  if (aContext->mAsyncPanZoomEnabled) {
-    aContext->mHandler->UpdateCarets();
-  } else {
-    aContext->mHandler->OnScrollStart();
-    aContext->SetState(aContext->ScrollState());
-  }
 }
 
 void
@@ -309,16 +319,55 @@ CopyPasteEventHub::PressNoCaretState::Leave(CopyPasteEventHub* aContext)
 void
 CopyPasteEventHub::ScrollState::OnScrollEnd(CopyPasteEventHub* aContext)
 {
+  aContext->SetState(aContext->PostScrollState());
+}
+
+nsEventStatus
+CopyPasteEventHub::PostScrollState::OnPress(CopyPasteEventHub* aContext,
+                                            const nsPoint& aPoint,
+                                            int32_t aTouchId)
+{
+  aContext->mHandler->OnScrollEnd();
+  aContext->SetState(aContext->NoActionState());
+  return aContext->GetState()->OnPress(aContext, aPoint, aTouchId);
+}
+
+void
+CopyPasteEventHub::PostScrollState::OnScrollStart(CopyPasteEventHub* aContext)
+{
+  aContext->SetState(aContext->ScrollState());
+}
+
+void
+CopyPasteEventHub::PostScrollState::OnScrollEnd(CopyPasteEventHub* aContext)
+{
   aContext->mHandler->OnScrollEnd();
   aContext->SetState(aContext->NoActionState());
 }
 
 void
-CopyPasteEventHub::ScrollState::Enter(CopyPasteEventHub* aContext)
+CopyPasteEventHub::PostScrollState::OnScrolling(CopyPasteEventHub* aContext)
 {
-  aContext->LaunchScrollEndDetector();
+  // Momentum scroll by wheel event.
+  aContext->LaunchScrollEndInjector();
 }
 
+void
+CopyPasteEventHub::PostScrollState::Enter(CopyPasteEventHub* aContext)
+{
+  // Launch the injector to leave PostScrollState.
+  aContext->LaunchScrollEndInjector();
+}
+
+void
+CopyPasteEventHub::PostScrollState::Leave(CopyPasteEventHub* aContext)
+{
+  aContext->CancelScrollEndInjector();
+}
+
+//
+// Implementation of CopyPasteEventHub
+//
 CopyPasteEventHub::State*
 CopyPasteEventHub::GetState()
 {
@@ -342,14 +391,12 @@ CopyPasteEventHub::SetState(State* aState)
   }
 }
 
-//
-// Implementation of CopyPasteEventHub
-//
 NS_IMPL_STATE_CLASS_GETTER(NoActionState)
 NS_IMPL_STATE_CLASS_GETTER(PressCaretState)
 NS_IMPL_STATE_CLASS_GETTER(DragCaretState)
 NS_IMPL_STATE_CLASS_GETTER(PressNoCaretState)
 NS_IMPL_STATE_CLASS_GETTER(ScrollState)
+NS_IMPL_STATE_CLASS_GETTER(PostScrollState)
 
 CopyPasteEventHub::CopyPasteEventHub()
   : mInitialized(false)
@@ -398,7 +445,7 @@ CopyPasteEventHub::Init(nsIPresShell* aPresShell)
   mDocShell = static_cast<nsDocShell*>(docShell);
 
   mLongTapDetectorTimer = do_CreateInstance("@mozilla.org/timer;1");
-  mScrollEndDetectorTimer = do_CreateInstance("@mozilla.org/timer;1");
+  mScrollEndInjectorTimer = do_CreateInstance("@mozilla.org/timer;1");
 
   mHandler = MakeUnique<CopyPasteManager>(mPresShell);
 
@@ -422,8 +469,8 @@ CopyPasteEventHub::Terminate()
     mLongTapDetectorTimer->Cancel();
   }
 
-  if (mScrollEndDetectorTimer) {
-    mScrollEndDetectorTimer->Cancel();
+  if (mScrollEndInjectorTimer) {
+    mScrollEndInjectorTimer->Cancel();
   }
 
   mHandler = nullptr;
@@ -444,11 +491,16 @@ CopyPasteEventHub::HandleEvent(WidgetEvent* aEvent)
     status = HandleMouseEvent(aEvent->AsMouseEvent());
     break;
 
+  case eWheelEventClass:
+    status = HandleWheelEvent(aEvent->AsWheelEvent());
+    break;
+
   case eTouchEventClass:
     status = HandleTouchEvent(aEvent->AsTouchEvent());
     break;
 
   default:
+    LOG_DEBUG_VERBOSE("Unhandled event message: %d", aEvent->message);
     break;
   }
 
@@ -470,26 +522,61 @@ CopyPasteEventHub::HandleMouseEvent(WidgetMouseEvent* aEvent)
 
   switch (aEvent->message) {
   case NS_MOUSE_BUTTON_DOWN:
+    LOG_DEBUG_VERBOSE("NS_MOUSE_BUTTON_DOWN, state: %s", mState->Name());
     rv = mState->OnPress(this, point, id);
     break;
 
   case NS_MOUSE_MOVE:
+    LOG_DEBUG_VERBOSE("NS_MOUSE_MOVE, state: %s", mState->Name());
     rv = mState->OnMove(this, point);
     break;
 
   case NS_MOUSE_BUTTON_UP:
+    LOG_DEBUG_VERBOSE("NS_MOUSE_BUTTON_UP, state: %s", mState->Name());
     rv = mState->OnRelease(this);
     break;
 
   case NS_MOUSE_MOZLONGTAP:
+    LOG_DEBUG_VERBOSE("NS_MOUSE_MOZLONGTAP, state: %s", mState->Name());
     rv = mState->OnLongTap(this, point);
     break;
 
   default:
+    LOG_DEBUG_VERBOSE("Unhandled mouse event message: %d", aEvent->message);
     break;
   }
 
   return rv;
+}
+
+nsEventStatus
+CopyPasteEventHub::HandleWheelEvent(WidgetWheelEvent* aEvent)
+{
+  switch (aEvent->message) {
+  case NS_WHEEL_WHEEL:
+    LOG_DEBUG_VERBOSE("NS_WHEEL_WHEEL, isMomentum %d, state: %s",
+                      aEvent->isMomentum, mState->Name());
+    mState->OnScrolling(this);
+    break;
+
+  case NS_WHEEL_START:
+    LOG_DEBUG_VERBOSE("NS_WHEEL_START, state: %s", mState->Name());
+    mState->OnScrollStart(this);
+    break;
+
+  case NS_WHEEL_STOP:
+    LOG_DEBUG_VERBOSE("NS_WHEEL_STOP, state: %s", mState->Name());
+    mState->OnScrollEnd(this);
+    break;
+
+  default:
+    LOG_DEBUG_VERBOSE("Unhandled wheel event message: %d", aEvent->message);
+    break;
+  }
+
+  // Always ignore this event since we only want to know scroll start and scroll
+  // end, not to consume it.
+  return nsEventStatus_eIgnore;
 }
 
 nsEventStatus
@@ -503,19 +590,27 @@ CopyPasteEventHub::HandleTouchEvent(WidgetTouchEvent* aEvent)
 
   switch (aEvent->message) {
   case NS_TOUCH_START:
+    LOG_DEBUG_VERBOSE("NS_TOUCH_START, state: %s", mState->Name());
     rv = mState->OnPress(this, point, id);
     break;
 
   case NS_TOUCH_MOVE:
+    LOG_DEBUG_VERBOSE("NS_TOUCH_MOVE, state: %s", mState->Name());
     rv = mState->OnMove(this, point);
     break;
 
   case NS_TOUCH_END:
+    LOG_DEBUG_VERBOSE("NS_TOUCH_END, state: %s", mState->Name());
+    rv = mState->OnRelease(this);
+    break;
+
   case NS_TOUCH_CANCEL:
+    LOG_DEBUG_VERBOSE("NS_TOUCH_CANCEL, state: %s", mState->Name());
     rv = mState->OnRelease(this);
     break;
 
   default:
+    LOG_DEBUG_VERBOSE("Unhandled touch event message: %d", aEvent->message);
     break;
   }
 
@@ -587,36 +682,45 @@ CopyPasteEventHub::ReflowInterruptible(DOMHighResTimeStamp aStart,
 void
 CopyPasteEventHub::AsyncPanZoomStarted(const CSSIntPoint aScrollPos)
 {
+  LOG_DEBUG("state: %s", mState->Name());
   mState->OnScrollStart(this);
 }
 
 void
 CopyPasteEventHub::AsyncPanZoomStopped(const CSSIntPoint aScrollPos)
 {
+  LOG_DEBUG("state: %s", mState->Name());
   mState->OnScrollEnd(this);
 }
 
 void
 CopyPasteEventHub::ScrollPositionChanged()
 {
-  mState->OnScrolling(this);
+  // Do nothing for now.
+
+  // XXX: Do we receive a standalone ScrollPositionChanged() without
+  // AsyncPanZoomStarted()?
 }
 
 void
-CopyPasteEventHub::LaunchScrollEndDetector()
+CopyPasteEventHub::LaunchScrollEndInjector()
 {
-  if (mAsyncPanZoomEnabled) {
+  if (!mScrollEndInjectorTimer) {
     return;
   }
 
-  if (!mScrollEndDetectorTimer) {
+  mScrollEndInjectorTimer->InitWithFuncCallback(
+    FireScrollEnd, this, kScrollEndTimerDelay, nsITimer::TYPE_ONE_SHOT);
+}
+
+void
+CopyPasteEventHub::CancelScrollEndInjector()
+{
+  if (!mScrollEndInjectorTimer) {
     return;
   }
 
-  mScrollEndDetectorTimer->InitWithFuncCallback(FireScrollEnd,
-                                                this,
-                                                kScrollEndTimerDelay,
-                                                nsITimer::TYPE_ONE_SHOT);
+  mScrollEndInjectorTimer->Cancel();
 }
 
 /* static */ void
