@@ -53,6 +53,8 @@ public:
   using CopyPasteEventHub::DragCaretState;
   using CopyPasteEventHub::PressNoCaretState;
   using CopyPasteEventHub::ScrollState;
+  using CopyPasteEventHub::PostScrollState;
+  using CopyPasteEventHub::FireScrollEnd;
 
   explicit MockCopyPasteEventHub() : CopyPasteEventHub()
   {
@@ -148,6 +150,13 @@ public:
   static UniquePtr<WidgetEvent> CreateTouchReleaseEvent(nscoord aX, nscoord aY)
   {
     return CreateTouchEvent(NS_TOUCH_END, aX, aY);
+  }
+
+  static UniquePtr<WidgetEvent> CreateWheelEvent(uint32_t aMessage)
+  {
+    auto event = MakeUnique<WidgetWheelEvent>(true, aMessage, nullptr);
+
+    return Move(event);
   }
 
   void HandleEventAndCheckState(UniquePtr<WidgetEvent> aEvent,
@@ -439,18 +448,28 @@ CopyPasteEventHubTester::TestEventDrivenAsyncPanZoomScroll(
 
     EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
       .WillOnce(Return(NS_ERROR_FAILURE));
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), DragCaret(_)).Times(0);
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), DragCaret(_))
-      .Times(0);
-
-    EXPECT_CALL(check, Call("Before scroll start"));
+    EXPECT_CALL(check, Call("1"));
     EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollStart());
+
+    EXPECT_CALL(check, Call("2"));
     EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd());
-    EXPECT_CALL(check, Call("After scroll start"));
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+      .WillOnce(Return(NS_ERROR_FAILURE));
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), DragCaret(_)).Times(0);
+
+    EXPECT_CALL(check, Call("3"));
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollStart());
+
+    EXPECT_CALL(check, Call("4"));
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd());
   }
 
   mHub->SetAsyncPanZoomEnabled(true);
 
+  // Receive press event.
   HandleEventAndCheckState(aPressEventCreator(0, 0),
                            MockCopyPasteEventHub::PressNoCaretState(),
                            nsEventStatus_eIgnore);
@@ -459,41 +478,141 @@ CopyPasteEventHubTester::TestEventDrivenAsyncPanZoomScroll(
                            MockCopyPasteEventHub::PressNoCaretState(),
                            nsEventStatus_eIgnore);
 
-  check.Call("Before scroll start");
+  check.Call("1");
 
+  // Event driven scroll started
   mHub->AsyncPanZoomStarted(CSSIntPoint(150, 150));
-  CheckState(MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
 
   HandleEventAndCheckState(aMoveEventCreator(160, 160),
                            MockCopyPasteEventHub::ScrollState(),
                            nsEventStatus_eIgnore);
 
   mHub->ScrollPositionChanged();
-  CheckState(MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
 
+  // Event driven scroll ended
   mHub->AsyncPanZoomStopped(CSSIntPoint(200, 200));
-  CheckState(MockCopyPasteEventHub::NoActionState());
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::PostScrollState());
 
-  check.Call("After scroll start");
+  HandleEventAndCheckState(aReleaseEventCreator(210, 210),
+                           MockCopyPasteEventHub::PostScrollState(),
+                           nsEventStatus_eIgnore);
+
+  check.Call("2");
+
+  // Receive another press event.
+  HandleEventAndCheckState(aPressEventCreator(220, 220),
+                           MockCopyPasteEventHub::PressNoCaretState(),
+                           nsEventStatus_eIgnore);
+
+  HandleEventAndCheckState(aMoveEventCreator(230, 230),
+                           MockCopyPasteEventHub::PressNoCaretState(),
+                           nsEventStatus_eIgnore);
+
+  check.Call("3");
+
+  // Another APZ scroll started
+  mHub->AsyncPanZoomStarted(CSSIntPoint(280, 280));
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+
+  mHub->ScrollPositionChanged();
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+
+  // Another APZ scroll ended
+  mHub->AsyncPanZoomStopped(CSSIntPoint(300, 300));
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::PostScrollState());
+
+  HandleEventAndCheckState(aReleaseEventCreator(310, 310),
+                           MockCopyPasteEventHub::PostScrollState(),
+                           nsEventStatus_eIgnore);
+
+  check.Call("4");
+
+  // Simulate scroll end fired by timer.
+  MockCopyPasteEventHub::FireScrollEnd(nullptr, mHub);
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::NoActionState());
 }
 
-TEST_F(CopyPasteEventHubTester, TestMomentumDrivenAsyncPanZoomScroll)
+TEST_F(CopyPasteEventHubTester, TestNoEventAsyncPanZoomScroll)
 {
+  MockFunction<void(::std::string aCheckPointName)> check;
   {
     InSequence dummy;
 
+    EXPECT_CALL(check, Call("1"));
     EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollStart());
+
+    EXPECT_CALL(check, Call("2"));
     EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd());
   }
 
+  mHub->SetAsyncPanZoomEnabled(true);
+
+  check.Call("1");
+
   mHub->AsyncPanZoomStarted(CSSIntPoint(150, 150));
-  CheckState(MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
 
   mHub->ScrollPositionChanged();
-  CheckState(MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
 
   mHub->AsyncPanZoomStopped(CSSIntPoint(200, 200));
-  CheckState(MockCopyPasteEventHub::NoActionState());
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::PostScrollState());
+
+  mHub->AsyncPanZoomStarted(CSSIntPoint(210, 210));
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+
+  mHub->ScrollPositionChanged();
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+
+  mHub->AsyncPanZoomStopped(CSSIntPoint(250, 250));
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::PostScrollState());
+
+  check.Call("2");
+
+  // Simulate scroll end fired by timer.
+  MockCopyPasteEventHub::FireScrollEnd(nullptr, mHub);
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::NoActionState());
+}
+
+TEST_F(CopyPasteEventHubTester, TestWheelEventScroll)
+{
+  MockFunction<void(::std::string aCheckPointName)> check;
+  {
+    InSequence dummy;
+
+    EXPECT_CALL(check, Call("1"));
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollStart());
+
+    EXPECT_CALL(check, Call("2"));
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd());
+  }
+
+  check.Call("1");
+
+  HandleEventAndCheckState(CreateWheelEvent(NS_WHEEL_START),
+                           MockCopyPasteEventHub::ScrollState(),
+                           nsEventStatus_eIgnore);
+
+  HandleEventAndCheckState(CreateWheelEvent(NS_WHEEL_WHEEL),
+                           MockCopyPasteEventHub::ScrollState(),
+                           nsEventStatus_eIgnore);
+
+  HandleEventAndCheckState(CreateWheelEvent(NS_WHEEL_STOP),
+                           MockCopyPasteEventHub::PostScrollState(),
+                           nsEventStatus_eIgnore);
+
+  // Momentum scroll
+  HandleEventAndCheckState(CreateWheelEvent(NS_WHEEL_WHEEL),
+                           MockCopyPasteEventHub::PostScrollState(),
+                           nsEventStatus_eIgnore);
+
+  check.Call("2");
+
+  // Simulate scroll end fired by timer.
+  MockCopyPasteEventHub::FireScrollEnd(nullptr, mHub);
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::NoActionState());
 }
 
 }; // namespace mozilla
