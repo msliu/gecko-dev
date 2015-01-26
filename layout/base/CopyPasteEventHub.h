@@ -82,11 +82,8 @@ protected:
 
   bool MoveDistanceIsLarge(const nsPoint& aPoint);
 
-  /**
-   * Detecting long tap using timer
-   */
-  void LaunchLongTapDetector();
-  void CancelLongTapDetector();
+  void LaunchLongTapInjector();
+  void CancelLongTapInjector();
   static void FireLongTap(nsITimer* aTimer, void* aCopyPasteEventHub);
 
   void LaunchScrollEndInjector();
@@ -106,10 +103,9 @@ protected:
 
   WeakPtr<nsDocShell> mDocShell;
 
-  // This timer is used for detecting long tap fire. If content process
-  // has APZC, we'll use APZC for long tap detecting. Otherwise, we use this
-  // timer to detect long tap.
-  nsCOMPtr<nsITimer> mLongTapDetectorTimer;
+  // Use this timer for injecting a long tap event when APZ is disabled. If APZ
+  // is enabled, it will send long tap event to us.
+  nsCOMPtr<nsITimer> mLongTapInjectorTimer;
 
   // Use this timer for injecting a simulated scroll end.
   nsCOMPtr<nsITimer> mScrollEndInjectorTimer;

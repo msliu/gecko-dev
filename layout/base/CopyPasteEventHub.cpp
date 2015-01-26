@@ -307,13 +307,13 @@ CopyPasteEventHub::PressNoCaretState::OnScrollStart(CopyPasteEventHub* aContext)
 void
 CopyPasteEventHub::PressNoCaretState::Enter(CopyPasteEventHub* aContext)
 {
-  aContext->LaunchLongTapDetector();
+  aContext->LaunchLongTapInjector();
 }
 
 void
 CopyPasteEventHub::PressNoCaretState::Leave(CopyPasteEventHub* aContext)
 {
-  aContext->CancelLongTapDetector();
+  aContext->CancelLongTapInjector();
 }
 
 void
@@ -444,7 +444,7 @@ CopyPasteEventHub::Init(nsIPresShell* aPresShell)
 
   mDocShell = static_cast<nsDocShell*>(docShell);
 
-  mLongTapDetectorTimer = do_CreateInstance("@mozilla.org/timer;1");
+  mLongTapInjectorTimer = do_CreateInstance("@mozilla.org/timer;1");
   mScrollEndInjectorTimer = do_CreateInstance("@mozilla.org/timer;1");
 
   mHandler = MakeUnique<CopyPasteManager>(mPresShell);
@@ -465,8 +465,8 @@ CopyPasteEventHub::Terminate()
     docShell->RemoveWeakScrollObserver(this);
   }
 
-  if (mLongTapDetectorTimer) {
-    mLongTapDetectorTimer->Cancel();
+  if (mLongTapInjectorTimer) {
+    mLongTapInjectorTimer->Cancel();
   }
 
   if (mScrollEndInjectorTimer) {
@@ -626,35 +626,33 @@ CopyPasteEventHub::MoveDistanceIsLarge(const nsPoint& aPoint)
 }
 
 void
-CopyPasteEventHub::LaunchLongTapDetector()
+CopyPasteEventHub::LaunchLongTapInjector()
 {
   if (mAsyncPanZoomEnabled) {
     return;
   }
 
-  if (!mLongTapDetectorTimer) {
+  if (!mLongTapInjectorTimer) {
     return;
   }
 
   int32_t longTapDelay = gfxPrefs::UiClickHoldContextMenusDelay();
-  mLongTapDetectorTimer->InitWithFuncCallback(FireLongTap,
-                                              this,
-                                              longTapDelay,
+  mLongTapInjectorTimer->InitWithFuncCallback(FireLongTap, this, longTapDelay,
                                               nsITimer::TYPE_ONE_SHOT);
 }
 
 void
-CopyPasteEventHub::CancelLongTapDetector()
+CopyPasteEventHub::CancelLongTapInjector()
 {
   if (mAsyncPanZoomEnabled) {
     return;
   }
 
-  if (!mLongTapDetectorTimer) {
+  if (!mLongTapInjectorTimer) {
     return;
   }
 
-  mLongTapDetectorTimer->Cancel();
+  mLongTapInjectorTimer->Cancel();
 }
 
 /* static */ void
