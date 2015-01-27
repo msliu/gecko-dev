@@ -522,23 +522,31 @@ CopyPasteEventHub::HandleMouseEvent(WidgetMouseEvent* aEvent)
 
   switch (aEvent->message) {
   case NS_MOUSE_BUTTON_DOWN:
-    LOG_DEBUG_VERBOSE("NS_MOUSE_BUTTON_DOWN, state: %s", mState->Name());
+    LOG_DEBUG_VERBOSE("Before NS_MOUSE_BUTTON_DOWN, state: %s", mState->Name());
     rv = mState->OnPress(this, point, id);
+    LOG_DEBUG_VERBOSE("After NS_MOUSE_BUTTON_DOWN, state: %s, consume: %d",
+                      mState->Name(), rv);
     break;
 
   case NS_MOUSE_MOVE:
-    LOG_DEBUG_VERBOSE("NS_MOUSE_MOVE, state: %s", mState->Name());
+    LOG_DEBUG_VERBOSE("Before NS_MOUSE_MOVE, state: %s", mState->Name());
     rv = mState->OnMove(this, point);
+    LOG_DEBUG_VERBOSE("After NS_MOUSE_MOVE, state: %s, consume: %d",
+                      mState->Name(), rv);
     break;
 
   case NS_MOUSE_BUTTON_UP:
-    LOG_DEBUG_VERBOSE("NS_MOUSE_BUTTON_UP, state: %s", mState->Name());
+    LOG_DEBUG_VERBOSE("Before NS_MOUSE_BUTTON_UP, state: %s", mState->Name());
     rv = mState->OnRelease(this);
+    LOG_DEBUG_VERBOSE("After NS_MOUSE_BUTTON_UP, state: %s, consume: %d",
+                      mState->Name(), rv);
     break;
 
   case NS_MOUSE_MOZLONGTAP:
-    LOG_DEBUG_VERBOSE("NS_MOUSE_MOZLONGTAP, state: %s", mState->Name());
+    LOG_DEBUG_VERBOSE("Before NS_MOUSE_MOZLONGTAP, state: %s", mState->Name());
     rv = mState->OnLongTap(this, point);
+    LOG_DEBUG_VERBOSE("After NS_MOUSE_MOZLONGTAP, state: %s, consume: %d",
+                      mState->Name(), rv);
     break;
 
   default:
@@ -590,23 +598,31 @@ CopyPasteEventHub::HandleTouchEvent(WidgetTouchEvent* aEvent)
 
   switch (aEvent->message) {
   case NS_TOUCH_START:
-    LOG_DEBUG_VERBOSE("NS_TOUCH_START, state: %s", mState->Name());
+    LOG_DEBUG_VERBOSE("Before NS_TOUCH_START, state: %s", mState->Name());
     rv = mState->OnPress(this, point, id);
+    LOG_DEBUG_VERBOSE("After NS_TOUCH_START, state: %s, consume: %d",
+                      mState->Name(), rv);
     break;
 
   case NS_TOUCH_MOVE:
-    LOG_DEBUG_VERBOSE("NS_TOUCH_MOVE, state: %s", mState->Name());
+    LOG_DEBUG_VERBOSE("Before NS_TOUCH_MOVE, state: %s", mState->Name());
     rv = mState->OnMove(this, point);
+    LOG_DEBUG_VERBOSE("After NS_TOUCH_MOVE, state: %s, consume: %d",
+                      mState->Name(), rv);
     break;
 
   case NS_TOUCH_END:
-    LOG_DEBUG_VERBOSE("NS_TOUCH_END, state: %s", mState->Name());
+    LOG_DEBUG_VERBOSE("Before NS_TOUCH_END, state: %s", mState->Name());
     rv = mState->OnRelease(this);
+    LOG_DEBUG_VERBOSE("After NS_TOUCH_END, state: %s, consume: %d",
+                      mState->Name(), rv);
     break;
 
   case NS_TOUCH_CANCEL:
-    LOG_DEBUG_VERBOSE("NS_TOUCH_CANCEL, state: %s", mState->Name());
+    LOG_DEBUG_VERBOSE("Before NS_TOUCH_CANCEL, state: %s", mState->Name());
     rv = mState->OnRelease(this);
+    LOG_DEBUG_VERBOSE("After NS_TOUCH_CANCEL, state: %s, consume: %d",
+                      mState->Name(), rv);
     break;
 
   default:
@@ -666,6 +682,7 @@ NS_IMETHODIMP
 CopyPasteEventHub::Reflow(DOMHighResTimeStamp aStart,
                           DOMHighResTimeStamp aEnd)
 {
+  LOG_DEBUG("state: %s", mState->Name());
   mHandler->OnReflow();
   return NS_OK;
 }
@@ -694,7 +711,7 @@ CopyPasteEventHub::AsyncPanZoomStopped(const CSSIntPoint aScrollPos)
 void
 CopyPasteEventHub::ScrollPositionChanged()
 {
-  // Do nothing for now.
+  LOG_DEBUG("state: %s", mState->Name());
 
   // XXX: Do we receive a standalone ScrollPositionChanged() without
   // AsyncPanZoomStarted()?
@@ -737,6 +754,7 @@ CopyPasteEventHub::NotifySelectionChanged(nsIDOMDocument* aDoc,
     return NS_OK;
   }
 
+  LOG_DEBUG("state: %s, reason: %d", mState->Name(), aReason);
   return mHandler->OnSelectionChanged(aDoc, aSel, aReason);
 }
 
