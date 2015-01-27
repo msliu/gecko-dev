@@ -133,6 +133,7 @@ CopyPasteManager::UpdateCaretsForCursorMode()
   }
 
   mFirstCaret->SetPosition(startFrame, startOffset);
+  mFirstCaret->SetAppearance(Appearance::NORMAL);
   mSecondCaret->SetAppearance(Appearance::NONE);
 }
 
@@ -151,12 +152,20 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
     return;
   }
 
-  mFirstCaret->SetPosition(startFrame, startOffset);
-  mSecondCaret->SetPosition(endFrame, endOffset);
+  nsresult firstCaretPosChanged = mFirstCaret->SetPosition(startFrame, startOffset);
+  nsresult secondCaretPosChanged = mSecondCaret->SetPosition(endFrame, endOffset);
+
+  if (NS_SUCCEEDED(firstCaretPosChanged) || NS_SUCCEEDED(secondCaretPosChanged)) {
+    // Flush layout to make the carets intersection correct.
+    mPresShell->FlushPendingNotifications(Flush_Layout);
+  }
 
   if (mFirstCaret->Intersects(*mSecondCaret)) {
     mFirstCaret->SetAppearance(Appearance::LEFT);
     mSecondCaret->SetAppearance(Appearance::RIGHT);
+  } else {
+    mFirstCaret->SetAppearance(Appearance::NORMAL);
+    mSecondCaret->SetAppearance(Appearance::NORMAL);
   }
 }
 

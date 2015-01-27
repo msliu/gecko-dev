@@ -45,7 +45,9 @@ public:
   bool IsVisible() const;
   void SetAppearance(Appearance aAppearance);
 
-  void SetPosition(nsIFrame* aFrame, int32_t aOffset);
+  // Return NS_OK if the we did change to a new position.
+  nsresult SetPosition(nsIFrame* aFrame, int32_t aOffset);
+
   bool Intersects(const AccessibleCaret& rhs);
   bool Contains(const nsPoint& aPosition);
 
