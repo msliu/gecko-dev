@@ -28,11 +28,12 @@ AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
   MOZ_ASSERT(mPresShell->GetCanvasFrame()->GetCustomContentContainer());
   MOZ_ASSERT(ElementContainerFrame());
 
-  mCaretElementHolder = InjectCaretElement(mPresShell->GetDocument());
+  InjectCaretElement(mPresShell->GetDocument());
 }
 
 AccessibleCaret::~AccessibleCaret()
 {
+  RemoveCaretElement(mPresShell->GetDocument());
 }
 
 bool
@@ -114,22 +115,19 @@ AccessibleCaret::Contains(const nsPoint& aPosition)
   return rect.Contains(aPosition);
 }
 
-/* static */ already_AddRefed<AnonymousContent>
+void
 AccessibleCaret::InjectCaretElement(nsIDocument* aDocument)
 {
   ErrorResult rv;
   nsCOMPtr<Element> element = CreateCaretElement(aDocument);
-  nsRefPtr<AnonymousContent> anonymousContent =
-    aDocument->InsertAnonymousContent(*element, rv);
+  mCaretElementHolder = aDocument->InsertAnonymousContent(*element, rv);
 
   MOZ_ASSERT(!rv.Failed(), "Insert anonymous content should not fail!");
-  MOZ_ASSERT(anonymousContent, "We must have anonymous content!");
-
-  return anonymousContent.forget();
+  MOZ_ASSERT(mCaretElementHolder, "We must have anonymous content!");
 }
 
-/* static */ already_AddRefed<Element>
-AccessibleCaret::CreateCaretElement(nsIDocument* aDocument)
+already_AddRefed<Element>
+AccessibleCaret::CreateCaretElement(nsIDocument* aDocument) const
 {
   ErrorResult rv;
   nsCOMPtr<Element> element = aDocument->CreateHTMLElement(nsGkAtoms::div);
@@ -139,6 +137,14 @@ AccessibleCaret::CreateCaretElement(nsIDocument* aDocument)
                         AppearanceString(Appearance::NONE), rv);
   MOZ_ASSERT(!rv.Failed());
   return element.forget();
+}
+
+void
+AccessibleCaret::RemoveCaretElement(nsIDocument* aDocument)
+{
+  ErrorResult rv;
+  aDocument->RemoveAnonymousContent(*mCaretElementHolder, rv);
+  MOZ_ASSERT(!rv.Failed(), "Remove anonymous content should not fail!");
 }
 
 void

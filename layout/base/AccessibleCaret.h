@@ -69,8 +69,9 @@ private:
   // Utilities
   static nsString AppearanceString(Appearance aAppearance);
 
-  static already_AddRefed<dom::AnonymousContent> InjectCaretElement(nsIDocument* aDocument);
-  static already_AddRefed<dom::Element> CreateCaretElement(nsIDocument* aDocument);
+  void InjectCaretElement(nsIDocument* aDocument);
+  already_AddRefed<dom::Element> CreateCaretElement(nsIDocument* aDocument) const;
+  void RemoveCaretElement(nsIDocument* aDocument);
 
   // The bottom-center of a imaginary caret to which this AccessibleCaret is
   // attached.
