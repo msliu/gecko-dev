@@ -147,7 +147,7 @@ public:
                                   const nsPoint& aPoint);
   virtual void OnScrollStart(CopyPasteEventHub* aContext);
   virtual void OnScrollEnd(CopyPasteEventHub* aContext);
-  virtual void OnScrolling(CopyPasteEventHub* aContex);
+  virtual void OnScrolling(CopyPasteEventHub* aContext);
   virtual void OnBlur(CopyPasteEventHub* aContext);
   virtual void Enter(CopyPasteEventHub* aContext);
   virtual void Leave(CopyPasteEventHub* aContext);

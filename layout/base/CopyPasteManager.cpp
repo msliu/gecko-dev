@@ -258,6 +258,14 @@ CopyPasteManager::OnScrollEnd()
 }
 
 void
+CopyPasteManager::OnScrolling()
+{
+  if (mFirstCaret->IsVisible() || mSecondCaret->IsVisible()) {
+    UpdateCarets();
+  }
+}
+
+void
 CopyPasteManager::OnReflow()
 {
   if (mFirstCaret->IsVisible() || mSecondCaret->IsVisible()) {

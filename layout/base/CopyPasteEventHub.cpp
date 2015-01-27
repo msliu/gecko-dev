@@ -58,6 +58,7 @@ public:
                                 const nsPoint& aPoint,
                                 int32_t aTouchId) MOZ_OVERRIDE;
   virtual void OnScrollStart(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+  virtual void OnScrolling(CopyPasteEventHub* aContext);
   virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
 };
 
@@ -218,6 +219,12 @@ CopyPasteEventHub::NoActionState::OnScrollStart(CopyPasteEventHub* aContext)
 {
   aContext->mHandler->OnScrollStart();
   aContext->SetState(aContext->ScrollState());
+}
+
+void
+CopyPasteEventHub::NoActionState::OnScrolling(CopyPasteEventHub* aContext)
+{
+  aContext->mHandler->OnScrolling();
 }
 
 void
@@ -712,9 +719,7 @@ void
 CopyPasteEventHub::ScrollPositionChanged()
 {
   LOG_DEBUG("state: %s", mState->Name());
-
-  // XXX: Do we receive a standalone ScrollPositionChanged() without
-  // AsyncPanZoomStarted()?
+  mState->OnScrolling(this);
 }
 
 void
