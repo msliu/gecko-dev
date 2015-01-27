@@ -66,6 +66,7 @@ protected:
   virtual nsresult SelectWordOrShortcut(const nsPoint& aPoint);
   virtual void OnScrollStart();
   virtual void OnScrollEnd();
+  virtual void OnScrolling();
   virtual void OnReflow();
   virtual nsresult OnSelectionChanged(nsIDOMDocument* aDoc,
                                       nsISelection* aSel,
