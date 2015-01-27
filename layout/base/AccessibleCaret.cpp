@@ -155,29 +155,37 @@ AccessibleCaret::RemoveCaretElement(nsIDocument* aDocument)
   MOZ_ASSERT(!rv.Failed(), "Remove anonymous content should not fail!");
 }
 
-void
+nsresult
 AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
 {
-  nsRect imaginaryCaretRect =
+  nsRect imaginaryCaretRectInFrame =
     nsCaret::GetGeometryForFrame(aFrame, aOffset, nullptr);
   bool imaginaryCaretRectVisible =
-    nsLayoutUtils::IsRectVisibleInScrollFrames(aFrame, imaginaryCaretRect);
+    nsLayoutUtils::IsRectVisibleInScrollFrames(aFrame, imaginaryCaretRectInFrame);
 
   if (!imaginaryCaretRectVisible) {
     SetAppearance(Appearance::NONE);
-    return;
+    return NS_ERROR_FAILURE;
+  }
+
+  nsRect imaginaryCaretRect = imaginaryCaretRectInFrame;
+  nsLayoutUtils::TransformRect(aFrame, RootFrame(), imaginaryCaretRect);
+
+  if (imaginaryCaretRect == mImaginaryCaretRect) {
+    // XXX: Perhaps use customized enum to indicate the result of SetPosition.
+    return NS_ERROR_FAILURE;
   }
 
   SetAppearance(Appearance::NORMAL);
 
-  nsPoint caretElementPosition = CaretElementPosition(imaginaryCaretRect);
+  mImaginaryCaretRect = imaginaryCaretRect;
 
+  nsPoint caretElementPosition = CaretElementPosition(imaginaryCaretRectInFrame);
   caretElementPosition =
     ClampPositionToScrollFrames(aFrame, caretElementPosition);
   SetCaretElementPosition(aFrame, caretElementPosition);
 
-  mImaginaryCaretRect = imaginaryCaretRect;
-  nsLayoutUtils::TransformRect(aFrame, RootFrame(), mImaginaryCaretRect);
+  return NS_OK;
 }
 
 /* static */ nsPoint
