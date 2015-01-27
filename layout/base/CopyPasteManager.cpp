@@ -342,7 +342,7 @@ CopyPasteManager::SelectWord(const nsPoint& aPoint)
   }
 
   // Find content offsets for mouse down point
-  nsIFrame *ptFrame = nsLayoutUtils::GetFrameForPoint(rootFrame, aPoint,
+  nsIFrame* ptFrame = nsLayoutUtils::GetFrameForPoint(rootFrame, aPoint,
     nsLayoutUtils::IGNORE_PAINT_SUPPRESSION | nsLayoutUtils::IGNORE_CROSS_DOC);
   if (!ptFrame) {
     return NS_ERROR_FAILURE;
@@ -357,16 +357,26 @@ CopyPasteManager::SelectWord(const nsPoint& aPoint)
   nsPoint ptInFrame = aPoint;
   nsLayoutUtils::TransformPoint(rootFrame, ptFrame, ptInFrame);
 
-  // If target frame is editable, we should move focus to targe frame. If
-  // target frame isn't editable and our focus content is editable, we should
+  nsIFrame* currFrame = ptFrame;
+  nsIContent* newFocusContent = nullptr;
+  while (currFrame) {
+    int32_t tabIndexUnused = 0;
+    if (currFrame->IsFocusable(&tabIndexUnused, true)) {
+      newFocusContent = currFrame->GetContent();
+      nsCOMPtr<nsIDOMElement> domElement(do_QueryInterface(newFocusContent));
+      if (domElement)
+        break;
+    }
+    currFrame = currFrame->GetParent();
+  }
+
+  // If target frame is focusable, we should move focus to it. If target frame
+  // isn't focusable, and our previous focused content is editable, we should
   // clear focus.
   nsFocusManager* fm = nsFocusManager::GetFocusManager();
-  nsIContent* editingHost = ptFrame->GetContent()->GetEditingHost();
-  if (editingHost) {
-    nsCOMPtr<nsIDOMElement> elt = do_QueryInterface(editingHost->GetParent());
-    if (elt) {
-      fm->SetFocus(elt, 0);
-    }
+  if (newFocusContent && currFrame) {
+    nsCOMPtr<nsIDOMElement> domElement(do_QueryInterface(newFocusContent));
+    fm->SetFocus(domElement, 0);
   } else {
     nsIContent* focusedContent = GetFocusedContent();
     if (focusedContent && focusedContent->GetTextEditorRootContent()) {
