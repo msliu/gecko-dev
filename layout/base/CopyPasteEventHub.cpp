@@ -46,6 +46,7 @@ public:
                                 int32_t aTouchId) MOZ_OVERRIDE;
   virtual void OnScrollStart(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void OnScrolling(CopyPasteEventHub* aContext);
+  virtual void OnReflow(CopyPasteEventHub* aContext);
   virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
 };
 
@@ -227,6 +228,12 @@ void
 CopyPasteEventHub::NoActionState::OnScrolling(CopyPasteEventHub* aContext)
 {
   aContext->mHandler->OnScrolling();
+}
+
+void
+CopyPasteEventHub::NoActionState::OnReflow(CopyPasteEventHub* aContext)
+{
+  aContext->mHandler->OnReflow();
 }
 
 void
