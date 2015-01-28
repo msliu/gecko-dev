@@ -7,6 +7,7 @@
 #include "CopyPasteManager.h"
 
 #include "AccessibleCaret.h"
+#include "CopyPasteLogger.h"
 #include "CopyPasteEventHub.h"
 #include "mozilla/dom/Element.h"
 #include "mozilla/dom/Selection.h"
@@ -17,30 +18,20 @@
 
 namespace mozilla {
 
-using namespace dom;
-
-typedef AccessibleCaret::Appearance Appearance;
-
-// Avoid redefine macros
-#undef LOG
-
 #ifdef PR_LOGGING
-PRLogModuleInfo* gCopyPasteManagerLogModule;
-const char* kCopyPasteManagerLogModuleName = "CopyPasteManager";
-#define LOG(level, message, ...)                                               \
-  PR_LOG(gCopyPasteManagerLogModule, level,                                    \
-         ("%s (%p): %s:%d : " message "\n", kCopyPasteManagerLogModuleName,    \
-          this, __FUNCTION__, __LINE__, ##__VA_ARGS__));
-#define LOG_DEBUG(...) LOG(PR_LOG_DEBUG, ##__VA_ARGS__)
-#define LOG_WARNING(...) LOG(PR_LOG_WARNING, ##__VA_ARGS__)
-#define LOG_ERROR(...) LOG(PR_LOG_ERROR, ##__VA_ARGS__)
 
-#else
-#define LOG(level, message, ...)
-#define LOG_DEBUG(...)
-#define LOG_WARNING(...)
-#define LOG_ERROR(...)
+#undef CP_LOG
+#define CP_LOG(message, ...)                                                   \
+  CP_LOG_BASE("CopyPasteManager (%p): " message, this, ##__VA_ARGS__);
+
+#undef CP_LOGV
+#define CP_LOGV(message, ...)                                                  \
+  CP_LOGV_BASE("CopyPasteManager (%p): " message, this, ##__VA_ARGS__);
+
 #endif // #ifdef PR_LOGGING
+
+using namespace dom;
+typedef AccessibleCaret::Appearance Appearance;
 
 /* static */ const char*
 CopyPasteManager::ToStr(DragMode aDragMode)
@@ -70,13 +61,6 @@ CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
   , mCaretCenterToDownPointOffsetY(0)
   , mPresShell(aPresShell)
 {
-#ifdef PR_LOGGING
-  if (!gCopyPasteManagerLogModule) {
-    gCopyPasteManagerLogModule =
-      PR_NewLogModule(kCopyPasteManagerLogModuleName);
-  }
-#endif
-
   if (mPresShell) {
     mFirstCaret = MakeUnique<AccessibleCaret>(mPresShell);
     mSecondCaret = MakeUnique<AccessibleCaret>(mPresShell);
@@ -403,8 +387,8 @@ CopyPasteManager::SelectWord(const nsPoint& aPoint)
 #ifdef DEBUG_FRAME_DUMP
   nsCString frameTag;
   frame->ListTag(frameTag);
-  LOG_DEBUG("Frame=%s, ptInFrame=(%d, %d)", frameTag.get(), ptInFrame.x,
-            ptInFrame.y);
+  CP_LOG("Frame=%s, ptInFrame=(%d, %d)", frameTag.get(), ptInFrame.x,
+         ptInFrame.y);
 #endif
 
   SetSelectionDragState(false);

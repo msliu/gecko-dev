@@ -6,15 +6,24 @@
 
 #include "AccessibleCaret.h"
 
+#include "CopyPasteLogger.h"
+#include "mozilla/Preferences.h"
+#include "mozilla/dom/AnonymousContent.h"
 #include "nsCanvasFrame.h"
 #include "nsCaret.h"
 #include "nsDOMTokenList.h"
 #include "nsIFrame.h"
-#include "mozilla/dom/AnonymousContent.h"
-#include "mozilla/Preferences.h"
 
 using namespace mozilla;
 using namespace mozilla::dom;
+
+#undef CP_LOG
+#define CP_LOG(message, ...)                                                   \
+  CP_LOG_BASE("AccessibleCaret (%p): " message, this, ##__VA_ARGS__);
+
+#undef CP_LOGV
+#define CP_LOGV(message, ...)                                                  \
+  CP_LOGV_BASE("AccessibleCaret (%p): " message, this, ##__VA_ARGS__);
 
 AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
   : mAppearance(Appearance::NONE)

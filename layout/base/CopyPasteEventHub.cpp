@@ -6,6 +6,7 @@
 
 #include "CopyPasteEventHub.h"
 
+#include "CopyPasteLogger.h"
 #include "CopyPasteManager.h"
 #include "gfxPrefs.h"
 #include "mozilla/TouchEvents.h"
@@ -14,37 +15,23 @@
 #include "nsFrameSelection.h"
 #include "nsITimer.h"
 #include "nsPresContext.h"
-#include "prlog.h"
 
 namespace mozilla {
 
+#ifdef PR_LOGGING
+
+#undef CP_LOG
+#define CP_LOG(message, ...)                                                   \
+  CP_LOG_BASE("CopyPasteEventHub (%p): " message, this, ##__VA_ARGS__);
+
+#undef CP_LOGV
+#define CP_LOGV(message, ...)                                                  \
+  CP_LOGV_BASE("CopyPasteEventHub (%p): " message, this, ##__VA_ARGS__);
+
+#endif // #ifdef PR_LOGGING
+
 NS_IMPL_ISUPPORTS(CopyPasteEventHub, nsIReflowObserver, nsIScrollObserver,
                   nsISelectionListener, nsISupportsWeakReference);
-
-// Avoid redefine macros
-#undef LOG
-
-#ifdef PR_LOGGING
-static PRLogModuleInfo* gCopyPasteEventHubLogModule;
-static const char* kCopyPasteEventHubModuleName = "CopyPasteEventHub";
-#define LOG(level, message, ...)                                               \
-  PR_LOG(gCopyPasteEventHubLogModule, level,                                   \
-         ("%s (%p): %s:%d : " message "\n", kCopyPasteEventHubModuleName,      \
-          this, __FUNCTION__, __LINE__, ##__VA_ARGS__));
-#define LOG_ALWAYS(...) LOG(PR_LOG_ALWAYS, ##__VA_ARGS__)
-#define LOG_ERROR(...) LOG(PR_LOG_ERROR, ##__VA_ARGS__)
-#define LOG_WARNING(...) LOG(PR_LOG_WARNING, ##__VA_ARGS__)
-#define LOG_DEBUG(...) LOG(PR_LOG_DEBUG, ##__VA_ARGS__)
-#define LOG_DEBUG_VERBOSE(...) LOG(PR_LOG_DEBUG + 1, ##__VA_ARGS__)
-
-#else
-#define LOG(level, message, ...)
-#define LOG_ALWAYS(...)
-#define LOG_ERROR(...)
-#define LOG_WARNING(...)
-#define LOG_DEBUG(...)
-#define LOG_DEBUG_VERBOSE(...)
-#endif // #ifdef PR_LOGGING
 
 //
 // NoActionState
@@ -395,8 +382,8 @@ CopyPasteEventHub::GetState()
 void
 CopyPasteEventHub::SetState(State* aState)
 {
-  LOG_DEBUG("%s -> %s", mState ? mState->Name() : "nullptr",
-            aState ? aState->Name() : "nullptr");
+  CP_LOG("%s -> %s", mState ? mState->Name() : "nullptr",
+         aState ? aState->Name() : "nullptr");
 
   if (mState) {
     mState->Leave(this);
@@ -424,12 +411,6 @@ CopyPasteEventHub::CopyPasteEventHub()
   , mPressPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE)
   , mActiveTouchId(kInvalidTouchId)
 {
-#ifdef PR_LOGGING
-  if (!gCopyPasteEventHubLogModule) {
-    gCopyPasteEventHubLogModule = PR_NewLogModule(kCopyPasteEventHubModuleName);
-  }
-#endif
-
   SetState(NoActionState());
 }
 
@@ -518,7 +499,7 @@ CopyPasteEventHub::HandleEvent(WidgetEvent* aEvent)
     break;
 
   default:
-    LOG_DEBUG_VERBOSE("Unhandled event message: %d", aEvent->message);
+    CP_LOGV("Unhandled event message: %d", aEvent->message);
     break;
   }
 
@@ -540,35 +521,34 @@ CopyPasteEventHub::HandleMouseEvent(WidgetMouseEvent* aEvent)
 
   switch (aEvent->message) {
   case NS_MOUSE_BUTTON_DOWN:
-    LOG_DEBUG_VERBOSE("Before NS_MOUSE_BUTTON_DOWN, state: %s", mState->Name());
+    CP_LOGV("Before NS_MOUSE_BUTTON_DOWN, state: %s", mState->Name());
     rv = mState->OnPress(this, point, id);
-    LOG_DEBUG_VERBOSE("After NS_MOUSE_BUTTON_DOWN, state: %s, consume: %d",
-                      mState->Name(), rv);
+    CP_LOGV("After NS_MOUSE_BUTTON_DOWN, state: %s, consume: %d",
+            mState->Name(), rv);
     break;
 
   case NS_MOUSE_MOVE:
-    LOG_DEBUG_VERBOSE("Before NS_MOUSE_MOVE, state: %s", mState->Name());
+    CP_LOGV("Before NS_MOUSE_MOVE, state: %s", mState->Name());
     rv = mState->OnMove(this, point);
-    LOG_DEBUG_VERBOSE("After NS_MOUSE_MOVE, state: %s, consume: %d",
-                      mState->Name(), rv);
+    CP_LOGV("After NS_MOUSE_MOVE, state: %s, consume: %d", mState->Name(), rv);
     break;
 
   case NS_MOUSE_BUTTON_UP:
-    LOG_DEBUG_VERBOSE("Before NS_MOUSE_BUTTON_UP, state: %s", mState->Name());
+    CP_LOGV("Before NS_MOUSE_BUTTON_UP, state: %s", mState->Name());
     rv = mState->OnRelease(this);
-    LOG_DEBUG_VERBOSE("After NS_MOUSE_BUTTON_UP, state: %s, consume: %d",
-                      mState->Name(), rv);
+    CP_LOGV("After NS_MOUSE_BUTTON_UP, state: %s, consume: %d", mState->Name(),
+            rv);
     break;
 
   case NS_MOUSE_MOZLONGTAP:
-    LOG_DEBUG_VERBOSE("Before NS_MOUSE_MOZLONGTAP, state: %s", mState->Name());
+    CP_LOGV("Before NS_MOUSE_MOZLONGTAP, state: %s", mState->Name());
     rv = mState->OnLongTap(this, point);
-    LOG_DEBUG_VERBOSE("After NS_MOUSE_MOZLONGTAP, state: %s, consume: %d",
-                      mState->Name(), rv);
+    CP_LOGV("After NS_MOUSE_MOZLONGTAP, state: %s, consume: %d", mState->Name(),
+            rv);
     break;
 
   default:
-    LOG_DEBUG_VERBOSE("Unhandled mouse event message: %d", aEvent->message);
+    CP_LOGV("Unhandled mouse event message: %d", aEvent->message);
     break;
   }
 
@@ -580,23 +560,23 @@ CopyPasteEventHub::HandleWheelEvent(WidgetWheelEvent* aEvent)
 {
   switch (aEvent->message) {
   case NS_WHEEL_WHEEL:
-    LOG_DEBUG_VERBOSE("NS_WHEEL_WHEEL, isMomentum %d, state: %s",
-                      aEvent->isMomentum, mState->Name());
+    CP_LOGV("NS_WHEEL_WHEEL, isMomentum %d, state: %s", aEvent->isMomentum,
+            mState->Name());
     mState->OnScrolling(this);
     break;
 
   case NS_WHEEL_START:
-    LOG_DEBUG_VERBOSE("NS_WHEEL_START, state: %s", mState->Name());
+    CP_LOGV("NS_WHEEL_START, state: %s", mState->Name());
     mState->OnScrollStart(this);
     break;
 
   case NS_WHEEL_STOP:
-    LOG_DEBUG_VERBOSE("NS_WHEEL_STOP, state: %s", mState->Name());
+    CP_LOGV("NS_WHEEL_STOP, state: %s", mState->Name());
     mState->OnScrollEnd(this);
     break;
 
   default:
-    LOG_DEBUG_VERBOSE("Unhandled wheel event message: %d", aEvent->message);
+    CP_LOGV("Unhandled wheel event message: %d", aEvent->message);
     break;
   }
 
@@ -616,35 +596,32 @@ CopyPasteEventHub::HandleTouchEvent(WidgetTouchEvent* aEvent)
 
   switch (aEvent->message) {
   case NS_TOUCH_START:
-    LOG_DEBUG_VERBOSE("Before NS_TOUCH_START, state: %s", mState->Name());
+    CP_LOGV("Before NS_TOUCH_START, state: %s", mState->Name());
     rv = mState->OnPress(this, point, id);
-    LOG_DEBUG_VERBOSE("After NS_TOUCH_START, state: %s, consume: %d",
-                      mState->Name(), rv);
+    CP_LOGV("After NS_TOUCH_START, state: %s, consume: %d", mState->Name(), rv);
     break;
 
   case NS_TOUCH_MOVE:
-    LOG_DEBUG_VERBOSE("Before NS_TOUCH_MOVE, state: %s", mState->Name());
+    CP_LOGV("Before NS_TOUCH_MOVE, state: %s", mState->Name());
     rv = mState->OnMove(this, point);
-    LOG_DEBUG_VERBOSE("After NS_TOUCH_MOVE, state: %s, consume: %d",
-                      mState->Name(), rv);
+    CP_LOGV("After NS_TOUCH_MOVE, state: %s, consume: %d", mState->Name(), rv);
     break;
 
   case NS_TOUCH_END:
-    LOG_DEBUG_VERBOSE("Before NS_TOUCH_END, state: %s", mState->Name());
+    CP_LOGV("Before NS_TOUCH_END, state: %s", mState->Name());
     rv = mState->OnRelease(this);
-    LOG_DEBUG_VERBOSE("After NS_TOUCH_END, state: %s, consume: %d",
-                      mState->Name(), rv);
+    CP_LOGV("After NS_TOUCH_END, state: %s, consume: %d", mState->Name(), rv);
     break;
 
   case NS_TOUCH_CANCEL:
-    LOG_DEBUG_VERBOSE("Before NS_TOUCH_CANCEL, state: %s", mState->Name());
+    CP_LOGV("Before NS_TOUCH_CANCEL, state: %s", mState->Name());
     rv = mState->OnRelease(this);
-    LOG_DEBUG_VERBOSE("After NS_TOUCH_CANCEL, state: %s, consume: %d",
-                      mState->Name(), rv);
+    CP_LOGV("After NS_TOUCH_CANCEL, state: %s, consume: %d", mState->Name(),
+            rv);
     break;
 
   default:
-    LOG_DEBUG_VERBOSE("Unhandled touch event message: %d", aEvent->message);
+    CP_LOGV("Unhandled touch event message: %d", aEvent->message);
     break;
   }
 
@@ -700,7 +677,7 @@ NS_IMETHODIMP
 CopyPasteEventHub::Reflow(DOMHighResTimeStamp aStart,
                           DOMHighResTimeStamp aEnd)
 {
-  LOG_DEBUG("state: %s", mState->Name());
+  CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
   mHandler->OnReflow();
   return NS_OK;
 }
@@ -715,21 +692,21 @@ CopyPasteEventHub::ReflowInterruptible(DOMHighResTimeStamp aStart,
 void
 CopyPasteEventHub::AsyncPanZoomStarted(const CSSIntPoint aScrollPos)
 {
-  LOG_DEBUG("state: %s", mState->Name());
+  CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
   mState->OnScrollStart(this);
 }
 
 void
 CopyPasteEventHub::AsyncPanZoomStopped(const CSSIntPoint aScrollPos)
 {
-  LOG_DEBUG("state: %s", mState->Name());
+  CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
   mState->OnScrollEnd(this);
 }
 
 void
 CopyPasteEventHub::ScrollPositionChanged()
 {
-  LOG_DEBUG("state: %s", mState->Name());
+  CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
   mState->OnScrolling(this);
 }
 
@@ -770,7 +747,7 @@ CopyPasteEventHub::NotifySelectionChanged(nsIDOMDocument* aDoc,
     return NS_OK;
   }
 
-  LOG_DEBUG("state: %s, reason: %d", mState->Name(), aReason);
+  CP_LOG("%s, state: %s, reason: %d", __FUNCTION__, mState->Name(), aReason);
   return mHandler->OnSelectionChanged(aDoc, aSel, aReason);
 }
 
