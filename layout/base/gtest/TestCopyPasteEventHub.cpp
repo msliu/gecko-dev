@@ -183,6 +183,12 @@ public:
 
   template <typename PressEventCreator, typename MoveEventCreator,
             typename ReleaseEventCreator>
+  void TestPressMoveReleaseOnNoCaret(PressEventCreator aPressEventCreator,
+                                     MoveEventCreator aMoveEventCreator,
+                                     ReleaseEventCreator aReleaseEventCreator);
+
+  template <typename PressEventCreator, typename MoveEventCreator,
+            typename ReleaseEventCreator>
   void TestPressMoveReleaseOnCaret(PressEventCreator aPressEventCreator,
                                    MoveEventCreator aMoveEventCreator,
                                    ReleaseEventCreator aReleaseEventCreator);
@@ -273,6 +279,60 @@ CopyPasteEventHubTester::TestPressReleaseOnCaret(
   HandleEventAndCheckState(aReleaseEventCreator(0, 0),
                            MockCopyPasteEventHub::NoActionState(),
                            nsEventStatus_eConsumeNoDefault);
+}
+
+TEST_F(CopyPasteEventHubTester, TestMousePressMoveReleaseOnNoCaret)
+{
+  TestPressMoveReleaseOnNoCaret(CreateMousePressEvent, CreateMouseMoveEvent,
+                                CreateMouseReleaseEvent);
+}
+
+TEST_F(CopyPasteEventHubTester, TestTouchPressMoveReleaseOnNoCaret)
+{
+  TestPressMoveReleaseOnNoCaret(CreateTouchPressEvent, CreateTouchMoveEvent,
+                                CreateTouchReleaseEvent);
+}
+
+template <typename PressEventCreator, typename MoveEventCreator,
+          typename ReleaseEventCreator>
+void
+CopyPasteEventHubTester::TestPressMoveReleaseOnNoCaret(
+  PressEventCreator aPressEventCreator, MoveEventCreator aMoveEventCreator,
+  ReleaseEventCreator aReleaseEventCreator)
+{
+  nscoord x0 = 0, y0 = 0;
+  nscoord x1 = 100, y1 = 100;
+  nscoord x2 = 300, y2 = 300;
+  nscoord x3 = 400, y3 = 400;
+
+  {
+    InSequence dummy;
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+      .WillOnce(Return(NS_ERROR_FAILURE));
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), DragCaret(_)).Times(0);
+  }
+
+  HandleEventAndCheckState(aPressEventCreator(x0, y0),
+                           MockCopyPasteEventHub::PressNoCaretState(),
+                           nsEventStatus_eIgnore);
+
+  // A small move with the distance between (x0, y0) and (x1, y1) below the
+  // tolerance value.
+  HandleEventAndCheckState(aMoveEventCreator(x1, y1),
+                           MockCopyPasteEventHub::PressNoCaretState(),
+                           nsEventStatus_eIgnore);
+
+  // A large move to simulate a dragging to select text since the distance
+  // between (x0, y0) and (x2, y2) is above the tolerance value.
+  HandleEventAndCheckState(aMoveEventCreator(x2, y2),
+                           MockCopyPasteEventHub::NoActionState(),
+                           nsEventStatus_eIgnore);
+
+  HandleEventAndCheckState(aReleaseEventCreator(x3, y3),
+                           MockCopyPasteEventHub::NoActionState(),
+                           nsEventStatus_eIgnore);
 }
 
 TEST_F(CopyPasteEventHubTester, TestMousePressMoveReleaseOnCaret)
