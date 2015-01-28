@@ -102,6 +102,7 @@ UNIFIED_SOURCES += [
     'AccessibleCaret.cpp',
     'ActiveLayerTracker.cpp',
     'CopyPasteEventHub.cpp',
+    'CopyPasteLogger.cpp',
     'CopyPasteManager.cpp',
     'DisplayItemClip.cpp',
     'DisplayListClipState.cpp',
