@@ -96,6 +96,8 @@ class CopyPasteEventHub::PressNoCaretState : public CopyPasteEventHub::State
 public:
   NS_IMPL_STATE_UTILITIES(PressNoCaretState)
 
+  virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
+                               const nsPoint& aPoint) MOZ_OVERRIDE;
   virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
                                   const nsPoint& aPoint) MOZ_OVERRIDE;
@@ -280,13 +282,22 @@ CopyPasteEventHub::DragCaretState::OnRelease(CopyPasteEventHub* aContext)
 }
 
 nsEventStatus
+CopyPasteEventHub::PressNoCaretState::OnMove(CopyPasteEventHub* aContext,
+                                             const nsPoint& aPoint)
+{
+  if (aContext->MoveDistanceIsLarge(aPoint)) {
+    aContext->SetState(aContext->NoActionState());
+  }
+
+  return nsEventStatus_eIgnore;
+}
+
+nsEventStatus
 CopyPasteEventHub::PressNoCaretState::OnRelease(CopyPasteEventHub* aContext)
 {
-  nsEventStatus rv = nsEventStatus_eIgnore;
-
   aContext->SetState(aContext->NoActionState());
 
-  return rv;
+  return nsEventStatus_eIgnore;
 }
 
 nsEventStatus
