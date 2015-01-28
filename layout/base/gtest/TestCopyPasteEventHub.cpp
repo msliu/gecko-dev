@@ -174,8 +174,8 @@ public:
   }
 
   template <typename PressEventCreator, typename ReleaseEventCreator>
-  void TestPressReleaseNotOnCaret(PressEventCreator aPressEventCreator,
-                                  ReleaseEventCreator aReleaseEventCreator);
+  void TestPressReleaseOnNoCaret(PressEventCreator aPressEventCreator,
+                                 ReleaseEventCreator aReleaseEventCreator);
 
   template <typename PressEventCreator, typename ReleaseEventCreator>
   void TestPressReleaseOnCaret(PressEventCreator aPressEventCreator,
@@ -212,19 +212,19 @@ public:
   nsRefPtr<MockCopyPasteEventHub> mHub;
 }; // class CopyPasteEventHubTester
 
-TEST_F(CopyPasteEventHubTester, TestMousePressReleaseNotOnCaret)
+TEST_F(CopyPasteEventHubTester, TestMousePressReleaseOnNoCaret)
 {
-  TestPressReleaseNotOnCaret(CreateMousePressEvent, CreateMouseReleaseEvent);
+  TestPressReleaseOnNoCaret(CreateMousePressEvent, CreateMouseReleaseEvent);
 }
 
-TEST_F(CopyPasteEventHubTester, TestTouchPressReleaseNotOnCaret)
+TEST_F(CopyPasteEventHubTester, TestTouchPressReleaseOnNoCaret)
 {
-  TestPressReleaseNotOnCaret(CreateTouchPressEvent, CreateTouchReleaseEvent);
+  TestPressReleaseOnNoCaret(CreateTouchPressEvent, CreateTouchReleaseEvent);
 }
 
 template <typename PressEventCreator, typename ReleaseEventCreator>
 void
-CopyPasteEventHubTester::TestPressReleaseNotOnCaret(
+CopyPasteEventHubTester::TestPressReleaseOnNoCaret(
   PressEventCreator aPressEventCreator,
   ReleaseEventCreator aReleaseEventCreator)
 {
