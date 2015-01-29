@@ -174,6 +174,19 @@ CopyPasteEventHub::State::OnBlur(CopyPasteEventHub* aContext)
 }
 
 void
+CopyPasteEventHub::State::OnSelectionChanged(CopyPasteEventHub* aContext,
+                                             nsIDOMDocument* aDoc,
+                                             nsISelection* aSel,
+                                             int16_t aReason)
+{
+}
+
+void
+CopyPasteEventHub::State::OnReflow(CopyPasteEventHub* aContext)
+{
+}
+
+void
 CopyPasteEventHub::State::Enter(CopyPasteEventHub* aContext)
 {
 }
@@ -672,7 +685,7 @@ CopyPasteEventHub::Reflow(DOMHighResTimeStamp aStart,
                           DOMHighResTimeStamp aEnd)
 {
   CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
-  mHandler->OnReflow();
+  mState->OnReflow(this);
   return NS_OK;
 }
 
@@ -742,7 +755,8 @@ CopyPasteEventHub::NotifySelectionChanged(nsIDOMDocument* aDoc,
   }
 
   CP_LOG("%s, state: %s, reason: %d", __FUNCTION__, mState->Name(), aReason);
-  return mHandler->OnSelectionChanged(aDoc, aSel, aReason);
+  mState->OnSelectionChanged(this, aDoc, aSel, aReason);
+  return NS_OK;
 }
 
 nsPoint
