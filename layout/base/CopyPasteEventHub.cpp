@@ -382,18 +382,13 @@ CopyPasteEventHub::GetState()
 void
 CopyPasteEventHub::SetState(State* aState)
 {
-  CP_LOG("%s -> %s", mState ? mState->Name() : "nullptr",
-         aState ? aState->Name() : "nullptr");
+  MOZ_ASSERT(aState);
 
-  if (mState) {
-    mState->Leave(this);
-  }
+  CP_LOG("%s -> %s", mState->Name(), aState->Name());
 
+  mState->Leave(this);
   mState = aState;
-
-  if (mState) {
-    mState->Enter(this);
-  }
+  mState->Enter(this);
 }
 
 NS_IMPL_STATE_CLASS_GETTER(NoActionState)
@@ -406,12 +401,11 @@ NS_IMPL_STATE_CLASS_GETTER(PostScrollState)
 CopyPasteEventHub::CopyPasteEventHub()
   : mInitialized(false)
   , mAsyncPanZoomEnabled(false)
-  , mState(nullptr)
+  , mState(NoActionState())
   , mPresShell(nullptr)
   , mPressPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE)
   , mActiveTouchId(kInvalidTouchId)
 {
-  SetState(NoActionState());
 }
 
 CopyPasteEventHub::~CopyPasteEventHub()
