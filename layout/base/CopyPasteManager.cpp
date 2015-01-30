@@ -226,7 +226,9 @@ nsresult
 CopyPasteManager::SelectWordOrShortcut(const nsPoint& aPoint)
 {
   // TODO: Handle shortcut mode
-  return SelectWord(aPoint);
+  nsresult rv = SelectWord(aPoint);
+  UpdateCarets();
+  return rv;
 }
 
 void
