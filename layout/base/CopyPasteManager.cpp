@@ -539,6 +539,7 @@ CopyPasteManager::CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffse
                          true,
                          true,  //limit on scrolled views
                          false,
+                         false,
                          false);
   nsresult rv = theFrame->PeekOffset(&pos);
   if (NS_FAILED(rv)) {
