@@ -8,7 +8,6 @@
 #define AccessibleCaret_h__
 
 #include "mozilla/Attributes.h"
-#include "mozilla/TypedEnum.h"
 #include "nsISupportsBase.h"
 #include "nsISupportsImpl.h"
 #include "nsCOMPtr.h"
@@ -36,12 +35,12 @@ public:
   explicit AccessibleCaret(nsIPresShell* aPresShell);
   ~AccessibleCaret();
 
-  MOZ_BEGIN_NESTED_ENUM_CLASS(Appearance, uint8_t)
+  enum class Appearance : uint8_t {
     NONE,
     NORMAL,
     LEFT,
     RIGHT
-  MOZ_END_NESTED_ENUM_CLASS(Appearance)
+  };
 
   bool IsVisible() const;
   void SetAppearance(Appearance aAppearance);
@@ -86,8 +85,6 @@ private:
   nsRefPtr<dom::AnonymousContent> mCaretElementHolder;
   nsRect mImaginaryCaretRect;
 }; // class AccessibleCaret
-
-MOZ_FINISH_NESTED_ENUM_CLASS(AccessibleCaret::Appearance)
 
 } // namespace mozilla
 
