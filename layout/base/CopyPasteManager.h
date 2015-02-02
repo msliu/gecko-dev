@@ -44,17 +44,17 @@ protected:
   /**
    * Indicate which part of caret we are dragging at.
    */
-  MOZ_BEGIN_NESTED_ENUM_CLASS(DragMode, uint8_t)
+  enum class DragMode : uint8_t {
     NONE,
     FIRST_CARET,
     SECOND_CARET
-  MOZ_END_NESTED_ENUM_CLASS(DragMode)
+  };
 
-  MOZ_BEGIN_NESTED_ENUM_CLASS(CaretMode, uint8_t)
+  enum class CaretMode : uint8_t {
     NONE,
     CURSOR,
     SELECTION
-  MOZ_END_NESTED_ENUM_CLASS(CaretMode)
+  };
 
   static const char* ToStr(DragMode aDragMode);
   static const char* ToStr(CaretMode aCaretMode);
@@ -105,9 +105,6 @@ protected:
   static const int32_t kAutoScrollTimerDelay = 30;
   friend class CopyPasteEventHub;
 };
-
-MOZ_FINISH_NESTED_ENUM_CLASS(CopyPasteManager::DragMode)
-MOZ_FINISH_NESTED_ENUM_CLASS(CopyPasteManager::CaretMode)
 
 } // namespace mozilla
 
