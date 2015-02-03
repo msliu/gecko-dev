@@ -70,6 +70,7 @@ protected:
   NS_DECL_STATE_CLASS_GETTER(PressNoCaretState)
   NS_DECL_STATE_CLASS_GETTER(ScrollState)
   NS_DECL_STATE_CLASS_GETTER(PostScrollState)
+  NS_DECL_STATE_CLASS_GETTER(LongTapState)
 
   void SetState(State* aState);
 

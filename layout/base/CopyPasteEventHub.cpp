@@ -124,6 +124,15 @@ public:
   virtual void Leave(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
 };
 
+class CopyPasteEventHub::LongTapState : public CopyPasteEventHub::State
+{
+public:
+  NS_IMPL_STATE_UTILITIES(LongTapState)
+
+  virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
+                                  const nsPoint& aPoint) MOZ_OVERRIDE;
+};
+
 //
 // Implementation of all state functions
 //
@@ -311,15 +320,8 @@ nsEventStatus
 CopyPasteEventHub::PressNoCaretState::OnLongTap(CopyPasteEventHub* aContext,
                                                 const nsPoint& aPoint)
 {
-  nsEventStatus rv = nsEventStatus_eIgnore;
-
-  if (NS_SUCCEEDED(aContext->mHandler->SelectWordOrShortcut(aPoint))) {
-    rv = nsEventStatus_eConsumeNoDefault;
-  }
-
-  aContext->SetState(aContext->NoActionState());
-
-  return rv;
+  aContext->SetState(aContext->LongTapState());
+  return aContext->GetState()->OnLongTap(aContext, aPoint);
 }
 
 void
@@ -390,6 +392,21 @@ CopyPasteEventHub::PostScrollState::Leave(CopyPasteEventHub* aContext)
   aContext->CancelScrollEndInjector();
 }
 
+nsEventStatus
+CopyPasteEventHub::LongTapState::OnLongTap(CopyPasteEventHub* aContext,
+                                           const nsPoint& aPoint)
+{
+  nsEventStatus rv = nsEventStatus_eIgnore;
+
+  if (NS_SUCCEEDED(aContext->mHandler->SelectWordOrShortcut(aPoint))) {
+    rv = nsEventStatus_eConsumeNoDefault;
+  }
+
+  aContext->SetState(aContext->NoActionState());
+
+  return rv;
+}
+
 //
 // Implementation of CopyPasteEventHub
 //
@@ -417,6 +434,7 @@ NS_IMPL_STATE_CLASS_GETTER(DragCaretState)
 NS_IMPL_STATE_CLASS_GETTER(PressNoCaretState)
 NS_IMPL_STATE_CLASS_GETTER(ScrollState)
 NS_IMPL_STATE_CLASS_GETTER(PostScrollState)
+NS_IMPL_STATE_CLASS_GETTER(LongTapState)
 
 CopyPasteEventHub::CopyPasteEventHub()
   : mInitialized(false)
