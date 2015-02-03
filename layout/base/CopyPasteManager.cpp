@@ -76,6 +76,8 @@ CopyPasteManager::OnSelectionChanged(nsIDOMDocument* aDoc,
                                      nsISelection* aSel,
                                      int16_t aReason)
 {
+  CP_LOG("aSel: %p, GetSelection(): %p", aSel, GetSelection());
+
   if (aSel != GetSelection()) {
     return NS_OK;
   }
@@ -84,20 +86,14 @@ CopyPasteManager::OnSelectionChanged(nsIDOMDocument* aDoc,
     return NS_OK;
   }
 
-  if (aReason & (nsISelectionListener::KEYPRESS_REASON |
-                 nsISelectionListener::COLLAPSETOSTART_REASON |
-                 nsISelectionListener::COLLAPSETOEND_REASON)) {
-    HideCarets();
-  } else {
-    UpdateCarets();
-  }
-
+  UpdateCarets();
   return NS_OK;
 }
 
 void
 CopyPasteManager::HideCarets()
 {
+  CP_LOGV("%s", __FUNCTION__);
   mFirstCaret->SetAppearance(Appearance::NONE);
   mSecondCaret->SetAppearance(Appearance::NONE);
   mCaretMode = CaretMode::NONE;
@@ -124,6 +120,8 @@ CopyPasteManager::UpdateCarets()
 void
 CopyPasteManager::UpdateCaretsForCursorMode()
 {
+  CP_LOGV("%s, selection: %p", __FUNCTION__, GetSelection());
+
   int32_t startOffset;
   nsIFrame* startFrame = FindFirstNodeWithFrame(false, &startOffset);
 
@@ -140,6 +138,8 @@ CopyPasteManager::UpdateCaretsForCursorMode()
 void
 CopyPasteManager::UpdateCaretsForSelectionMode()
 {
+  CP_LOGV("%s, selection: %p", __FUNCTION__, GetSelection());
+
   int32_t startOffset;
   nsIFrame* startFrame = FindFirstNodeWithFrame(false, &startOffset);
 

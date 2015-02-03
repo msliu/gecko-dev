@@ -46,6 +46,9 @@ public:
                                 int32_t aTouchId) MOZ_OVERRIDE;
   virtual void OnScrollStart(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void OnScrolling(CopyPasteEventHub* aContext);
+  virtual void OnSelectionChanged(CopyPasteEventHub* aContext,
+                                  nsIDOMDocument* aDoc, nsISelection* aSel,
+                                  int16_t aReason);
   virtual void OnReflow(CopyPasteEventHub* aContext);
   virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
 };
@@ -90,6 +93,9 @@ public:
   virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
                                   const nsPoint& aPoint) MOZ_OVERRIDE;
   virtual void OnScrollStart(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+  virtual void OnSelectionChanged(CopyPasteEventHub* aContext,
+                                  nsIDOMDocument* aDoc, nsISelection* aSel,
+                                  int16_t aReason);
   virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void Leave(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
 };
@@ -240,6 +246,14 @@ CopyPasteEventHub::NoActionState::OnScrolling(CopyPasteEventHub* aContext)
 }
 
 void
+CopyPasteEventHub::NoActionState::OnSelectionChanged(
+  CopyPasteEventHub* aContext, nsIDOMDocument* aDoc, nsISelection* aSel,
+  int16_t aReason)
+{
+  aContext->mHandler->OnSelectionChanged(aDoc, aSel, aReason);
+}
+
+void
 CopyPasteEventHub::NoActionState::OnReflow(CopyPasteEventHub* aContext)
 {
   aContext->mHandler->OnReflow();
@@ -329,6 +343,14 @@ CopyPasteEventHub::PressNoCaretState::OnScrollStart(CopyPasteEventHub* aContext)
 {
   aContext->mHandler->OnScrollStart();
   aContext->SetState(aContext->ScrollState());
+}
+
+void
+CopyPasteEventHub::PressNoCaretState::OnSelectionChanged(
+  CopyPasteEventHub* aContext, nsIDOMDocument* aDoc, nsISelection* aSel,
+  int16_t aReason)
+{
+  aContext->mHandler->OnSelectionChanged(aDoc, aSel, aReason);
 }
 
 void
@@ -531,7 +553,6 @@ CopyPasteEventHub::HandleEvent(WidgetEvent* aEvent)
     break;
 
   default:
-    CP_LOGV("Unhandled event message: %d", aEvent->message);
     break;
   }
 
@@ -580,7 +601,6 @@ CopyPasteEventHub::HandleMouseEvent(WidgetMouseEvent* aEvent)
     break;
 
   default:
-    CP_LOGV("Unhandled mouse event message: %d", aEvent->message);
     break;
   }
 
@@ -608,7 +628,6 @@ CopyPasteEventHub::HandleWheelEvent(WidgetWheelEvent* aEvent)
     break;
 
   default:
-    CP_LOGV("Unhandled wheel event message: %d", aEvent->message);
     break;
   }
 
@@ -653,7 +672,6 @@ CopyPasteEventHub::HandleTouchEvent(WidgetTouchEvent* aEvent)
     break;
 
   default:
-    CP_LOGV("Unhandled touch event message: %d", aEvent->message);
     break;
   }
 
