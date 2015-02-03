@@ -772,7 +772,7 @@ CopyPasteEventHub::GetTouchEventPosition(WidgetTouchEvent* aEvent,
 {
   for (size_t i = 0; i < aEvent->touches.Length(); i++) {
     if (aEvent->touches[i]->Identifier() == aIdentifier) {
-      nsIntPoint touchIntPoint = aEvent->touches[i]->mRefPoint;
+      LayoutDeviceIntPoint touchIntPoint = aEvent->touches[i]->mRefPoint;
 
       // Return dev pixel directly, only used for gtest.
       if (!mPresShell) {
@@ -792,8 +792,7 @@ CopyPasteEventHub::GetTouchEventPosition(WidgetTouchEvent* aEvent,
 nsPoint
 CopyPasteEventHub::GetMouseEventPosition(WidgetMouseEvent* aEvent)
 {
-  nsIntPoint mouseIntPoint =
-    LayoutDeviceIntPoint::ToUntyped(aEvent->AsGUIEvent()->refPoint);
+  LayoutDeviceIntPoint mouseIntPoint = aEvent->AsGUIEvent()->refPoint;
 
   // Return dev pixel directly, only used for gtest.
   if (!mPresShell) {
