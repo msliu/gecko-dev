@@ -37,6 +37,9 @@ public:
 
   nsEventStatus HandleEvent(WidgetEvent* aEvent);
 
+  // Call this function to notify the blur event happened.
+  void NotifyBlur();
+
   NS_DECL_ISUPPORTS
   NS_DECL_NSIREFLOWOBSERVER
   NS_DECL_NSISELECTIONLISTENER

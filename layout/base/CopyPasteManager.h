@@ -68,6 +68,7 @@ protected:
   virtual void OnScrollEnd();
   virtual void OnScrolling();
   virtual void OnReflow();
+  virtual void OnBlur();
   virtual nsresult OnSelectionChanged(nsIDOMDocument* aDoc,
                                       nsISelection* aSel,
                                       int16_t aReason);
