@@ -14,8 +14,8 @@
 #include "nsDOMTokenList.h"
 #include "nsIFrame.h"
 
-using namespace mozilla;
-using namespace mozilla::dom;
+namespace mozilla {
+using namespace dom;
 
 #undef CP_LOG
 #define CP_LOG(message, ...)                                                   \
@@ -260,3 +260,5 @@ AccessibleCaret::SetCaretElementPosition(nsIFrame* aFrame,
 
   CP_LOG("Set caret style: %s", NS_ConvertUTF16toUTF8(styleStr).get());
 }
+
+} // namespace mozilla
