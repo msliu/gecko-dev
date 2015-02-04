@@ -257,4 +257,6 @@ AccessibleCaret::SetCaretElementPosition(nsIFrame* aFrame,
   ErrorResult rv;
   CaretElement()->SetAttribute(NS_LITERAL_STRING("style"), styleStr, rv);
   MOZ_ASSERT(!rv.Failed());
+
+  CP_LOG("Set caret style: %s", NS_ConvertUTF16toUTF8(styleStr).get());
 }
