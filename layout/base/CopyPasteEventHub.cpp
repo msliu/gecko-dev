@@ -802,6 +802,17 @@ CopyPasteEventHub::NotifySelectionChanged(nsIDOMDocument* aDoc,
   return NS_OK;
 }
 
+void
+CopyPasteEventHub::NotifyBlur()
+{
+  if (!mInitialized) {
+    return;
+  }
+
+  CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
+  mState->OnBlur(this);
+}
+
 nsPoint
 CopyPasteEventHub::GetTouchEventPosition(WidgetTouchEvent* aEvent,
                                          int32_t aIdentifier)

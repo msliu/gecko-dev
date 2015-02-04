@@ -268,6 +268,12 @@ CopyPasteManager::OnReflow()
   }
 }
 
+void
+CopyPasteManager::OnBlur()
+{
+  HideCarets();
+}
+
 nsIContent*
 CopyPasteManager::GetFocusedContent()
 {
