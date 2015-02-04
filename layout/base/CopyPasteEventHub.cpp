@@ -96,6 +96,7 @@ public:
   virtual void OnSelectionChanged(CopyPasteEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
                                   int16_t aReason);
+  virtual void OnReflow(CopyPasteEventHub* aContext);
   virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void Leave(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
 };
@@ -137,6 +138,7 @@ public:
 
   virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
                                   const nsPoint& aPoint) MOZ_OVERRIDE;
+  virtual void OnReflow(CopyPasteEventHub* aContext);
 };
 
 //
@@ -346,6 +348,12 @@ CopyPasteEventHub::PressNoCaretState::OnScrollStart(CopyPasteEventHub* aContext)
 }
 
 void
+CopyPasteEventHub::PressNoCaretState::OnReflow(CopyPasteEventHub* aContext)
+{
+  aContext->mHandler->OnReflow();
+}
+
+void
 CopyPasteEventHub::PressNoCaretState::OnSelectionChanged(
   CopyPasteEventHub* aContext, nsIDOMDocument* aDoc, nsISelection* aSel,
   int16_t aReason)
@@ -427,6 +435,12 @@ CopyPasteEventHub::LongTapState::OnLongTap(CopyPasteEventHub* aContext,
   aContext->SetState(aContext->NoActionState());
 
   return rv;
+}
+
+void
+CopyPasteEventHub::LongTapState::OnReflow(CopyPasteEventHub* aContext)
+{
+  aContext->mHandler->OnReflow();
 }
 
 //
