@@ -25,9 +25,12 @@ using namespace dom;
 #define CP_LOGV(message, ...)                                                  \
   CP_LOGV_BASE("AccessibleCaret (%p): " message, this, ##__VA_ARGS__);
 
+NS_IMPL_ISUPPORTS(AccessibleCaret::DummyTouchListener, nsIDOMEventListener)
+
 AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
   : mAppearance(Appearance::NONE)
   , mPresShell(aPresShell)
+  , mDummyTouchListener(new DummyTouchListener())
 {
   // Check all resources required.
   MOZ_ASSERT(mPresShell);
@@ -132,6 +135,12 @@ AccessibleCaret::InjectCaretElement(nsIDocument* aDocument)
 
   MOZ_ASSERT(!rv.Failed(), "Insert anonymous content should not fail!");
   MOZ_ASSERT(mCaretElementHolder, "We must have anonymous content!");
+
+  // InsertAnonymousContent will clone the element to make an AnonymousContent.
+  // Since event listeners are not being cloned when cloning a node, we need to
+  // add the listener here.
+  CaretElement()->AddEventListener(NS_LITERAL_STRING("touchstart"),
+                                   mDummyTouchListener, false);
 }
 
 already_AddRefed<Element>
@@ -150,6 +159,9 @@ AccessibleCaret::CreateCaretElement(nsIDocument* aDocument) const
 void
 AccessibleCaret::RemoveCaretElement(nsIDocument* aDocument)
 {
+  CaretElement()->RemoveEventListener(NS_LITERAL_STRING("touchstart"),
+                                      mDummyTouchListener, false);
+
   ErrorResult rv;
   aDocument->RemoveAnonymousContent(*mCaretElementHolder, rv);
   MOZ_ASSERT(!rv.Failed(), "Remove anonymous content should not fail!");
