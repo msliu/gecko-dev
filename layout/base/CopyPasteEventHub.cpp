@@ -64,6 +64,8 @@ public:
   virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
                                const nsPoint& aPoint) MOZ_OVERRIDE;
   virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+  virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
+                                  const nsPoint& aPoint) MOZ_OVERRIDE;
 };
 
 //
@@ -289,6 +291,14 @@ CopyPasteEventHub::PressCaretState::OnRelease(CopyPasteEventHub* aContext)
   aContext->mHandler->TapCaret(aContext->mPressPoint);
   aContext->SetState(aContext->NoActionState());
 
+  // We should always consume the event since we've pressed on the caret.
+  return nsEventStatus_eConsumeNoDefault;
+}
+
+nsEventStatus
+CopyPasteEventHub::PressCaretState::OnLongTap(CopyPasteEventHub* aContext,
+                                              const nsPoint& aPoint)
+{
   // We should always consume the event since we've pressed on the caret.
   return nsEventStatus_eConsumeNoDefault;
 }
