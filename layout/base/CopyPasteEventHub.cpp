@@ -845,15 +845,9 @@ CopyPasteEventHub::GetTouchEventPosition(WidgetTouchEvent* aEvent,
     if (aEvent->touches[i]->Identifier() == aIdentifier) {
       LayoutDeviceIntPoint touchIntPoint = aEvent->touches[i]->mRefPoint;
 
-      // Return dev pixel directly, only used for gtest.
-      if (!mPresShell) {
-        return nsPoint(touchIntPoint.x, touchIntPoint.y);
-      }
-
       // Get event coordinate relative to root frame.
       nsIFrame* rootFrame = mPresShell->GetRootFrame();
-      return nsLayoutUtils::GetEventCoordinatesRelativeTo(aEvent,
-                                                          touchIntPoint,
+      return nsLayoutUtils::GetEventCoordinatesRelativeTo(aEvent, touchIntPoint,
                                                           rootFrame);
     }
   }
@@ -865,15 +859,9 @@ CopyPasteEventHub::GetMouseEventPosition(WidgetMouseEvent* aEvent)
 {
   LayoutDeviceIntPoint mouseIntPoint = aEvent->AsGUIEvent()->refPoint;
 
-  // Return dev pixel directly, only used for gtest.
-  if (!mPresShell) {
-    return nsPoint(mouseIntPoint.x, mouseIntPoint.y);
-  }
-
   // Get event coordinate relative to root frame.
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
-  return nsLayoutUtils::GetEventCoordinatesRelativeTo(aEvent,
-                                                      mouseIntPoint,
+  return nsLayoutUtils::GetEventCoordinatesRelativeTo(aEvent, mouseIntPoint,
                                                       rootFrame);
 }
 

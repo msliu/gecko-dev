@@ -62,6 +62,21 @@ public:
     mInitialized = true;
   }
 
+  virtual nsPoint GetTouchEventPosition(WidgetTouchEvent* aEvent,
+                                        int32_t aIdentifier) MOZ_OVERRIDE
+  {
+    // Return the device point directly.
+    LayoutDeviceIntPoint touchIntPoint = aEvent->touches[0]->mRefPoint;
+    return nsPoint(touchIntPoint.x, touchIntPoint.y);
+  }
+
+  virtual nsPoint GetMouseEventPosition(WidgetMouseEvent* aEvent) MOZ_OVERRIDE
+  {
+    // Return the device point directly.
+    LayoutDeviceIntPoint mouseIntPoint = aEvent->AsGUIEvent()->refPoint;
+    return nsPoint(mouseIntPoint.x, mouseIntPoint.y);
+  }
+
   MockCopyPasteManager* GetMockCopyPasteManager()
   {
     return reinterpret_cast<MockCopyPasteManager*>(mHandler.get());
