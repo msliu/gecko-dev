@@ -81,8 +81,9 @@ protected:
   nsEventStatus HandleWheelEvent(WidgetWheelEvent* aEvent);
   nsEventStatus HandleTouchEvent(WidgetTouchEvent* aEvent);
 
-  nsPoint GetTouchEventPosition(WidgetTouchEvent* aEvent, int32_t aIdentifier);
-  nsPoint GetMouseEventPosition(WidgetMouseEvent* aEvent);
+  virtual nsPoint GetTouchEventPosition(WidgetTouchEvent* aEvent,
+                                        int32_t aIdentifier);
+  virtual nsPoint GetMouseEventPosition(WidgetMouseEvent* aEvent);
 
   bool MoveDistanceIsLarge(const nsPoint& aPoint);
 
