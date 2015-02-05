@@ -268,11 +268,18 @@ CopyPasteEventHubTester::TestPressReleaseOnCaret(
     EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
       .WillOnce(Return(NS_OK));
 
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), SelectWordOrShortcut(_))
+      .Times(0);
+
     EXPECT_CALL(*mHub->GetMockCopyPasteManager(), ReleaseCaret());
     EXPECT_CALL(*mHub->GetMockCopyPasteManager(), TapCaret(_));
   }
 
   HandleEventAndCheckState(aPressEventCreator(0, 0),
+                           MockCopyPasteEventHub::PressCaretState(),
+                           nsEventStatus_eConsumeNoDefault);
+
+  HandleEventAndCheckState(CreateLongTapEvent(0, 0),
                            MockCopyPasteEventHub::PressCaretState(),
                            nsEventStatus_eConsumeNoDefault);
 
