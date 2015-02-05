@@ -841,9 +841,9 @@ nsPoint
 CopyPasteEventHub::GetTouchEventPosition(WidgetTouchEvent* aEvent,
                                          int32_t aIdentifier)
 {
-  for (size_t i = 0; i < aEvent->touches.Length(); i++) {
-    if (aEvent->touches[i]->Identifier() == aIdentifier) {
-      LayoutDeviceIntPoint touchIntPoint = aEvent->touches[i]->mRefPoint;
+  for (dom::Touch* touch : aEvent->touches) {
+    if (touch->Identifier() == aIdentifier) {
+      LayoutDeviceIntPoint touchIntPoint = touch->mRefPoint;
 
       // Get event coordinate relative to root frame.
       nsIFrame* rootFrame = mPresShell->GetRootFrame();
