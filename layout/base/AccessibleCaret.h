@@ -8,6 +8,7 @@
 #define AccessibleCaret_h__
 
 #include "mozilla/Attributes.h"
+#include "nsIDOMEventListener.h"
 #include "nsISupportsBase.h"
 #include "nsISupportsImpl.h"
 #include "nsCOMPtr.h"
@@ -81,11 +82,30 @@ private:
   static nsPoint ClampPositionToScrollFrames(nsIFrame* aFrame,
                                              const nsPoint& aPosition);
 
+  class DummyTouchListener MOZ_FINAL : public nsIDOMEventListener
+  {
+  public:
+    NS_DECL_ISUPPORTS
+    NS_IMETHOD HandleEvent(nsIDOMEvent* aEvent) MOZ_OVERRIDE
+    {
+      return NS_OK;
+    }
+
+  private:
+    virtual ~DummyTouchListener() {};
+  };
+
   // Member variables
   Appearance mAppearance;
   nsIPresShell* mPresShell;
   nsRefPtr<dom::AnonymousContent> mCaretElementHolder;
   nsRect mImaginaryCaretRect;
+
+  // A no-op touch-start listener which prevents APZ from panning when dragging
+  // the caret.
+  nsRefPtr<DummyTouchListener> mDummyTouchListener;
+
+
 }; // class AccessibleCaret
 
 } // namespace mozilla

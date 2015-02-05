@@ -324,6 +324,10 @@ div:-moz-native-anonymous.moz-accessiblecaret > div {
   margin-left: -15px;
   z-index: 2147483647;
   border: 0.1px solid red;
+
+  /* Override this property in moz-custom-content-container to make dummy touch
+   * listener work. */
+  pointer-events: auto;
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret.normal > div {
