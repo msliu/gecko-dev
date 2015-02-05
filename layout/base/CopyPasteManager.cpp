@@ -160,12 +160,14 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
     mPresShell->FlushPendingNotifications(Flush_Layout);
   }
 
-  if (mFirstCaret->Intersects(*mSecondCaret)) {
-    mFirstCaret->SetAppearance(Appearance::LEFT);
-    mSecondCaret->SetAppearance(Appearance::RIGHT);
-  } else {
-    mFirstCaret->SetAppearance(Appearance::NORMAL);
-    mSecondCaret->SetAppearance(Appearance::NORMAL);
+  if (mFirstCaret->IsVisible() && mSecondCaret->IsVisible()) {
+    if (mFirstCaret->Intersects(*mSecondCaret)) {
+      mFirstCaret->SetAppearance(Appearance::LEFT);
+      mSecondCaret->SetAppearance(Appearance::RIGHT);
+    } else {
+      mFirstCaret->SetAppearance(Appearance::NORMAL);
+      mSecondCaret->SetAppearance(Appearance::NORMAL);
+    }
   }
 }
 
