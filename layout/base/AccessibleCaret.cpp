@@ -60,12 +60,14 @@ AccessibleCaret::SetAppearance(Appearance aAppearance)
     return;
   }
 
-  mAppearance = aAppearance;
-
   ErrorResult rv;
-  CaretElement()->SetAttribute(NS_LITERAL_STRING("class"),
-                               AppearanceString(aAppearance), rv);
-  MOZ_ASSERT(!rv.Failed());
+  CaretElement()->ClassList()->Remove(AppearanceString(mAppearance), rv);
+  MOZ_ASSERT(!rv.Failed(), "Remove old appearance failed!");
+
+  CaretElement()->ClassList()->Add(AppearanceString(aAppearance), rv);
+  MOZ_ASSERT(!rv.Failed(), "Add new appearance failed!");
+
+  mAppearance = aAppearance;
 }
 
 /* static */ nsString
@@ -74,16 +76,16 @@ AccessibleCaret::AppearanceString(Appearance aAppearance)
   nsAutoString string;
   switch (aAppearance) {
   case Appearance::NONE:
-    string = NS_LITERAL_STRING("moz-accessiblecaret none");
+    string = NS_LITERAL_STRING("none");
     break;
   case Appearance::NORMAL:
-    string = NS_LITERAL_STRING("moz-accessiblecaret normal");
+    string = NS_LITERAL_STRING("normal");
     break;
   case Appearance::RIGHT:
-    string = NS_LITERAL_STRING("moz-accessiblecaret right");
+    string = NS_LITERAL_STRING("right");
     break;
   case Appearance::LEFT:
-    string = NS_LITERAL_STRING("moz-accessiblecaret left");
+    string = NS_LITERAL_STRING("left");
     break;
   }
   return string;
@@ -146,13 +148,15 @@ AccessibleCaret::InjectCaretElement(nsIDocument* aDocument)
 already_AddRefed<Element>
 AccessibleCaret::CreateCaretElement(nsIDocument* aDocument) const
 {
-  ErrorResult rv;
   nsCOMPtr<Element> element = aDocument->CreateHTMLElement(nsGkAtoms::div);
   nsCOMPtr<Element> elementInner = aDocument->CreateHTMLElement(nsGkAtoms::div);
   element->AppendChildTo(elementInner, false);
+
+  ErrorResult rv;
   element->SetAttribute(NS_LITERAL_STRING("class"),
-                        AppearanceString(Appearance::NONE), rv);
-  MOZ_ASSERT(!rv.Failed());
+                        NS_LITERAL_STRING("moz-accessiblecaret none"), rv);
+  MOZ_ASSERT(!rv.Failed(), "Set default class attribute failed!");
+
   return element.forget();
 }
 
