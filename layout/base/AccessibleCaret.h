@@ -68,7 +68,7 @@ private:
   nsIFrame* RootFrame() const;
   nsIFrame* ElementContainerFrame() const;
 
-  // Utilities
+  // Transform Appearance to CSS class name in ua.css.
   static nsString AppearanceString(Appearance aAppearance);
 
   void InjectCaretElement(nsIDocument* aDocument);
