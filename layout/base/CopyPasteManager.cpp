@@ -58,7 +58,7 @@ CopyPasteManager::ToStr(CaretMode aCaretMode)
 CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
   : mDragMode(DragMode::NONE)
   , mCaretMode(CaretMode::NONE)
-  , mCaretCenterToDownPointOffsetY(0)
+  , mOffsetYToCaretLogicalPosition(0)
   , mPresShell(aPresShell)
 {
   if (mPresShell) {
@@ -178,13 +178,15 @@ CopyPasteManager::PressCaret(const nsPoint& aPoint)
 
   if (mFirstCaret->Contains(aPoint)) {
     mDragMode = DragMode::FIRST_CARET;
-    mCaretCenterToDownPointOffsetY = mFirstCaret->LogicalPosition().y - aPoint.y;
+    mOffsetYToCaretLogicalPosition =
+      mFirstCaret->LogicalPosition().y - aPoint.y;
     SetSelectionDirection(eDirPrevious);
     SetSelectionDragState(true);
     rv = NS_OK;
   } else if (mSecondCaret->Contains(aPoint)) {
     mDragMode = DragMode::SECOND_CARET;
-    mCaretCenterToDownPointOffsetY = mSecondCaret->LogicalPosition().y - aPoint.y;
+    mOffsetYToCaretLogicalPosition =
+      mSecondCaret->LogicalPosition().y - aPoint.y;
     SetSelectionDirection(eDirNext);
     SetSelectionDragState(true);
     rv = NS_OK;
@@ -203,7 +205,7 @@ CopyPasteManager::DragCaret(const nsPoint& aPoint)
   }
 
   nsPoint point = aPoint;
-  point.y += mCaretCenterToDownPointOffsetY;
+  point.y += mOffsetYToCaretLogicalPosition;
   DragCaretInternal(point);
   UpdateCarets();
   return NS_OK;
