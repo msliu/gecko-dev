@@ -28,7 +28,7 @@ using namespace dom;
 NS_IMPL_ISUPPORTS(AccessibleCaret::DummyTouchListener, nsIDOMEventListener)
 
 AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
-  : mAppearance(Appearance::NONE)
+  : mAppearance(Appearance::None)
   , mPresShell(aPresShell)
   , mDummyTouchListener(new DummyTouchListener())
 {
@@ -50,7 +50,7 @@ AccessibleCaret::~AccessibleCaret()
 bool
 AccessibleCaret::IsVisible() const
 {
-  return mAppearance != Appearance::NONE;
+  return mAppearance != Appearance::None;
 }
 
 void
@@ -75,16 +75,16 @@ AccessibleCaret::AppearanceString(Appearance aAppearance)
 {
   nsAutoString string;
   switch (aAppearance) {
-  case Appearance::NONE:
+  case Appearance::None:
     string = NS_LITERAL_STRING("none");
     break;
-  case Appearance::NORMAL:
+  case Appearance::Normal:
     string = NS_LITERAL_STRING("normal");
     break;
-  case Appearance::RIGHT:
+  case Appearance::Right:
     string = NS_LITERAL_STRING("right");
     break;
-  case Appearance::LEFT:
+  case Appearance::Left:
     string = NS_LITERAL_STRING("left");
     break;
   }
@@ -180,7 +180,7 @@ AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
     nsLayoutUtils::IsRectVisibleInScrollFrames(aFrame, imaginaryCaretRectInFrame);
 
   if (!imaginaryCaretRectVisible) {
-    SetAppearance(Appearance::NONE);
+    SetAppearance(Appearance::None);
     return NS_ERROR_FAILURE;
   }
 
@@ -192,7 +192,7 @@ AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
     return NS_ERROR_FAILURE;
   }
 
-  SetAppearance(Appearance::NORMAL);
+  SetAppearance(Appearance::Normal);
 
   mImaginaryCaretRect = imaginaryCaretRect;
 
