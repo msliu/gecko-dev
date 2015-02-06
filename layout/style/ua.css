@@ -336,6 +336,7 @@ div:-moz-native-anonymous.moz-accessiblecaret {
 div:-moz-native-anonymous.moz-accessiblecaret > div {
   background-position: center center;
   background-size: 100% 100%;
+  cursor: move;
 
   /* XXX: Remove this debug border when AccessibleCaret is ready. */
   border: 0.1px solid blue;
