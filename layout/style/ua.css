@@ -319,33 +319,41 @@ div:-moz-native-anonymous.moz-accessiblecaret > div {
   position: absolute;
   width: 29px;
   height: 31px;
-  background-position: center center;
-  background-size: 100% 100%;
-  margin-left: -15px;
   z-index: 2147483647;
-  border: 0.1px solid red;
 
   /* Override this property in moz-custom-content-container to make dummy touch
    * listener work. */
   pointer-events: auto;
 }
 
+div:-moz-native-anonymous.moz-accessiblecaret {
+  margin-left: -15px;
+
+  /* XXX: Remove this debug border when AccessibleCaret is ready. */
+  border: 0.1px solid red;
+}
+
+div:-moz-native-anonymous.moz-accessiblecaret > div {
+  background-position: center center;
+  background-size: 100% 100%;
+
+  /* XXX: Remove this debug border when AccessibleCaret is ready. */
+  border: 0.1px solid blue;
+}
+
 div:-moz-native-anonymous.moz-accessiblecaret.normal > div {
   background-image: url("resource://gre/res/text_caret.png");
   margin-left: 0px;
-  border: 0.1px solid blue;
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret.left > div {
   background-image: url("resource://gre/res/text_caret_tilt_left.png");
   margin-left: -14px;
-  border: 0.1px solid blue;
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret.right > div {
   background-image: url("resource://gre/res/text_caret_tilt_right.png");
   margin-left: 14px;
-  border: 0.1px solid blue;
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret.none {
