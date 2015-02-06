@@ -37,10 +37,10 @@ public:
   ~AccessibleCaret();
 
   enum class Appearance : uint8_t {
-    NONE,
-    NORMAL,
-    LEFT,
-    RIGHT
+    None,
+    Normal,
+    Left,
+    Right
   };
 
   bool IsVisible() const;
