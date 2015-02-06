@@ -98,7 +98,7 @@ protected:
 
   DragMode mDragMode;
   CaretMode mCaretMode;
-  nscoord mCaretCenterToDownPointOffsetY;
+  nscoord mOffsetYToCaretLogicalPosition;
   nsIPresShell* mPresShell;
   UniquePtr<AccessibleCaret> mFirstCaret;
   UniquePtr<AccessibleCaret> mSecondCaret;
