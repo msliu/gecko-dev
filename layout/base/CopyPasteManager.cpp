@@ -94,8 +94,8 @@ void
 CopyPasteManager::HideCarets()
 {
   CP_LOGV("%s", __FUNCTION__);
-  mFirstCaret->SetAppearance(Appearance::NONE);
-  mSecondCaret->SetAppearance(Appearance::NONE);
+  mFirstCaret->SetAppearance(Appearance::None);
+  mSecondCaret->SetAppearance(Appearance::None);
   mCaretMode = CaretMode::NONE;
 }
 
@@ -131,8 +131,8 @@ CopyPasteManager::UpdateCaretsForCursorMode()
   }
 
   mFirstCaret->SetPosition(startFrame, startOffset);
-  mFirstCaret->SetAppearance(Appearance::NORMAL);
-  mSecondCaret->SetAppearance(Appearance::NONE);
+  mFirstCaret->SetAppearance(Appearance::Normal);
+  mSecondCaret->SetAppearance(Appearance::None);
 }
 
 void
@@ -162,11 +162,11 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
 
   if (mFirstCaret->IsVisible() && mSecondCaret->IsVisible()) {
     if (mFirstCaret->Intersects(*mSecondCaret)) {
-      mFirstCaret->SetAppearance(Appearance::LEFT);
-      mSecondCaret->SetAppearance(Appearance::RIGHT);
+      mFirstCaret->SetAppearance(Appearance::Left);
+      mSecondCaret->SetAppearance(Appearance::Right);
     } else {
-      mFirstCaret->SetAppearance(Appearance::NORMAL);
-      mSecondCaret->SetAppearance(Appearance::NORMAL);
+      mFirstCaret->SetAppearance(Appearance::Normal);
+      mSecondCaret->SetAppearance(Appearance::Normal);
     }
   }
 }
