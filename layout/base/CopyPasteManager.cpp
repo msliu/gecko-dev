@@ -167,16 +167,15 @@ CopyPasteManager::PressCaret(const nsPoint& aPoint)
 
   if (mFirstCaret->Contains(aPoint)) {
     mActiveCaret = mFirstCaret.get();
-    mOffsetYToCaretLogicalPosition =
-      mFirstCaret->LogicalPosition().y - aPoint.y;
     SetSelectionDirection(eDirPrevious);
-    SetSelectionDragState(true);
-    rv = NS_OK;
   } else if (mSecondCaret->Contains(aPoint)) {
     mActiveCaret = mSecondCaret.get();
-    mOffsetYToCaretLogicalPosition =
-      mSecondCaret->LogicalPosition().y - aPoint.y;
     SetSelectionDirection(eDirNext);
+  }
+
+  if (mActiveCaret) {
+    mOffsetYToCaretLogicalPosition =
+      mActiveCaret->LogicalPosition().y - aPoint.y;
     SetSelectionDragState(true);
     rv = NS_OK;
   }
