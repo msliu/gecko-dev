@@ -563,70 +563,72 @@ CopyPasteManager::CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffse
   return true;
 }
 
-nsEventStatus
-CopyPasteManager::DragCaretInternal(const nsPoint &aMovePoint)
+nsresult
+CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
 {
   if (!mPresShell) {
-    return nsEventStatus_eConsumeNoDefault;
+    return NS_ERROR_NULL_POINTER;
   }
 
   nsIFrame* rootFrame = mPresShell->GetRootFrame();
   if (!rootFrame) {
-    return nsEventStatus_eConsumeNoDefault;
+    return NS_ERROR_NULL_POINTER;
   }
 
   // Find out which content we point to
-  nsIFrame *ptFrame = nsLayoutUtils::GetFrameForPoint(rootFrame, aMovePoint,
+  nsIFrame* ptFrame = nsLayoutUtils::GetFrameForPoint(
+    rootFrame, aPoint,
     nsLayoutUtils::IGNORE_PAINT_SUPPRESSION | nsLayoutUtils::IGNORE_CROSS_DOC);
   if (!ptFrame) {
-    return nsEventStatus_eConsumeNoDefault;
+    return NS_ERROR_FAILURE;
   }
 
   nsRefPtr<nsFrameSelection> fs = GetFrameSelection();
   if (!fs) {
-    return nsEventStatus_eConsumeNoDefault;
+    return NS_ERROR_NULL_POINTER;
   }
 
   nsresult result;
-  nsIFrame *newFrame = nullptr;
+  nsIFrame* newFrame = nullptr;
   nsPoint newPoint;
-  nsPoint ptInFrame = aMovePoint;
+  nsPoint ptInFrame = aPoint;
   nsLayoutUtils::TransformPoint(rootFrame, ptFrame, ptInFrame);
-  result = fs->ConstrainFrameAndPointToAnchorSubtree(ptFrame, ptInFrame, &newFrame, newPoint);
+  result = fs->ConstrainFrameAndPointToAnchorSubtree(ptFrame, ptInFrame,
+                                                     &newFrame, newPoint);
   if (NS_FAILED(result) || !newFrame) {
-    return nsEventStatus_eConsumeNoDefault;
+    return NS_ERROR_FAILURE;
   }
 
   bool selectable;
   newFrame->IsSelectable(&selectable, nullptr);
   if (!selectable) {
-    return nsEventStatus_eConsumeNoDefault;
+    return NS_ERROR_FAILURE;
   }
 
   nsFrame::ContentOffsets offsets =
     newFrame->GetContentOffsetsFromPoint(newPoint);
   if (!offsets.content) {
-    return nsEventStatus_eConsumeNoDefault;
+    return NS_ERROR_FAILURE;
   }
 
   nsRefPtr<dom::Selection> selection = GetSelection();
   if (!selection) {
-    return nsEventStatus_eConsumeNoDefault;
+    return NS_ERROR_NULL_POINTER;
   }
 
   if (mCaretMode == CaretMode::SELECTION &&
       !CompareRangeWithContentOffset(offsets)) {
-    return nsEventStatus_eConsumeNoDefault;
+    return NS_ERROR_FAILURE;
   }
 
   nsIFrame* anchorFrame;
   selection->GetPrimaryFrameForAnchorNode(&anchorFrame);
   if (!anchorFrame) {
-    return nsEventStatus_eConsumeNoDefault;
+    return NS_ERROR_FAILURE;
   }
 
   // Move caret position.
-  nsIFrame *scrollable =
+  nsIFrame* scrollable =
     nsLayoutUtils::GetClosestFrameOfType(anchorFrame, nsGkAtoms::scrollFrame);
   nsWeakFrame weakScrollable = scrollable;
   fs->HandleClick(offsets.content, offsets.StartOffset(),
@@ -635,16 +637,16 @@ CopyPasteManager::DragCaretInternal(const nsPoint &aMovePoint)
                   false,
                   offsets.associate);
   if (!weakScrollable.IsAlive()) {
-    return nsEventStatus_eConsumeNoDefault;
+    return NS_ERROR_FAILURE;
   }
 
   // Scroll scrolled frame.
-  nsIScrollableFrame *saf = do_QueryFrame(scrollable);
-  nsIFrame *capturingFrame = saf->GetScrolledFrame();
-  nsPoint ptInScrolled = aMovePoint;
+  nsIScrollableFrame* saf = do_QueryFrame(scrollable);
+  nsIFrame* capturingFrame = saf->GetScrolledFrame();
+  nsPoint ptInScrolled = aPoint;
   nsLayoutUtils::TransformPoint(rootFrame, capturingFrame, ptInScrolled);
   fs->StartAutoScrollTimer(capturingFrame, ptInScrolled, kAutoScrollTimerDelay);
-  return nsEventStatus_eConsumeNoDefault;
+  return NS_OK;
 }
 
 } // namespace mozilla
