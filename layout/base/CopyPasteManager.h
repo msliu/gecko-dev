@@ -41,22 +41,12 @@ public:
   void HideCarets();
 
 protected:
-  /**
-   * Indicate which part of caret we are dragging at.
-   */
-  enum class DragMode : uint8_t {
-    NONE,
-    FIRST_CARET,
-    SECOND_CARET
-  };
-
   enum class CaretMode : uint8_t {
     NONE,
     CURSOR,
     SELECTION
   };
 
-  static const char* ToStr(DragMode aDragMode);
   static const char* ToStr(CaretMode aCaretMode);
 
   virtual nsresult PressCaret(const nsPoint& aPoint);
@@ -96,12 +86,14 @@ protected:
    */
   bool CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffsets);
 
-  DragMode mDragMode;
   CaretMode mCaretMode;
   nscoord mOffsetYToCaretLogicalPosition;
   nsIPresShell* mPresShell;
   UniquePtr<AccessibleCaret> mFirstCaret;
   UniquePtr<AccessibleCaret> mSecondCaret;
+
+  // The caret being pressed or dragged.
+  AccessibleCaret* mActiveCaret;
 
   static const int32_t kAutoScrollTimerDelay = 30;
   friend class CopyPasteEventHub;

@@ -34,17 +34,6 @@ using namespace dom;
 typedef AccessibleCaret::Appearance Appearance;
 
 /* static */ const char*
-CopyPasteManager::ToStr(DragMode aDragMode)
-{
-  switch(aDragMode) {
-  case DragMode::NONE: return "DragMode::NONE";
-  case DragMode::FIRST_CARET: return "DragMode::FIRST_CARET";
-  case DragMode::SECOND_CARET: return "DragMode::SECOND_CARET";
-  default: return "";
-  }
-}
-
-/* static */ const char*
 CopyPasteManager::ToStr(CaretMode aCaretMode)
 {
   switch(aCaretMode) {
@@ -56,10 +45,10 @@ CopyPasteManager::ToStr(CaretMode aCaretMode)
 }
 
 CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
-  : mDragMode(DragMode::NONE)
-  , mCaretMode(CaretMode::NONE)
+  : mCaretMode(CaretMode::NONE)
   , mOffsetYToCaretLogicalPosition(0)
   , mPresShell(aPresShell)
+  , mActiveCaret(nullptr)
 {
   if (mPresShell) {
     mFirstCaret = MakeUnique<AccessibleCaret>(mPresShell);
@@ -177,21 +166,19 @@ CopyPasteManager::PressCaret(const nsPoint& aPoint)
   nsresult rv = NS_ERROR_FAILURE;
 
   if (mFirstCaret->Contains(aPoint)) {
-    mDragMode = DragMode::FIRST_CARET;
+    mActiveCaret = mFirstCaret.get();
     mOffsetYToCaretLogicalPosition =
       mFirstCaret->LogicalPosition().y - aPoint.y;
     SetSelectionDirection(eDirPrevious);
     SetSelectionDragState(true);
     rv = NS_OK;
   } else if (mSecondCaret->Contains(aPoint)) {
-    mDragMode = DragMode::SECOND_CARET;
+    mActiveCaret = mSecondCaret.get();
     mOffsetYToCaretLogicalPosition =
       mSecondCaret->LogicalPosition().y - aPoint.y;
     SetSelectionDirection(eDirNext);
     SetSelectionDragState(true);
     rv = NS_OK;
-  } else {
-    mDragMode = DragMode::NONE;
   }
 
   return rv;
@@ -200,9 +187,7 @@ CopyPasteManager::PressCaret(const nsPoint& aPoint)
 nsresult
 CopyPasteManager::DragCaret(const nsPoint& aPoint)
 {
-  if (mDragMode == DragMode::NONE) {
-    return NS_ERROR_UNEXPECTED;
-  }
+  MOZ_ASSERT(mActiveCaret);
 
   nsPoint point = aPoint;
   point.y += mOffsetYToCaretLogicalPosition;
@@ -214,12 +199,10 @@ CopyPasteManager::DragCaret(const nsPoint& aPoint)
 nsresult
 CopyPasteManager::ReleaseCaret()
 {
-  if (mDragMode == DragMode::NONE) {
-    return NS_ERROR_UNEXPECTED;
-  }
+  MOZ_ASSERT(mActiveCaret);
 
+  mActiveCaret = nullptr;
   SetSelectionDragState(false);
-  mDragMode = DragMode::NONE;
   return NS_OK;
 }
 
@@ -228,7 +211,7 @@ CopyPasteManager::TapCaret(const nsPoint& aPoint)
 {
   nsresult rv = NS_ERROR_FAILURE;
 
-  if (mCaretMode == CaretMode::CURSOR && mDragMode == DragMode::FIRST_CARET) {
+  if (mCaretMode == CaretMode::CURSOR && mActiveCaret == mFirstCaret.get()) {
     rv = NS_OK;
   }
 
@@ -514,15 +497,15 @@ CopyPasteManager::CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffse
   int32_t rangeCount = selection->GetRangeCount();
   MOZ_ASSERT(rangeCount > 0);
 
-  nsRefPtr<nsRange> range = mDragMode == DragMode::FIRST_CARET ?
-    selection->GetRangeAt(0) : selection->GetRangeAt(rangeCount - 1);
+  int32_t rangeIndex = (mActiveCaret == mFirstCaret.get() ? 0 : rangeCount - 1);
+  nsRefPtr<nsRange> range = selection->GetRangeAt(rangeIndex);
 
   nsINode* node = nullptr;
   int32_t nodeOffset = 0;
   CaretAssociationHint hint;
   nsDirection dir;
 
-  if (mDragMode == DragMode::FIRST_CARET) {
+  if (mActiveCaret == mFirstCaret.get()) {
     // Check previous character of end node offset
     node = range->GetEndParent();
     nodeOffset = range->EndOffset();
@@ -571,8 +554,8 @@ CopyPasteManager::CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffse
                                                  aOffsets.StartOffset(),
                                                  pos.mResultContent,
                                                  pos.mContentOffset);
-  if ((mDragMode == DragMode::FIRST_CARET && result == 1) ||
-      (mDragMode == DragMode::SECOND_CARET && result == -1)) {
+  if ((mActiveCaret == mFirstCaret.get() && result == 1) ||
+      (mActiveCaret == mSecondCaret.get() && result == -1)) {
     aOffsets.content = pos.mResultContent;
     aOffsets.offset = pos.mContentOffset;
     aOffsets.secondaryOffset = pos.mContentOffset;
