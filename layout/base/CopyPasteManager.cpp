@@ -288,7 +288,7 @@ CopyPasteManager::GetFrameSelection()
       return nullptr;
     }
 
-    // Prevent us from touching the nsFrameSelection associated to other
+    // Prevent us from touching the nsFrameSelection associated with other
     // PresShell.
     nsRefPtr<nsFrameSelection> fs = focusFrame->GetFrameSelection();
     if (!fs || fs->GetShell() != mPresShell) {
@@ -625,7 +625,7 @@ CopyPasteManager::DragCaretInternal(const nsPoint &aMovePoint)
     return nsEventStatus_eConsumeNoDefault;
   }
 
-  // Move caret postion.
+  // Move caret position.
   nsIFrame *scrollable =
     nsLayoutUtils::GetClosestFrameOfType(anchorFrame, nsGkAtoms::scrollFrame);
   nsWeakFrame weakScrollable = scrollable;
