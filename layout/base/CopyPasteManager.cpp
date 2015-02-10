@@ -538,7 +538,7 @@ CopyPasteManager::CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffse
   int32_t rangeCount = selection->GetRangeCount();
   MOZ_ASSERT(rangeCount > 0);
 
-  int32_t rangeIndex = (mActiveCaret == mFirstCaret.get() ? 0 : rangeCount - 1);
+  int32_t rangeIndex = (mActiveCaret == mFirstCaret.get() ? rangeCount - 1 : 0);
   nsRefPtr<nsRange> range = selection->GetRangeAt(rangeIndex);
 
   nsINode* node = nullptr;
