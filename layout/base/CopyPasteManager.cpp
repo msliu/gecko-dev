@@ -490,7 +490,7 @@ CopyPasteManager::CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffse
 {
   nsRefPtr<dom::Selection> selection = GetSelection();
   if (!selection) {
-    return nsEventStatus_eConsumeNoDefault;
+    return false;
   }
 
   int32_t rangeCount = selection->GetRangeCount();
