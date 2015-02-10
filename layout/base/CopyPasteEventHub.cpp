@@ -45,11 +45,11 @@ public:
                                 const nsPoint& aPoint,
                                 int32_t aTouchId) MOZ_OVERRIDE;
   virtual void OnScrollStart(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
-  virtual void OnScrolling(CopyPasteEventHub* aContext);
+  virtual void OnScrolling(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void OnSelectionChanged(CopyPasteEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
-                                  int16_t aReason);
-  virtual void OnReflow(CopyPasteEventHub* aContext);
+                                  int16_t aReason) MOZ_OVERRIDE;
+  virtual void OnReflow(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
 };
 
@@ -97,8 +97,8 @@ public:
   virtual void OnScrollStart(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void OnSelectionChanged(CopyPasteEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
-                                  int16_t aReason);
-  virtual void OnReflow(CopyPasteEventHub* aContext);
+                                  int16_t aReason) MOZ_OVERRIDE;
+  virtual void OnReflow(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void Leave(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
 };
@@ -140,7 +140,7 @@ public:
 
   virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
                                   const nsPoint& aPoint) MOZ_OVERRIDE;
-  virtual void OnReflow(CopyPasteEventHub* aContext);
+  virtual void OnReflow(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
 };
 
 //
