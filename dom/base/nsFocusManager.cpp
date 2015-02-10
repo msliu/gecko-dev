@@ -1696,7 +1696,7 @@ nsFocusManager::Blur(nsPIDOMWindow* aWindowToClear,
 
   nsRefPtr<CopyPasteEventHub> copyPasteEventHub = presShell->GetCopyPasteEventHub();
   if (copyPasteEventHub) {
-    copyPasteEventHub->NotifyBlur();
+    copyPasteEventHub->NotifyBlur(aIsLeavingDocument || !mActiveWindow);
   }
 
   // at this point, it is expected that this window will be still be
