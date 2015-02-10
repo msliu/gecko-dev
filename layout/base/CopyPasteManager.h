@@ -66,7 +66,8 @@ protected:
   void UpdateCaretsForCursorMode();
   void UpdateCaretsForSelectionMode();
 
-  // Glue function
+  nsRect SelectionBoundingRect();
+
   virtual bool SelectionIsCollapsed();
   virtual int32_t SelectionRangeCount();
   virtual nsresult SelectWord(const nsPoint& aPoint);
@@ -79,6 +80,7 @@ protected:
   dom::Selection* GetSelection();
   already_AddRefed<nsFrameSelection> GetFrameSelection();
   nsIContent* GetFocusedContent();
+
   /*
    * If we're dragging start caret, we do not want to drag over previous
    * character of end caret. Same as end caret. So we check if content offset
