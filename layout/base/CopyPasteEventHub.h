@@ -38,7 +38,7 @@ public:
   nsEventStatus HandleEvent(WidgetEvent* aEvent);
 
   // Call this function to notify the blur event happened.
-  void NotifyBlur();
+  void NotifyBlur(bool aIsLeavingDocument);
 
   NS_DECL_ISUPPORTS
   NS_DECL_NSIREFLOWOBSERVER
@@ -153,7 +153,7 @@ public:
   virtual void OnScrollStart(CopyPasteEventHub* aContext);
   virtual void OnScrollEnd(CopyPasteEventHub* aContext);
   virtual void OnScrolling(CopyPasteEventHub* aContext);
-  virtual void OnBlur(CopyPasteEventHub* aContext);
+  virtual void OnBlur(CopyPasteEventHub* aContext, bool aIsLeavingDocument);
   virtual void OnSelectionChanged(CopyPasteEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
                                   int16_t aReason);

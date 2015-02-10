@@ -49,6 +49,8 @@ public:
   virtual void OnSelectionChanged(CopyPasteEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
                                   int16_t aReason) MOZ_OVERRIDE;
+  virtual void OnBlur(CopyPasteEventHub* aContext,
+                      bool aIsLeavingDocument) MOZ_OVERRIDE;
   virtual void OnReflow(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
 };
@@ -95,6 +97,8 @@ public:
   virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
                                   const nsPoint& aPoint) MOZ_OVERRIDE;
   virtual void OnScrollStart(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+  virtual void OnBlur(CopyPasteEventHub* aContext,
+                      bool aIsLeavingDocument) MOZ_OVERRIDE;
   virtual void OnSelectionChanged(CopyPasteEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
                                   int16_t aReason) MOZ_OVERRIDE;
@@ -189,7 +193,8 @@ CopyPasteEventHub::State::OnScrolling(CopyPasteEventHub* aContext)
 }
 
 void
-CopyPasteEventHub::State::OnBlur(CopyPasteEventHub* aContext)
+CopyPasteEventHub::State::OnBlur(CopyPasteEventHub* aContext,
+                                 bool aIsLeavingDocument)
 {
 }
 
@@ -247,6 +252,13 @@ void
 CopyPasteEventHub::NoActionState::OnScrolling(CopyPasteEventHub* aContext)
 {
   aContext->mHandler->OnScrolling();
+}
+
+void
+CopyPasteEventHub::NoActionState::OnBlur(CopyPasteEventHub* aContext,
+                                         bool aIsLeavingDocument)
+{
+  aContext->mHandler->OnBlur();
 }
 
 void
@@ -361,6 +373,16 @@ void
 CopyPasteEventHub::PressNoCaretState::OnReflow(CopyPasteEventHub* aContext)
 {
   aContext->mHandler->OnReflow();
+}
+
+void
+CopyPasteEventHub::PressNoCaretState::OnBlur(CopyPasteEventHub* aContext,
+                                             bool aIsLeavingDocument)
+{
+  aContext->mHandler->OnBlur();
+  if (aIsLeavingDocument) {
+    aContext->SetState(aContext->NoActionState());
+  }
 }
 
 void
@@ -827,14 +849,14 @@ CopyPasteEventHub::NotifySelectionChanged(nsIDOMDocument* aDoc,
 }
 
 void
-CopyPasteEventHub::NotifyBlur()
+CopyPasteEventHub::NotifyBlur(bool aIsLeavingDocument)
 {
   if (!mInitialized) {
     return;
   }
 
   CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
-  mState->OnBlur(this);
+  mState->OnBlur(this, aIsLeavingDocument);
 }
 
 nsPoint
