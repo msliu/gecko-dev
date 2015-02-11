@@ -32,6 +32,7 @@ namespace mozilla {
 
 using namespace dom;
 typedef AccessibleCaret::Appearance Appearance;
+typedef AccessibleCaret::PositionChangedResult PositionChangedResult;
 
 /* static */ const char*
 CopyPasteManager::ToStr(CaretMode aCaretMode)
@@ -146,10 +147,13 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
     return;
   }
 
-  nsresult firstCaretPosChanged = mFirstCaret->SetPosition(startFrame, startOffset);
-  nsresult secondCaretPosChanged = mSecondCaret->SetPosition(endFrame, endOffset);
+  PositionChangedResult firstCaretResult =
+    mFirstCaret->SetPosition(startFrame, startOffset);
+  PositionChangedResult secondCaretResult =
+    mSecondCaret->SetPosition(endFrame, endOffset);
 
-  if (NS_SUCCEEDED(firstCaretPosChanged) || NS_SUCCEEDED(secondCaretPosChanged)) {
+  if (firstCaretResult == PositionChangedResult::Changed ||
+      secondCaretResult == PositionChangedResult::Changed) {
     // Flush layout to make the carets intersection correct.
     mPresShell->FlushPendingNotifications(Flush_Layout);
   }
