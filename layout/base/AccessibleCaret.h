@@ -53,7 +53,7 @@ public:
   bool Contains(const nsPoint& aPosition);
 
   // The geometry center of a imaginary caret to which this AccessibleCaret is
-  // attached.
+  // attached. It is needed when dragging the caret.
   nsPoint LogicalPosition() const;
 
 private:
