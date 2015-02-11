@@ -68,6 +68,11 @@ AccessibleCaret::SetAppearance(Appearance aAppearance)
   MOZ_ASSERT(!rv.Failed(), "Add new appearance failed!");
 
   mAppearance = aAppearance;
+
+  // Need to reset rect since the cached rect will be compared in SetPosition.
+  if (mAppearance == Appearance::None) {
+    mImaginaryCaretRect = nsRect();
+  }
 }
 
 /* static */ nsString
@@ -171,25 +176,27 @@ AccessibleCaret::RemoveCaretElement(nsIDocument* aDocument)
   MOZ_ASSERT(!rv.Failed(), "Remove anonymous content should not fail!");
 }
 
-nsresult
+AccessibleCaret::PositionChangedResult
 AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
 {
   nsRect imaginaryCaretRectInFrame =
     nsCaret::GetGeometryForFrame(aFrame, aOffset, nullptr);
+
+  // Check if the caret rect is visible in scrollport.
   bool imaginaryCaretRectVisible =
     nsLayoutUtils::IsRectVisibleInScrollFrames(aFrame, imaginaryCaretRectInFrame);
 
   if (!imaginaryCaretRectVisible) {
+    // Don't bother to set the caret position since it's invisible.
     SetAppearance(Appearance::None);
-    return NS_ERROR_FAILURE;
+    return PositionChangedResult::Invisible;
   }
 
   nsRect imaginaryCaretRect = imaginaryCaretRectInFrame;
   nsLayoutUtils::TransformRect(aFrame, RootFrame(), imaginaryCaretRect);
 
-  if (imaginaryCaretRect == mImaginaryCaretRect) {
-    // XXX: Perhaps use customized enum to indicate the result of SetPosition.
-    return NS_ERROR_FAILURE;
+  if (imaginaryCaretRect.IsEqualEdges(mImaginaryCaretRect)) {
+    return PositionChangedResult::NotChanged;
   }
 
   SetAppearance(Appearance::Normal);
@@ -201,7 +208,7 @@ AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
     ClampPositionToScrollFrames(aFrame, caretElementPosition);
   SetCaretElementPosition(aFrame, caretElementPosition);
 
-  return NS_OK;
+  return PositionChangedResult::Changed;
 }
 
 /* static */ nsPoint
