@@ -152,6 +152,19 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
   PositionChangedResult secondCaretResult =
     mSecondCaret->SetPosition(endFrame, endOffset);
 
+  // XXX: Let's revise this duplicate code later.
+  if (firstCaretResult == PositionChangedResult::Invisible) {
+    mFirstCaret->SetAppearance(Appearance::None);
+  } else if (firstCaretResult == PositionChangedResult::Changed) {
+    mFirstCaret->SetAppearance(Appearance::Normal);
+  }
+
+  if (secondCaretResult == PositionChangedResult::Invisible) {
+    mSecondCaret->SetAppearance(Appearance::None);
+  } else if (secondCaretResult == PositionChangedResult::Changed) {
+    mSecondCaret->SetAppearance(Appearance::Normal);
+  }
+
   if (firstCaretResult == PositionChangedResult::Changed ||
       secondCaretResult == PositionChangedResult::Changed) {
     // Flush layout to make the carets intersection correct.

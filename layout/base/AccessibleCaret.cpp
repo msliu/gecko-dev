@@ -188,7 +188,6 @@ AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
 
   if (!imaginaryCaretRectVisible) {
     // Don't bother to set the caret position since it's invisible.
-    SetAppearance(Appearance::None);
     return PositionChangedResult::Invisible;
   }
 
@@ -198,8 +197,6 @@ AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
   if (imaginaryCaretRect.IsEqualEdges(mImaginaryCaretRect)) {
     return PositionChangedResult::NotChanged;
   }
-
-  SetAppearance(Appearance::Normal);
 
   mImaginaryCaretRect = imaginaryCaretRect;
 
