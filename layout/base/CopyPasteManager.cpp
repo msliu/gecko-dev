@@ -603,9 +603,11 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
     return NS_ERROR_NULL_POINTER;
   }
 
+  nsPoint point = AdjustDragBoundary(aPoint);
+
   // Find out which content we point to
   nsIFrame* ptFrame = nsLayoutUtils::GetFrameForPoint(
-    rootFrame, aPoint,
+    rootFrame, point,
     nsLayoutUtils::IGNORE_PAINT_SUPPRESSION | nsLayoutUtils::IGNORE_CROSS_DOC);
   if (!ptFrame) {
     return NS_ERROR_FAILURE;
@@ -619,7 +621,7 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
   nsresult result;
   nsIFrame* newFrame = nullptr;
   nsPoint newPoint;
-  nsPoint ptInFrame = aPoint;
+  nsPoint ptInFrame = point;
   nsLayoutUtils::TransformPoint(rootFrame, ptFrame, ptInFrame);
   result = fs->ConstrainFrameAndPointToAnchorSubtree(ptFrame, ptInFrame,
                                                      &newFrame, newPoint);
@@ -671,10 +673,39 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
   // Scroll scrolled frame.
   nsIScrollableFrame* saf = do_QueryFrame(scrollable);
   nsIFrame* capturingFrame = saf->GetScrolledFrame();
-  nsPoint ptInScrolled = aPoint;
+  nsPoint ptInScrolled = point;
   nsLayoutUtils::TransformPoint(rootFrame, capturingFrame, ptInScrolled);
   fs->StartAutoScrollTimer(capturingFrame, ptInScrolled, kAutoScrollTimerDelay);
   return NS_OK;
+}
+
+nsPoint
+CopyPasteManager::AdjustDragBoundary(const nsPoint& aPoint)
+{
+  // Bug 1068474: Adjust the Y-coordinate so that the carets won't be in tilt
+  // mode when a caret is being dragged surpass the other caret.
+  //
+  // For example, when dragging the second caret, the horizontal boundary (lower
+  // bound) of its Y-coordinate is the logical position of the first caret.
+  // Likewise, when dragging the first caret, the horizontal boundary (upper
+  // bound) of its Y-coordinate is the logical position of the second caret.
+  nsPoint adjustedPoint = aPoint;
+
+  if (mCaretMode == CaretMode::SELECTION) {
+    if (mActiveCaret == mFirstCaret.get()) {
+      nscoord dragDownBoundaryY = mSecondCaret->LogicalPosition().y;
+      if (adjustedPoint.y > dragDownBoundaryY) {
+        adjustedPoint.y = dragDownBoundaryY;
+      }
+    } else {
+      nscoord dragUpBoundaryY = mFirstCaret->LogicalPosition().y;
+      if (adjustedPoint.y < dragUpBoundaryY) {
+        adjustedPoint.y = dragUpBoundaryY;
+      }
+    }
+  }
+
+  return adjustedPoint;
 }
 
 } // namespace mozilla
