@@ -66,8 +66,6 @@ protected:
   void UpdateCaretsForCursorMode();
   void UpdateCaretsForSelectionMode();
 
-  nsRect SelectionBoundingRect();
-
   virtual bool SelectionIsCollapsed();
   virtual int32_t SelectionRangeCount();
   virtual nsresult SelectWord(const nsPoint& aPoint);

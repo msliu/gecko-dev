@@ -12,6 +12,7 @@
 #include "mozilla/dom/Element.h"
 #include "mozilla/dom/Selection.h"
 #include "mozilla/dom/TreeWalker.h"
+#include "nsContentUtils.h"
 #include "nsFocusManager.h"
 #include "nsFrame.h"
 #include "nsFrameSelection.h"
@@ -92,7 +93,12 @@ CopyPasteManager::HideCarets()
 void
 CopyPasteManager::UpdateCarets()
 {
-  int32_t rangeCount = SelectionRangeCount();
+  Selection* selection = GetSelection();
+  if (!selection) {
+    return;
+  }
+
+  int32_t rangeCount = selection->GetRangeCount();
   if (rangeCount <= 0) {
     HideCarets();
     return;
@@ -101,7 +107,7 @@ CopyPasteManager::UpdateCarets()
   // XXX: Calling this to force generate nsTextFrame for contents which contains
   // only newline in test_selectioncarets_multiplerange.html. It should be
   // removed once we implement event dispatching to Gaia.
-  SelectionBoundingRect();
+  nsContentUtils::GetSelectionBoundingRect(selection);
 
   if (SelectionIsCollapsed()) {
     mCaretMode = CaretMode::CURSOR;
@@ -322,43 +328,6 @@ CopyPasteManager::GetFrameSelection()
     // For non-editable content
     return mPresShell->FrameSelection();
   }
-}
-
-nsRect
-CopyPasteManager::SelectionBoundingRect()
-{
-  nsRect rect;
-  Selection* selection = GetSelection();
-
-  if (!selection) {
-    return rect;
-  }
-
-  // Bounding client rect may be empty after calling GetBoundingClientRect
-  // when range is collapsed. So we get caret's rect when range is
-  // collapsed.
-  if (selection->IsCollapsed()) {
-    nsIFrame* frame = nsCaret::GetGeometry(selection, &rect);
-    if (frame) {
-      nsIFrame* relativeTo =
-        nsLayoutUtils::GetContainingBlockForClientRect(frame);
-      rect =
-        nsLayoutUtils::TransformFrameRectToAncestor(frame, rect, relativeTo);
-    }
-  } else {
-    int32_t rangeCount = selection->GetRangeCount();
-    nsLayoutUtils::RectAccumulator accumulator;
-    for (int32_t idx = 0; idx < rangeCount; ++idx) {
-      nsRange* range = selection->GetRangeAt(idx);
-      nsRange::CollectClientRects(&accumulator, range, range->GetStartParent(),
-                                  range->StartOffset(), range->GetEndParent(),
-                                  range->EndOffset(), true, false);
-    }
-    rect = accumulator.mResultRect.IsEmpty() ? accumulator.mFirstRect
-                                             : accumulator.mResultRect;
-  }
-
-  return rect;
 }
 
 bool
