@@ -13,6 +13,7 @@
 #include "nsISelectionListener.h"
 #include "nsRefPtr.h"
 #include "nsWeakReference.h"
+#include "mozilla/dom/CaretStateChangedEvent.h"
 #include "mozilla/EventForwards.h"
 #include "mozilla/UniquePtr.h"
 #include "mozilla/WeakPtr.h"
@@ -80,6 +81,7 @@ protected:
   dom::Selection* GetSelection();
   already_AddRefed<nsFrameSelection> GetFrameSelection();
   nsIContent* GetFocusedContent();
+  void DispatchCaretStateChangedEvent(dom::CaretChangedReason aReason);
 
   /*
    * If we're dragging start caret, we do not want to drag over previous
