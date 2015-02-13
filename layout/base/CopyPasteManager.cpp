@@ -867,4 +867,62 @@ CopyPasteManager::CancelTimeoutTimer()
   }
 }
 
+void
+CopyPasteManager::DispatchCaretStateChangedEvent(CaretChangedReason aReason) const
+{
+  Selection* sel = GetSelection();
+  if (!sel) {
+    return;
+  }
+
+  nsIDocument* doc = mPresShell->GetDocument();
+  MOZ_ASSERT(doc);
+
+  CaretStateChangedEventInit init;
+  init.mBubbles = true;
+
+  // XXX: Do we need to flush layout?
+  mPresShell->FlushPendingNotifications(Flush_Layout);
+  const nsRange* range = sel->GetAnchorFocusRange();
+  nsINode* commonAncestorNode = nullptr;
+  if (range) {
+    commonAncestorNode = range->GetCommonAncestor();
+  }
+
+  if (!commonAncestorNode) {
+    commonAncestorNode = sel->GetFrameSelection()->GetAncestorLimiter();
+  }
+
+  nsRefPtr<DOMRect> domRect = new DOMRect(ToSupports(doc));
+  nsRect rect = nsContentUtils::GetSelectionBoundingRect(sel);
+  if (commonAncestorNode) {
+    nsIFrame* commonAncestorFrame = commonAncestorNode->AsContent()->GetPrimaryFrame();
+    nsIFrame* rootFrame = mPresShell->GetRootFrame();
+    nsLayoutUtils::TransformRect(rootFrame, commonAncestorFrame, rect);
+    nsRect clampedRect = nsLayoutUtils::ClampRectToScrollFrames(commonAncestorFrame,
+                                                                rect);
+    nsLayoutUtils::TransformRect(commonAncestorFrame, rootFrame, clampedRect);
+    domRect->SetLayoutRect(clampedRect);
+    init.mSelectionVisible = !clampedRect.IsEmpty();
+    init.mBoundingClientRect = domRect;
+  } else {
+    domRect->SetLayoutRect(rect);
+    init.mSelectionVisible = true;
+  }
+
+  init.mBoundingClientRect = domRect;
+  init.mReason = aReason;
+  init.mCollapsed = sel->IsCollapsed();
+  init.mCaretVisible = mFirstCaret->IsLogicallyVisible() ||
+                       mSecondCaret->IsLogicallyVisible();
+
+  nsRefPtr<CaretStateChangedEvent> event =
+    CaretStateChangedEvent::Constructor(doc, NS_LITERAL_STRING("mozcaretstatechanged"), init);
+
+  event->SetTrusted(true);
+  event->GetInternalNSEvent()->mFlags.mOnlyChromeDispatch = true;
+  bool ret;
+  doc->DispatchEvent(event, &ret);
+}
+
 } // namespace mozilla
