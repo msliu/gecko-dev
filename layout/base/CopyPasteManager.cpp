@@ -333,28 +333,6 @@ CopyPasteManager::GetCaretMode()
   return CaretMode::Selection;
 }
 
-bool
-CopyPasteManager::SelectionIsCollapsed()
-{
-  Selection* sel = GetSelection();
-  if (!sel) {
-    return true;
-  }
-
-  return sel->IsCollapsed();
-}
-
-int32_t
-CopyPasteManager::SelectionRangeCount()
-{
-  Selection* sel = GetSelection();
-  if (!sel) {
-    return 0;
-  }
-
-  return sel->GetRangeCount();
-}
-
 nsresult
 CopyPasteManager::SelectWord(const nsPoint& aPoint)
 {
