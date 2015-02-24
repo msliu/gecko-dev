@@ -35,20 +35,8 @@ using namespace dom;
 typedef AccessibleCaret::Appearance Appearance;
 typedef AccessibleCaret::PositionChangedResult PositionChangedResult;
 
-/* static */ const char*
-CopyPasteManager::ToStr(CaretMode aCaretMode)
-{
-  switch(aCaretMode) {
-  case CaretMode::NONE: return "CaretMode::NONE";
-  case CaretMode::CURSOR: return "CaretMode::CURSOR";
-  case CaretMode::SELECTION: return "CaretMode::SELECTION";
-  default: return "";
-  }
-}
-
 CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
-  : mCaretMode(CaretMode::NONE)
-  , mOffsetYToCaretLogicalPosition(0)
+  : mOffsetYToCaretLogicalPosition(0)
   , mPresShell(aPresShell)
   , mActiveCaret(nullptr)
 {
@@ -87,19 +75,13 @@ CopyPasteManager::HideCarets()
   CP_LOGV("%s", __FUNCTION__);
   mFirstCaret->SetAppearance(Appearance::None);
   mSecondCaret->SetAppearance(Appearance::None);
-  mCaretMode = CaretMode::NONE;
 }
 
 void
 CopyPasteManager::UpdateCarets()
 {
-  Selection* selection = GetSelection();
-  if (!selection) {
-    return;
-  }
-
-  int32_t rangeCount = selection->GetRangeCount();
-  if (rangeCount <= 0) {
+  CaretMode caretMode = GetCaretMode();
+  if (caretMode == CaretMode::None) {
     HideCarets();
     return;
   }
@@ -107,13 +89,11 @@ CopyPasteManager::UpdateCarets()
   // XXX: Calling this to force generate nsTextFrame for contents which contains
   // only newline in test_selectioncarets_multiplerange.html. It should be
   // removed once we implement event dispatching to Gaia.
-  nsContentUtils::GetSelectionBoundingRect(selection);
+  nsContentUtils::GetSelectionBoundingRect(GetSelection());
 
-  if (SelectionIsCollapsed()) {
-    mCaretMode = CaretMode::CURSOR;
+  if (caretMode == CaretMode::Cursor) {
     UpdateCaretsForCursorMode();
   } else {
-    mCaretMode = CaretMode::SELECTION;
     UpdateCaretsForSelectionMode();
   }
 }
@@ -215,6 +195,7 @@ nsresult
 CopyPasteManager::DragCaret(const nsPoint& aPoint)
 {
   MOZ_ASSERT(mActiveCaret);
+  MOZ_ASSERT(GetCaretMode() != CaretMode::None);
 
   nsPoint point = aPoint;
   point.y += mOffsetYToCaretLogicalPosition;
@@ -236,9 +217,11 @@ CopyPasteManager::ReleaseCaret()
 nsresult
 CopyPasteManager::TapCaret(const nsPoint& aPoint)
 {
+  MOZ_ASSERT(GetCaretMode() != CaretMode::None);
+
   nsresult rv = NS_ERROR_FAILURE;
 
-  if (mCaretMode == CaretMode::CURSOR && mActiveCaret == mFirstCaret.get()) {
+  if (GetCaretMode() == CaretMode::Cursor && mActiveCaret == mFirstCaret.get()) {
     rv = NS_OK;
   }
 
@@ -328,6 +311,26 @@ CopyPasteManager::GetFrameSelection()
     // For non-editable content
     return mPresShell->FrameSelection();
   }
+}
+
+CopyPasteManager::CaretMode
+CopyPasteManager::GetCaretMode()
+{
+  Selection* selection = GetSelection();
+  if (!selection) {
+    return CaretMode::None;
+  }
+
+  int32_t rangeCount = selection->GetRangeCount();
+  if (rangeCount <= 0) {
+    return CaretMode::None;
+  }
+
+  if (selection->IsCollapsed()) {
+    return CaretMode::Cursor;
+  }
+
+  return CaretMode::Selection;
 }
 
 bool
@@ -646,7 +649,7 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
     return NS_ERROR_NULL_POINTER;
   }
 
-  if (mCaretMode == CaretMode::SELECTION &&
+  if (GetCaretMode() == CaretMode::Selection &&
       !CompareRangeWithContentOffset(offsets)) {
     return NS_ERROR_FAILURE;
   }
@@ -663,7 +666,7 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
   nsWeakFrame weakScrollable = scrollable;
   fs->HandleClick(offsets.content, offsets.StartOffset(),
                   offsets.EndOffset(),
-                  mCaretMode == CaretMode::SELECTION,
+                  GetCaretMode() == CaretMode::Selection,
                   false,
                   offsets.associate);
   if (!weakScrollable.IsAlive()) {
@@ -691,7 +694,7 @@ CopyPasteManager::AdjustDragBoundary(const nsPoint& aPoint)
   // bound) of its Y-coordinate is the logical position of the second caret.
   nsPoint adjustedPoint = aPoint;
 
-  if (mCaretMode == CaretMode::SELECTION) {
+  if (GetCaretMode() == CaretMode::Selection) {
     if (mActiveCaret == mFirstCaret.get()) {
       nscoord dragDownBoundaryY = mSecondCaret->LogicalPosition().y;
       if (adjustedPoint.y > dragDownBoundaryY) {
