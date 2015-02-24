@@ -7,11 +7,12 @@
 #include "CopyPasteManager.h"
 
 #include "AccessibleCaret.h"
-#include "CopyPasteLogger.h"
 #include "CopyPasteEventHub.h"
+#include "CopyPasteLogger.h"
 #include "mozilla/dom/Element.h"
 #include "mozilla/dom/Selection.h"
 #include "mozilla/dom/TreeWalker.h"
+#include "nsCaret.h"
 #include "nsContentUtils.h"
 #include "nsFocusManager.h"
 #include "nsFrame.h"
@@ -102,6 +103,12 @@ void
 CopyPasteManager::UpdateCaretsForCursorMode()
 {
   CP_LOGV("%s, selection: %p", __FUNCTION__, GetSelection());
+
+  nsRefPtr<nsCaret> caret = mPresShell->GetCaret();
+  if (!caret || !caret->IsVisible()) {
+    HideCarets();
+    return;
+  }
 
   int32_t startOffset;
   nsIFrame* startFrame = FindFirstNodeWithFrame(false, &startOffset);
