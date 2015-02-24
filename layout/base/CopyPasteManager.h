@@ -42,12 +42,12 @@ public:
 
 protected:
   enum class CaretMode : uint8_t {
-    NONE,
-    CURSOR,
-    SELECTION
+    None,
+    Cursor,
+    Selection
   };
 
-  static const char* ToStr(CaretMode aCaretMode);
+  CaretMode GetCaretMode();
 
   virtual nsresult PressCaret(const nsPoint& aPoint);
   virtual nsresult DragCaret(const nsPoint& aPoint);
@@ -87,7 +87,6 @@ protected:
    */
   bool CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffsets);
 
-  CaretMode mCaretMode;
   nscoord mOffsetYToCaretLogicalPosition;
   nsIPresShell* mPresShell;
   UniquePtr<AccessibleCaret> mFirstCaret;
