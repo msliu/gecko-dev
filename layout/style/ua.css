@@ -312,8 +312,8 @@ parsererror|sourcetext {
 div:-moz-native-anonymous.moz-accessiblecaret,
 div:-moz-native-anonymous.moz-accessiblecaret > div {
   position: absolute;
-  width: 29px;
-  height: 31px;
+  width: 44px;
+  height: 47px;
   z-index: 2147483647;
 
   /* Override this property in moz-custom-content-container to make dummy touch
@@ -322,7 +322,7 @@ div:-moz-native-anonymous.moz-accessiblecaret > div {
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret {
-  margin-left: -15px;
+  margin-left: -23px;
 
   /* XXX: Remove this debug border when AccessibleCaret is ready. */
   border: 0.1px solid red;
@@ -344,12 +344,12 @@ div:-moz-native-anonymous.moz-accessiblecaret.normal > div {
 
 div:-moz-native-anonymous.moz-accessiblecaret.left > div {
   background-image: url("resource://gre/res/text_caret_tilt_left.png");
-  margin-left: -14px;
+  margin-left: -17px;
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret.right > div {
   background-image: url("resource://gre/res/text_caret_tilt_right.png");
-  margin-left: 14px;
+  margin-left: 18px;
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret.none {
