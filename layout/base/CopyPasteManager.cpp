@@ -62,6 +62,7 @@ CopyPasteManager::OnSelectionChanged(nsIDOMDocument* aDoc,
     return NS_OK;
   }
 
+  // XXX: Do we need to skip reason = 0?
   if (!aReason) {
     return NS_OK;
   }
