@@ -119,6 +119,9 @@ CopyPasteManager::UpdateCaretsForCursorMode()
     return;
   }
 
+  // No need to consider whether the caret's position is out of scrollport.
+  // According to the spec, we need to explicitly hide it after the scrolling is
+  // ended.
   mFirstCaret->SetPosition(startFrame, startOffset);
   mFirstCaret->SetAppearance(Appearance::Normal);
   mSecondCaret->SetAppearance(Appearance::None);
@@ -257,7 +260,11 @@ CopyPasteManager::OnScrollEnd()
 {
   CP_LOG("%s", __FUNCTION__);
 
-  UpdateCarets();
+  if (GetCaretMode() == CaretMode::Cursor) {
+    HideCarets();
+  } else {
+    UpdateCarets();
+  }
 }
 
 void
