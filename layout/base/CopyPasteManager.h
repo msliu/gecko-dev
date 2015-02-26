@@ -62,6 +62,7 @@ protected:
   virtual nsresult OnSelectionChanged(nsIDOMDocument* aDoc,
                                       nsISelection* aSel,
                                       int16_t aReason);
+  virtual void OnKeyboardEvent();
 
   void UpdateCaretsForCursorMode();
   void UpdateCaretsForSelectionMode();
