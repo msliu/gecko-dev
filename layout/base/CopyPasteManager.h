@@ -37,9 +37,6 @@ public:
   explicit CopyPasteManager(nsIPresShell* aPresShell);
   virtual ~CopyPasteManager();
 
-  void UpdateCarets();
-  void HideCarets();
-
 protected:
   enum class CaretMode : uint8_t {
     None,
@@ -63,6 +60,9 @@ protected:
                                       nsISelection* aSel,
                                       int16_t aReason);
   virtual void OnKeyboardEvent();
+
+  void UpdateCarets();
+  void HideCarets();
 
   void UpdateCaretsForCursorMode();
   void UpdateCaretsForSelectionMode();
