@@ -623,7 +623,7 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
     return NS_ERROR_FAILURE;
   }
 
-  nsFrame::ContentOffsets offsets =
+  nsIFrame::ContentOffsets offsets =
     newFrame->GetContentOffsetsFromPoint(newPoint);
   if (!offsets.content) {
     return NS_ERROR_FAILURE;
