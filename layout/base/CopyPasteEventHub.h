@@ -7,6 +7,9 @@
 #ifndef CopyPasteEventHub_h__
 #define CopyPasteEventHub_h__
 
+#include "mozilla/EventForwards.h"
+#include "mozilla/UniquePtr.h"
+#include "mozilla/WeakPtr.h"
 #include "nsCOMPtr.h"
 #include "nsIReflowObserver.h"
 #include "nsIScrollObserver.h"
@@ -14,9 +17,6 @@
 #include "nsPoint.h"
 #include "nsRefPtr.h"
 #include "nsWeakReference.h"
-#include "mozilla/EventForwards.h"
-#include "mozilla/WeakPtr.h"
-#include "mozilla/UniquePtr.h"
 
 class nsDocShell;
 class nsIPresShell;
@@ -24,6 +24,10 @@ class nsITimer;
 
 namespace mozilla {
 class CopyPasteManager;
+class WidgetKeyboardEvent;
+class WidgetMouseEvent;
+class WidgetTouchEvent;
+class WidgetWheelEvent;
 
 class CopyPasteEventHub : public nsIReflowObserver,
                           public nsIScrollObserver,
@@ -80,6 +84,7 @@ protected:
   nsEventStatus HandleMouseEvent(WidgetMouseEvent* aEvent);
   nsEventStatus HandleWheelEvent(WidgetWheelEvent* aEvent);
   nsEventStatus HandleTouchEvent(WidgetTouchEvent* aEvent);
+  nsEventStatus HandleKeyboardEvent(WidgetKeyboardEvent* aEvent);
 
   virtual nsPoint GetTouchEventPosition(WidgetTouchEvent* aEvent,
                                         int32_t aIdentifier);

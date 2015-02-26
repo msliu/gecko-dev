@@ -56,7 +56,7 @@ CopyPasteManager::OnSelectionChanged(nsIDOMDocument* aDoc,
                                      nsISelection* aSel,
                                      int16_t aReason)
 {
-  CP_LOG("aSel: %p, GetSelection(): %p", aSel, GetSelection());
+  CP_LOG("aSel: %p, GetSelection(): %p, aReason: %d", aSel, GetSelection(), aReason);
 
   if (aSel != GetSelection()) {
     return NS_OK;
@@ -64,6 +64,11 @@ CopyPasteManager::OnSelectionChanged(nsIDOMDocument* aDoc,
 
   // XXX: Do we need to skip reason = 0?
   if (!aReason) {
+    return NS_OK;
+  }
+
+  // Move cursor by keyboard.
+  if (aReason & nsISelectionListener::KEYPRESS_REASON) {
     return NS_OK;
   }
 
@@ -289,6 +294,14 @@ CopyPasteManager::OnReflow()
 
 void
 CopyPasteManager::OnBlur()
+{
+  CP_LOG("%s", __FUNCTION__);
+
+  HideCarets();
+}
+
+void
+CopyPasteManager::OnKeyboardEvent()
 {
   CP_LOG("%s", __FUNCTION__);
 

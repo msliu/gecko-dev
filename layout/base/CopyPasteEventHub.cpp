@@ -9,6 +9,8 @@
 #include "CopyPasteLogger.h"
 #include "CopyPasteManager.h"
 #include "gfxPrefs.h"
+#include "mozilla/MouseEvents.h"
+#include "mozilla/TextEvents.h"
 #include "mozilla/TouchEvents.h"
 #include "nsDocShell.h"
 #include "nsFocusManager.h"
@@ -598,6 +600,10 @@ CopyPasteEventHub::HandleEvent(WidgetEvent* aEvent)
     status = HandleTouchEvent(aEvent->AsTouchEvent());
     break;
 
+  case eKeyboardEventClass:
+    status = HandleKeyboardEvent(aEvent->AsKeyboardEvent());
+    break;
+
   default:
     break;
   }
@@ -722,6 +728,23 @@ CopyPasteEventHub::HandleTouchEvent(WidgetTouchEvent* aEvent)
   }
 
   return rv;
+}
+
+nsEventStatus
+CopyPasteEventHub::HandleKeyboardEvent(WidgetKeyboardEvent* aEvent)
+{
+  switch (aEvent->message) {
+  case NS_KEY_UP:
+  case NS_KEY_DOWN:
+  case NS_KEY_PRESS:
+    mHandler->OnKeyboardEvent();
+    break;
+
+  default:
+    break;
+  }
+
+  return nsEventStatus_eIgnore;
 }
 
 bool
