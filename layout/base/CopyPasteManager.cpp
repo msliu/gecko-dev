@@ -247,18 +247,24 @@ CopyPasteManager::SelectWordOrShortcut(const nsPoint& aPoint)
 void
 CopyPasteManager::OnScrollStart()
 {
+  CP_LOG("%s", __FUNCTION__);
+
   HideCarets();
 }
 
 void
 CopyPasteManager::OnScrollEnd()
 {
+  CP_LOG("%s", __FUNCTION__);
+
   UpdateCarets();
 }
 
 void
 CopyPasteManager::OnScrolling()
 {
+  CP_LOG("%s", __FUNCTION__);
+
   if (mFirstCaret->IsVisible() || mSecondCaret->IsVisible()) {
     UpdateCarets();
   }
@@ -267,6 +273,8 @@ CopyPasteManager::OnScrolling()
 void
 CopyPasteManager::OnReflow()
 {
+  CP_LOG("%s", __FUNCTION__);
+
   if (mFirstCaret->IsVisible() || mSecondCaret->IsVisible()) {
     UpdateCarets();
   }
@@ -275,6 +283,8 @@ CopyPasteManager::OnReflow()
 void
 CopyPasteManager::OnBlur()
 {
+  CP_LOG("%s", __FUNCTION__);
+
   HideCarets();
 }
 
