@@ -415,7 +415,7 @@ CopyPasteManager::SelectWord(const nsPoint& aPoint)
   // Clear maintain selection otherwise we cannot select less than a word
   nsRefPtr<nsFrameSelection> fs = GetFrameSelection();
   if (fs) {
-    fs->MaintainSelection();
+    fs->MaintainSelection(eSelectNoAmount);
   }
   return rs;
 }
