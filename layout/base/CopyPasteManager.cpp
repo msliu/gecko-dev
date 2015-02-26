@@ -204,8 +204,7 @@ CopyPasteManager::DragCaret(const nsPoint& aPoint)
   MOZ_ASSERT(mActiveCaret);
   MOZ_ASSERT(GetCaretMode() != CaretMode::None);
 
-  nsPoint point = aPoint;
-  point.y += mOffsetYToCaretLogicalPosition;
+  nsPoint point(aPoint.x, aPoint.y + mOffsetYToCaretLogicalPosition);
   DragCaretInternal(point);
   UpdateCarets();
   return NS_OK;
