@@ -328,7 +328,7 @@ CopyPasteManager::GetCaretMode()
     return CaretMode::None;
   }
 
-  int32_t rangeCount = selection->GetRangeCount();
+  uint32_t rangeCount = selection->RangeCount();
   if (rangeCount <= 0) {
     return CaretMode::None;
   }
@@ -455,7 +455,7 @@ CopyPasteManager::FindFirstNodeWithFrame(bool aBackward, int* aOutOffset)
     return nullptr;
   }
 
-  int32_t rangeCount = selection->GetRangeCount();
+  uint32_t rangeCount = selection->RangeCount();
   if (rangeCount <= 0) {
     return nullptr;
   }
@@ -509,7 +509,7 @@ CopyPasteManager::CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffse
     return false;
   }
 
-  int32_t rangeCount = selection->GetRangeCount();
+  uint32_t rangeCount = selection->RangeCount();
   MOZ_ASSERT(rangeCount > 0);
 
   int32_t rangeIndex = (mActiveCaret == mFirstCaret.get() ? rangeCount - 1 : 0);
