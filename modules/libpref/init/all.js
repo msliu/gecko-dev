@@ -4510,6 +4510,10 @@ pref("selectioncaret.detects.longtap", true);
 // Turn of accessible caret by default
 pref("layout.accessiblecaret.enabled", false);
 
+// Timeout in milliseconds to hide the accessiblecaret under cursor mode while
+// no one touches it. Set the value to 0 to disable this feature.
+pref("layout.accessiblecaret.timeout_ms", 3000);
+
 // Wakelock is disabled by default.
 pref("dom.wakelock.enabled", false);
 

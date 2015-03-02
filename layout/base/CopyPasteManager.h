@@ -86,6 +86,11 @@ protected:
    */
   bool CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffsets);
 
+  uint32_t CaretTimeoutMs();
+  void LaunchTimeoutTimer();
+  void CancelTimeoutTimer();
+
+  // Member variables
   nscoord mOffsetYToCaretLogicalPosition;
   nsIPresShell* mPresShell;
   UniquePtr<AccessibleCaret> mFirstCaret;
@@ -93,6 +98,8 @@ protected:
 
   // The caret being pressed or dragged.
   AccessibleCaret* mActiveCaret;
+
+  nsCOMPtr<nsITimer> mCaretTimeoutTimer;
 
   static const int32_t kAutoScrollTimerDelay = 30;
   friend class CopyPasteEventHub;
