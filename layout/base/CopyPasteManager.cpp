@@ -44,11 +44,14 @@ CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
   if (mPresShell) {
     mFirstCaret = MakeUnique<AccessibleCaret>(mPresShell);
     mSecondCaret = MakeUnique<AccessibleCaret>(mPresShell);
+
+    mCaretTimeoutTimer = do_CreateInstance("@mozilla.org/timer;1");
   }
 }
 
 CopyPasteManager::~CopyPasteManager()
 {
+  CancelTimeoutTimer();
 }
 
 nsresult
@@ -82,6 +85,7 @@ CopyPasteManager::HideCarets()
   CP_LOGV("%s", __FUNCTION__);
   mFirstCaret->SetAppearance(Appearance::None);
   mSecondCaret->SetAppearance(Appearance::None);
+  CancelTimeoutTimer();
 }
 
 void
@@ -130,6 +134,8 @@ CopyPasteManager::UpdateCaretsForCursorMode()
   mFirstCaret->SetPosition(startFrame, startOffset);
   mFirstCaret->SetAppearance(Appearance::Normal);
   mSecondCaret->SetAppearance(Appearance::None);
+
+  LaunchTimeoutTimer();
 }
 
 void
@@ -201,6 +207,7 @@ CopyPasteManager::PressCaret(const nsPoint& aPoint)
     mOffsetYToCaretLogicalPosition =
       mActiveCaret->LogicalPosition().y - aPoint.y;
     SetSelectionDragState(true);
+    CancelTimeoutTimer();
     rv = NS_OK;
   }
 
@@ -226,6 +233,7 @@ CopyPasteManager::ReleaseCaret()
 
   mActiveCaret = nullptr;
   SetSelectionDragState(false);
+  LaunchTimeoutTimer();
   return NS_OK;
 }
 
@@ -724,6 +732,48 @@ CopyPasteManager::AdjustDragBoundary(const nsPoint& aPoint)
   }
 
   return adjustedPoint;
+}
+
+uint32_t
+CopyPasteManager::CaretTimeoutMs()
+{
+  static bool added = false;
+  static uint32_t caretTimeoutMs = 0;
+
+  if (!added) {
+    Preferences::AddUintVarCache(&caretTimeoutMs,
+                                 "layout.accessiblecaret.timeout_ms");
+    added = true;
+  }
+
+  return caretTimeoutMs;
+}
+
+void
+CopyPasteManager::LaunchTimeoutTimer()
+{
+  if (!mCaretTimeoutTimer || CaretTimeoutMs() == 0 ||
+      GetCaretMode() != CaretMode::Cursor) {
+    return;
+  }
+
+  nsTimerCallbackFunc callback = [](nsITimer* aTimer, void* aClosure) {
+    CopyPasteManager* self = static_cast<CopyPasteManager*>(aClosure);
+    if (self->GetCaretMode() == CaretMode::Cursor) {
+      self->HideCarets();
+    }
+  };
+
+  mCaretTimeoutTimer->InitWithFuncCallback(callback, this, CaretTimeoutMs(),
+                                           nsITimer::TYPE_ONE_SHOT);
+}
+
+void
+CopyPasteManager::CancelTimeoutTimer()
+{
+  if (mCaretTimeoutTimer) {
+    mCaretTimeoutTimer->Cancel();
+  }
 }
 
 } // namespace mozilla
