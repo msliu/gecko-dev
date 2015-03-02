@@ -120,10 +120,22 @@ CopyPasteManager::UpdateCaretsForCursorMode()
     return;
   }
 
-  int32_t startOffset;
-  nsIFrame* startFrame = FindFirstNodeWithFrame(false, &startOffset);
+  int32_t offset = 0;
+  nsIFrame* frame = FindFirstNodeWithFrame(false, &offset);
 
-  if (!startFrame || !startFrame->GetContent()->IsEditable()) {
+  if (!frame) {
+    HideCarets();
+    return;
+  }
+
+  Element* editingHost = frame->GetContent()->GetEditingHost();
+  if (!editingHost) {
+    HideCarets();
+    return;
+  }
+
+  if (!nsContentUtils::HasNonEmptyTextContent(
+        editingHost, nsContentUtils::eRecurseIntoChildren)) {
     HideCarets();
     return;
   }
@@ -131,7 +143,7 @@ CopyPasteManager::UpdateCaretsForCursorMode()
   // No need to consider whether the caret's position is out of scrollport.
   // According to the spec, we need to explicitly hide it after the scrolling is
   // ended.
-  mFirstCaret->SetPosition(startFrame, startOffset);
+  mFirstCaret->SetPosition(frame, offset);
   mFirstCaret->SetAppearance(Appearance::Normal);
   mSecondCaret->SetAppearance(Appearance::None);
 
