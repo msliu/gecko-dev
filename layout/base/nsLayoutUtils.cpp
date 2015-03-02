@@ -2499,6 +2499,39 @@ nsLayoutUtils::IsRectVisibleInScrollFrames(nsIFrame* aFrame, const nsRect& aRect
   return true;
 }
 
+nsRect
+nsLayoutUtils::ClampRectToScrollFrames(nsIFrame* aFrame, const nsRect& aRect)
+{
+  nsIFrame* closestScrollFrame =
+    nsLayoutUtils::GetClosestFrameOfType(aFrame, nsGkAtoms::scrollFrame);
+
+  nsIFrame* rootFrame =
+    nsLayoutUtils::GetContainingBlockForClientRect(aFrame);
+
+  nsRect resultRect = aRect;
+
+  while (closestScrollFrame) {
+    nsIScrollableFrame* sf = do_QueryFrame(closestScrollFrame);
+    nsRect scrollPortRect = sf->GetScrollPortRect();
+
+    nsLayoutUtils::TransformRect(closestScrollFrame, rootFrame,
+                                 scrollPortRect);
+
+    resultRect = resultRect.Intersect(scrollPortRect);
+    // Check whether aRect is visible in the scroll frame or not.
+    if (resultRect.IsEmpty()) {
+      break;
+    }
+
+    // Get next ancestor scroll frame.
+    closestScrollFrame =
+      nsLayoutUtils::GetClosestFrameOfType(closestScrollFrame->GetParent(),
+                                           nsGkAtoms::scrollFrame);
+  }
+
+  return resultRect;
+}
+
 bool
 nsLayoutUtils::GetLayerTransformForFrame(nsIFrame* aFrame,
                                          Matrix4x4* aTransform)
