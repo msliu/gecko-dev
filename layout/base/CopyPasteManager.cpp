@@ -765,7 +765,7 @@ void
 CopyPasteManager::LaunchTimeoutTimer()
 {
   if (!mCaretTimeoutTimer || CaretTimeoutMs() == 0 ||
-      GetCaretMode() != CaretMode::Cursor) {
+      GetCaretMode() != CaretMode::Cursor || mActiveCaret) {
     return;
   }
 
