@@ -67,7 +67,8 @@ protected:
   void UpdateCaretsForCursorMode();
   void UpdateCaretsForSelectionMode();
 
-  virtual nsresult SelectWord(const nsPoint& aPoint);
+  virtual bool ChangeFocus(nsIFrame* aFrame);
+  virtual nsresult SelectWord(nsIFrame* aFrame, const nsPoint& aPoint);
   virtual void SetSelectionDragState(bool aState);
   virtual void SetSelectionDirection(nsDirection aDir);
   virtual nsIFrame* FindFirstNodeWithFrame(bool aBackward, int* aOutOffset);

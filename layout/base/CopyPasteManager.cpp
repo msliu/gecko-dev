@@ -266,8 +266,41 @@ CopyPasteManager::TapCaret(const nsPoint& aPoint)
 nsresult
 CopyPasteManager::SelectWordOrShortcut(const nsPoint& aPoint)
 {
-  // TODO: Handle shortcut mode
-  nsresult rv = SelectWord(aPoint);
+  if (!mPresShell) {
+    return NS_ERROR_UNEXPECTED;
+  }
+
+  nsIFrame* rootFrame = mPresShell->GetRootFrame();
+  if (!rootFrame) {
+    return NS_ERROR_NOT_AVAILABLE;
+  }
+
+  // Find content offsets for mouse down point
+  nsIFrame* ptFrame = nsLayoutUtils::GetFrameForPoint(rootFrame, aPoint,
+    nsLayoutUtils::IGNORE_PAINT_SUPPRESSION | nsLayoutUtils::IGNORE_CROSS_DOC);
+  if (!ptFrame) {
+    return NS_ERROR_FAILURE;
+  }
+
+  bool selectable;
+  ptFrame->IsSelectable(&selectable, nullptr);
+  if (!selectable) {
+    return NS_ERROR_FAILURE;
+  }
+
+  nsPoint ptInFrame = aPoint;
+  nsLayoutUtils::TransformPoint(rootFrame, ptFrame, ptInFrame);
+
+  nsIContent* editingHost = ptFrame->GetContent()->GetEditingHost();
+  if (ChangeFocus(ptFrame) &&
+      (editingHost && !nsContentUtils::HasNonEmptyTextContent(
+        editingHost, nsContentUtils::eRecurseIntoChildren))) {
+    // Content is empty. No need to select word.
+    CP_LOG("Cannot select word bacause content is empty");
+    return NS_ERROR_NOT_AVAILABLE;
+  }
+
+  nsresult rv = SelectWord(ptFrame, ptInFrame);
   UpdateCarets();
   return rv;
 }
@@ -390,35 +423,10 @@ CopyPasteManager::GetCaretMode()
   return CaretMode::Selection;
 }
 
-nsresult
-CopyPasteManager::SelectWord(const nsPoint& aPoint)
+bool
+CopyPasteManager::ChangeFocus(nsIFrame* aFrame)
 {
-  if (!mPresShell) {
-    return NS_ERROR_UNEXPECTED;
-  }
-
-  nsIFrame* rootFrame = mPresShell->GetRootFrame();
-  if (!rootFrame) {
-    return NS_ERROR_NOT_AVAILABLE;
-  }
-
-  // Find content offsets for mouse down point
-  nsIFrame* ptFrame = nsLayoutUtils::GetFrameForPoint(rootFrame, aPoint,
-    nsLayoutUtils::IGNORE_PAINT_SUPPRESSION | nsLayoutUtils::IGNORE_CROSS_DOC);
-  if (!ptFrame) {
-    return NS_ERROR_FAILURE;
-  }
-
-  bool selectable;
-  ptFrame->IsSelectable(&selectable, nullptr);
-  if (!selectable) {
-    return NS_ERROR_FAILURE;
-  }
-
-  nsPoint ptInFrame = aPoint;
-  nsLayoutUtils::TransformPoint(rootFrame, ptFrame, ptInFrame);
-
-  nsIFrame* currFrame = ptFrame;
+  nsIFrame* currFrame = aFrame;
   nsIContent* newFocusContent = nullptr;
   while (currFrame) {
     int32_t tabIndexUnused = 0;
@@ -448,16 +456,22 @@ CopyPasteManager::SelectWord(const nsPoint& aPoint)
     }
   }
 
+  return (newFocusContent && currFrame);
+}
+
+nsresult
+CopyPasteManager::SelectWord(nsIFrame* aFrame, const nsPoint& aPoint)
+{
   SetSelectionDragState(true);
-  nsFrame* frame = static_cast<nsFrame*>(ptFrame);
-  nsresult rs = frame->SelectByTypeAtPoint(mPresShell->GetPresContext(), ptInFrame,
+  nsFrame* frame = static_cast<nsFrame*>(aFrame);
+  nsresult rs = frame->SelectByTypeAtPoint(mPresShell->GetPresContext(), aPoint,
                                            eSelectWord, eSelectWord, 0);
 
 #ifdef DEBUG_FRAME_DUMP
   nsCString frameTag;
   frame->ListTag(frameTag);
-  CP_LOG("Frame=%s, ptInFrame=(%d, %d)", frameTag.get(), ptInFrame.x,
-         ptInFrame.y);
+  CP_LOG("Frame=%s, ptInFrame=(%d, %d)", frameTag.get(), aPoint.x,
+         aPoint.y);
 #endif
 
   SetSelectionDragState(false);
