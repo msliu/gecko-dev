@@ -30,13 +30,13 @@ class TouchCaretTest(MarionetteTestCase):
     def expiration_time(self):
         'Return touch caret expiration time in milliseconds.'
         return self.marionette.execute_script(
-            'return SpecialPowers.getIntPref("touchcaret.expiration.time");')
+            'return SpecialPowers.getIntPref("layout.accessiblecaret.timeout_ms");')
 
     @expiration_time.setter
     def expiration_time(self, expiration_time):
         'Set touch caret expiration time in milliseconds.'
         self.marionette.execute_script(
-            'SpecialPowers.setIntPref("touchcaret.expiration.time", arguments[0]);',
+            'SpecialPowers.setIntPref("layout.accessiblecaret.timeout_ms", arguments[0]);',
             script_args=[expiration_time])
 
     def openTestHtml(self, enabled=True, expiration_time=None):
@@ -45,7 +45,7 @@ class TouchCaretTest(MarionetteTestCase):
 
         '''
         self.marionette.execute_async_script(
-            'SpecialPowers.pushPrefEnv({"set": [["touchcaret.enabled", %s]]}, marionetteScriptFinished);' %
+            'SpecialPowers.pushPrefEnv({"set": [["layout.accessiblecaret.enabled", %s]]}, marionetteScriptFinished);' %
             ('true' if enabled else 'false'))
 
         # Set a larger expiration time to avoid intermittent test failures.
