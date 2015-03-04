@@ -9,8 +9,6 @@ from marionette import MarionetteTestCase
 from marionette_driver.selection import SelectionManager
 from marionette_driver.gestures import long_press_without_contextmenu
 
-from math import ceil, floor
-
 
 class SelectionCaretsTest(MarionetteTestCase):
     _long_press_time = 1        # 1 second
@@ -214,11 +212,11 @@ class SelectionCaretsTest(MarionetteTestCase):
         tilt_left_margin_left = -17
 
         left_caret_left_edge_x = caret3_x + caret_margin_left + tilt_left_margin_left
-        el.tap(ceil(left_caret_left_edge_x), caret3_y)
+        el.tap(left_caret_left_edge_x + 2, caret3_y)
 
         right_caret_right_edge_x = (caret4_x + caret_margin_left +
                                     tilt_right_margin_left + caret_width)
-        el.tap(floor(right_caret_right_edge_x), caret4_y)
+        el.tap(right_caret_right_edge_x - 2, caret4_y)
 
         # Drag the left caret back to the initial selection, the first word.
         self.actions.flick(el, caret3_x, caret3_y, caret1_x, caret1_y).perform()
