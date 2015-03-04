@@ -65,16 +65,19 @@ CopyPasteManager::OnSelectionChanged(nsIDOMDocument* aDoc,
     return NS_OK;
   }
 
-  // XXX: Do we need to skip reason = 0?
-  if (!aReason) {
+  // Move the cursor by Javascript.
+  if (aReason == nsISelectionListener::NO_REASON) {
+    HideCarets();
     return NS_OK;
   }
 
   // Move cursor by keyboard.
   if (aReason & nsISelectionListener::KEYPRESS_REASON) {
+    HideCarets();
     return NS_OK;
   }
 
+  // Range will collapse after cutting or copying text.
   if (aReason & (nsISelectionListener::COLLAPSETOSTART_REASON |
                  nsISelectionListener::COLLAPSETOEND_REASON)) {
     HideCarets();
