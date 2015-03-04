@@ -336,7 +336,9 @@ CopyPasteManager::OnScrolling()
 {
   CP_LOG("%s", __FUNCTION__);
 
-  if (mFirstCaret->IsVisible() || mSecondCaret->IsVisible()) {
+  if (GetCaretMode() == CaretMode::Cursor) {
+    HideCarets();
+  } else {
     UpdateCarets();
   }
 }
