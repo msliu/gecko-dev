@@ -262,7 +262,7 @@ CopyPasteManager::TapCaret(const nsPoint& aPoint)
 
   nsresult rv = NS_ERROR_FAILURE;
 
-  if (GetCaretMode() == CaretMode::Cursor && mActiveCaret == mFirstCaret.get()) {
+  if (GetCaretMode() == CaretMode::Cursor) {
     rv = NS_OK;
   }
 
