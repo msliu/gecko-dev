@@ -75,6 +75,12 @@ CopyPasteManager::OnSelectionChanged(nsIDOMDocument* aDoc,
     return NS_OK;
   }
 
+  if (aReason & (nsISelectionListener::COLLAPSETOSTART_REASON |
+                 nsISelectionListener::COLLAPSETOEND_REASON)) {
+    HideCarets();
+    return NS_OK;
+  }
+
   UpdateCarets();
   return NS_OK;
 }
