@@ -202,8 +202,14 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
 
   if (mFirstCaret->IsVisible() && mSecondCaret->IsVisible()) {
     if (mFirstCaret->Intersects(*mSecondCaret)) {
-      mFirstCaret->SetAppearance(Appearance::Left);
-      mSecondCaret->SetAppearance(Appearance::Right);
+      if (mFirstCaret->LogicalPosition().x <=
+          mSecondCaret->LogicalPosition().x) {
+        mFirstCaret->SetAppearance(Appearance::Left);
+        mSecondCaret->SetAppearance(Appearance::Right);
+      } else {
+        mFirstCaret->SetAppearance(Appearance::Right);
+        mSecondCaret->SetAppearance(Appearance::Left);
+      }
     } else {
       mFirstCaret->SetAppearance(Appearance::Normal);
       mSecondCaret->SetAppearance(Appearance::Normal);
