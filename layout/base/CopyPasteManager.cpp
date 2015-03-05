@@ -143,17 +143,16 @@ CopyPasteManager::UpdateCaretsForCursorMode()
     return;
   }
 
-  if (!nsContentUtils::HasNonEmptyTextContent(
-        editingHost, nsContentUtils::eRecurseIntoChildren)) {
-    HideCarets();
-    return;
-  }
-
   // No need to consider whether the caret's position is out of scrollport.
   // According to the spec, we need to explicitly hide it after the scrolling is
   // ended.
   mFirstCaret->SetPosition(frame, offset);
-  mFirstCaret->SetAppearance(Appearance::Normal);
+  if (nsContentUtils::HasNonEmptyTextContent(
+        editingHost, nsContentUtils::eRecurseIntoChildren)) {
+    mFirstCaret->SetAppearance(Appearance::Normal);
+  } else {
+    mFirstCaret->SetAppearance(Appearance::NormalNotShown);
+  }
   mSecondCaret->SetAppearance(Appearance::None);
 
   LaunchTimeoutTimer();
