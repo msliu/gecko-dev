@@ -353,11 +353,7 @@ CopyPasteManager::OnScrolling()
     return;
   }
 
-  if (GetCaretMode() == CaretMode::Cursor) {
-    HideCarets();
-  } else {
-    UpdateCarets();
-  }
+  UpdateCarets();
 }
 
 void
