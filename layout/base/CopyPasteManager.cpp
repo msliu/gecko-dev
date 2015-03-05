@@ -93,9 +93,12 @@ void
 CopyPasteManager::HideCarets()
 {
   CP_LOGV("%s", __FUNCTION__);
-  mFirstCaret->SetAppearance(Appearance::None);
-  mSecondCaret->SetAppearance(Appearance::None);
-  CancelTimeoutTimer();
+  if (mFirstCaret->IsVisible() || mSecondCaret->IsVisible()) {
+    mFirstCaret->SetAppearance(Appearance::None);
+    mSecondCaret->SetAppearance(Appearance::None);
+    DispatchCaretStateChangedEvent(CaretChangedReason::Visibilitychange);
+    CancelTimeoutTimer();
+  }
 }
 
 void
@@ -165,7 +168,8 @@ CopyPasteManager::UpdateCaretsForCursorMode()
   // No need to consider whether the caret's position is out of scrollport.
   // According to the spec, we need to explicitly hide it after the scrolling is
   // ended.
-  mFirstCaret->SetPosition(frame, offset);
+  bool oldSecondCaretVisible = mSecondCaret->IsVisible();
+  PositionChangedResult caretResult = mFirstCaret->SetPosition(frame, offset);
   if (nsContentUtils::HasNonEmptyTextContent(
         editingHost, nsContentUtils::eRecurseIntoChildren)) {
     mFirstCaret->SetAppearance(Appearance::Normal);
@@ -175,6 +179,10 @@ CopyPasteManager::UpdateCaretsForCursorMode()
   }
   mSecondCaret->SetAppearance(Appearance::None);
 
+  if ((caretResult == PositionChangedResult::Changed ||
+      oldSecondCaretVisible) && !mActiveCaret) {
+    DispatchCaretStateChangedEvent(CaretChangedReason::Updateposition);
+  }
 }
 
 void
@@ -223,6 +231,14 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
     mPresShell->FlushPendingNotifications(Flush_Layout);
   }
 
+  if ((firstCaretResult == PositionChangedResult::Changed ||
+       secondCaretResult == PositionChangedResult::Changed ||
+       firstCaretResult == PositionChangedResult::Invisible ||
+       secondCaretResult == PositionChangedResult::Invisible) &&
+      !mActiveCaret) {
+    DispatchCaretStateChangedEvent(CaretChangedReason::Updateposition);
+  }
+
   if (firstCaretResult == PositionChangedResult::Changed ||
       secondCaretResult == PositionChangedResult::Changed) {
     if (mFirstCaret->Intersects(*mSecondCaret)) {
@@ -258,6 +274,7 @@ CopyPasteManager::PressCaret(const nsPoint& aPoint)
     mOffsetYToCaretLogicalPosition =
       mActiveCaret->LogicalPosition().y - aPoint.y;
     SetSelectionDragState(true);
+    DispatchCaretStateChangedEvent(CaretChangedReason::Presscaret);
     CancelTimeoutTimer();
     rv = NS_OK;
   }
@@ -284,6 +301,7 @@ CopyPasteManager::ReleaseCaret()
 
   mActiveCaret = nullptr;
   SetSelectionDragState(false);
+  DispatchCaretStateChangedEvent(CaretChangedReason::Releasecaret);
   LaunchTimeoutTimer();
   return NS_OK;
 }
@@ -296,6 +314,7 @@ CopyPasteManager::TapCaret(const nsPoint& aPoint)
   nsresult rv = NS_ERROR_FAILURE;
 
   if (GetCaretMode() == CaretMode::Cursor) {
+    DispatchCaretStateChangedEvent(CaretChangedReason::Taponcaret);
     rv = NS_OK;
   }
 
@@ -336,6 +355,7 @@ CopyPasteManager::SelectWordOrShortcut(const nsPoint& aPoint)
         editingHost, nsContentUtils::eRecurseIntoChildren))) {
     // Content is empty. No need to select word.
     CP_LOG("%s, Cannot select word bacause content is empty", __FUNCTION__);
+    DispatchCaretStateChangedEvent(CaretChangedReason::Longpressonemptycontent);
     return NS_OK;
   }
 
