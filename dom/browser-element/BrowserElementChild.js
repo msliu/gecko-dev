@@ -38,6 +38,7 @@ if (!('BrowserElementIsPreloaded' in this)) {
       Services.prefs.getBoolPref("dom.mozInputMethod.enabled")) {
     try {
       Services.scriptloader.loadSubScript("chrome://global/content/forms.js");
+      Services.scriptloader.loadSubScript("chrome://global/content/BrowserElementCopyPaste.js");
     } catch (e) {
     }
   }
