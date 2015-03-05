@@ -81,6 +81,7 @@ AccessibleCaret::AppearanceString(Appearance aAppearance)
   nsAutoString string;
   switch (aAppearance) {
   case Appearance::None:
+  case Appearance::NormalNotShown:
     string = NS_LITERAL_STRING("none");
     break;
   case Appearance::Normal:
