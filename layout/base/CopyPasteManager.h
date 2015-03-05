@@ -101,6 +101,7 @@ protected:
   AccessibleCaret* mActiveCaret;
 
   nsCOMPtr<nsITimer> mCaretTimeoutTimer;
+  CaretMode mCaretMode;
 
   static const int32_t kAutoScrollTimerDelay = 30;
   friend class CopyPasteEventHub;

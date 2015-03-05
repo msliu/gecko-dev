@@ -40,6 +40,7 @@ CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
   : mOffsetYToCaretLogicalPosition(0)
   , mPresShell(aPresShell)
   , mActiveCaret(nullptr)
+  , mCaretMode(CaretMode::None)
 {
   if (mPresShell) {
     mFirstCaret = MakeUnique<AccessibleCaret>(mPresShell);
@@ -100,8 +101,8 @@ CopyPasteManager::HideCarets()
 void
 CopyPasteManager::UpdateCarets()
 {
-  CaretMode caretMode = GetCaretMode();
-  if (caretMode == CaretMode::None) {
+  mCaretMode = GetCaretMode();
+  if (mCaretMode == CaretMode::None) {
     HideCarets();
     return;
   }
@@ -111,7 +112,7 @@ CopyPasteManager::UpdateCarets()
   // removed once we implement event dispatching to Gaia.
   nsContentUtils::GetSelectionBoundingRect(GetSelection());
 
-  if (caretMode == CaretMode::Cursor) {
+  if (mCaretMode == CaretMode::Cursor) {
     UpdateCaretsForCursorMode();
   } else {
     UpdateCaretsForSelectionMode();
@@ -355,6 +356,12 @@ void
 CopyPasteManager::OnReflow()
 {
   CP_LOG("%s", __FUNCTION__);
+
+  if (mCaretMode != GetCaretMode()) {
+    // Assume caret mode will not change after a reflow event without a prior
+    // selection changed event.
+    return;
+  }
 
   if (mFirstCaret->IsVisible() || mSecondCaret->IsVisible()) {
     UpdateCarets();
