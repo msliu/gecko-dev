@@ -333,6 +333,10 @@ CopyPasteManager::OnScrollEnd()
 {
   CP_LOG("%s", __FUNCTION__);
 
+  if (mCaretMode != GetCaretMode()) {
+    return;
+  }
+
   if (GetCaretMode() == CaretMode::Cursor) {
     HideCarets();
   } else {
@@ -344,6 +348,10 @@ void
 CopyPasteManager::OnScrolling()
 {
   CP_LOG("%s", __FUNCTION__);
+
+  if (mCaretMode != GetCaretMode()) {
+    return;
+  }
 
   if (GetCaretMode() == CaretMode::Cursor) {
     HideCarets();
@@ -358,8 +366,6 @@ CopyPasteManager::OnReflow()
   CP_LOG("%s", __FUNCTION__);
 
   if (mCaretMode != GetCaretMode()) {
-    // Assume caret mode will not change after a reflow event without a prior
-    // selection changed event.
     return;
   }
 
