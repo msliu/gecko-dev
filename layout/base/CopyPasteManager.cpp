@@ -373,8 +373,9 @@ void
 CopyPasteManager::OnKeyboardEvent()
 {
   CP_LOG("%s", __FUNCTION__);
-
-  HideCarets();
+  if (GetCaretMode() == CaretMode::Cursor) {
+    HideCarets();
+  }
 }
 
 nsIContent*
@@ -671,7 +672,7 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
     return NS_ERROR_NULL_POINTER;
   }
 
-  nsPoint point = AdjustDragBoundary(aPoint);
+  nsPoint point = aPoint;
 
   // Find out which content we point to
   nsIFrame* ptFrame = nsLayoutUtils::GetFrameForPoint(
@@ -732,7 +733,7 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
   fs->HandleClick(offsets.content, offsets.StartOffset(),
                   offsets.EndOffset(),
                   GetCaretMode() == CaretMode::Selection,
-                  false,
+                  true,
                   offsets.associate);
   if (!weakScrollable.IsAlive()) {
     return NS_ERROR_FAILURE;
