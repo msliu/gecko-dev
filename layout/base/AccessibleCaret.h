@@ -39,6 +39,7 @@ public:
   enum class Appearance : uint8_t {
     None,
     Normal,
+    NormalNotShown,
     Left,
     Right
   };
