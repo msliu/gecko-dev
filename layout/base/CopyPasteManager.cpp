@@ -321,7 +321,7 @@ CopyPasteManager::SelectWordOrShortcut(const nsPoint& aPoint)
         editingHost, nsContentUtils::eRecurseIntoChildren))) {
     // Content is empty. No need to select word.
     CP_LOG("Cannot select word bacause content is empty");
-    return NS_ERROR_NOT_AVAILABLE;
+    return NS_OK;
   }
 
   nsresult rv = SelectWord(ptFrame, ptInFrame);
