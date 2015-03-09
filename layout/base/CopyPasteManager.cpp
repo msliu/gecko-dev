@@ -744,6 +744,9 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
     return NS_ERROR_FAILURE;
   }
 
+  // Clear maintain selection so that we can drag caret freely.
+  fs->MaintainSelection(eSelectNoAmount);
+
   // Move caret position.
   nsIFrame* scrollable =
     nsLayoutUtils::GetClosestFrameOfType(anchorFrame, nsGkAtoms::scrollFrame);
