@@ -155,12 +155,12 @@ CopyPasteManager::UpdateCaretsForCursorMode()
   if (nsContentUtils::HasNonEmptyTextContent(
         editingHost, nsContentUtils::eRecurseIntoChildren)) {
     mFirstCaret->SetAppearance(Appearance::Normal);
+    LaunchTimeoutTimer();
   } else {
     mFirstCaret->SetAppearance(Appearance::NormalNotShown);
   }
   mSecondCaret->SetAppearance(Appearance::None);
 
-  LaunchTimeoutTimer();
 }
 
 void
