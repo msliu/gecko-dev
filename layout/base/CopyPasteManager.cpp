@@ -362,6 +362,22 @@ CopyPasteManager::OnScrolling()
     return;
   }
 
+  if (GetCaretMode() == CaretMode::Cursor) {
+    HideCarets();
+  } else {
+    UpdateCarets();
+  }
+}
+
+void
+CopyPasteManager::OnScrollPositionChanged()
+{
+  CP_LOG("%s", __FUNCTION__);
+
+  if (mCaretMode != GetCaretMode()) {
+    return;
+  }
+
   UpdateCarets();
 }
 

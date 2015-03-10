@@ -48,6 +48,7 @@ public:
                                 int32_t aTouchId) MOZ_OVERRIDE;
   virtual void OnScrollStart(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void OnScrolling(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+  virtual void OnScrollPositionChanged(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
   virtual void OnSelectionChanged(CopyPasteEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
                                   int16_t aReason) MOZ_OVERRIDE;
@@ -195,6 +196,11 @@ CopyPasteEventHub::State::OnScrolling(CopyPasteEventHub* aContext)
 }
 
 void
+CopyPasteEventHub::State::OnScrollPositionChanged(CopyPasteEventHub* aContext)
+{
+}
+
+void
 CopyPasteEventHub::State::OnBlur(CopyPasteEventHub* aContext,
                                  bool aIsLeavingDocument)
 {
@@ -254,6 +260,13 @@ void
 CopyPasteEventHub::NoActionState::OnScrolling(CopyPasteEventHub* aContext)
 {
   aContext->mHandler->OnScrolling();
+}
+
+void
+CopyPasteEventHub::NoActionState::OnScrollPositionChanged(
+  CopyPasteEventHub* aContext)
+{
+  aContext->mHandler->OnScrollPositionChanged();
 }
 
 void
@@ -826,7 +839,7 @@ void
 CopyPasteEventHub::ScrollPositionChanged()
 {
   CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
-  mState->OnScrolling(this);
+  mState->OnScrollPositionChanged(this);
 }
 
 void
