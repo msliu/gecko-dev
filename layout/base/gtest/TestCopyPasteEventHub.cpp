@@ -43,6 +43,8 @@ public:
   MOCK_METHOD1(SelectWordOrShortcut, nsresult(const nsPoint& aPoint));
   MOCK_METHOD0(OnScrollStart, void());
   MOCK_METHOD0(OnScrollEnd, void());
+  MOCK_METHOD0(OnScrolling, void());
+  MOCK_METHOD0(OnScrollPositionChanged, void());
 };
 
 class MockCopyPasteEventHub : public CopyPasteEventHub
@@ -625,6 +627,9 @@ TEST_F(CopyPasteEventHubTester, TestNoEventAsyncPanZoomScroll)
     EXPECT_CALL(check, Call("1"));
     EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollStart());
 
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrolling()).Times(0);
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollPositionChanged()).Times(0);
+
     EXPECT_CALL(check, Call("2"));
     EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd());
   }
@@ -680,6 +685,8 @@ TEST_F(CopyPasteEventHubTester, TestWheelEventScroll)
   HandleEventAndCheckState(CreateWheelEvent(NS_WHEEL_WHEEL),
                            MockCopyPasteEventHub::ScrollState(),
                            nsEventStatus_eIgnore);
+
+  mHub->ScrollPositionChanged();
 
   HandleEventAndCheckState(CreateWheelEvent(NS_WHEEL_STOP),
                            MockCopyPasteEventHub::PostScrollState(),

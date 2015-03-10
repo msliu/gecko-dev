@@ -158,6 +158,7 @@ public:
   virtual void OnScrollStart(CopyPasteEventHub* aContext);
   virtual void OnScrollEnd(CopyPasteEventHub* aContext);
   virtual void OnScrolling(CopyPasteEventHub* aContext);
+  virtual void OnScrollPositionChanged(CopyPasteEventHub* aContext);
   virtual void OnBlur(CopyPasteEventHub* aContext, bool aIsLeavingDocument);
   virtual void OnSelectionChanged(CopyPasteEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
