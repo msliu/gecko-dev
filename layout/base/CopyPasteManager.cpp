@@ -391,8 +391,9 @@ void
 CopyPasteManager::OnKeyboardEvent()
 {
   CP_LOG("%s", __FUNCTION__);
-
-  HideCarets();
+  if (GetCaretMode() == CaretMode::Cursor) {
+    HideCarets();
+  }
 }
 
 nsIContent*
