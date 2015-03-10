@@ -324,8 +324,8 @@ div:-moz-native-anonymous.moz-accessiblecaret > div {
 div:-moz-native-anonymous.moz-accessiblecaret {
   margin-left: -23px;
 
-  /* XXX: Remove this debug border when AccessibleCaret is ready. */
-  border: 0.1px solid red;
+  /* XXX: Remove this debug background-color when AccessibleCaret is ready. */
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret > div {
@@ -333,8 +333,8 @@ div:-moz-native-anonymous.moz-accessiblecaret > div {
   background-size: 100% 100%;
   cursor: move;
 
-  /* XXX: Remove this debug border when AccessibleCaret is ready. */
-  border: 0.1px solid blue;
+  /* XXX: Remove this debug background-color when AccessibleCaret is ready. */
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret.normal > div {
