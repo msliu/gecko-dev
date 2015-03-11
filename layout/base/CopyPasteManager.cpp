@@ -547,7 +547,7 @@ CopyPasteManager::SetSelectionDragState(bool aState)
 void
 CopyPasteManager::SetSelectionDirection(nsDirection aDir)
 {
-  nsRefPtr<dom::Selection> selection = GetSelection();
+  Selection* selection = GetSelection();
   if (selection) {
     selection->SetDirection(aDir);
   }
@@ -619,7 +619,7 @@ CopyPasteManager::FindFirstNodeWithFrame(bool aBackward, int* aOutOffset)
 bool
 CopyPasteManager::CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffsets)
 {
-  nsRefPtr<dom::Selection> selection = GetSelection();
+  Selection* selection = GetSelection();
   if (!selection) {
     return false;
   }
@@ -744,7 +744,7 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
     return NS_ERROR_FAILURE;
   }
 
-  nsRefPtr<dom::Selection> selection = GetSelection();
+  Selection* selection = GetSelection();
   if (!selection) {
     return NS_ERROR_NULL_POINTER;
   }
