@@ -320,7 +320,7 @@ CopyPasteManager::SelectWordOrShortcut(const nsPoint& aPoint)
       (editingHost && !nsContentUtils::HasNonEmptyTextContent(
         editingHost, nsContentUtils::eRecurseIntoChildren))) {
     // Content is empty. No need to select word.
-    CP_LOG("Cannot select word bacause content is empty");
+    CP_LOG("%s, Cannot select word bacause content is empty", __FUNCTION__);
     return NS_OK;
   }
 
