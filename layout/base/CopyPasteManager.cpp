@@ -763,6 +763,16 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
   // Clear maintain selection so that we can drag caret freely.
   fs->MaintainSelection(eSelectNoAmount);
 
+  // Change the range on the opposite side where the other caret is attached as
+  // generated so that AutoPrepareFocusRange could figure out the correct anchor
+  // focus range.
+  uint32_t rangeCount = selection->RangeCount();
+  if (rangeCount >= 2) {
+    uint32_t rangeIndex = (mActiveCaret == mFirstCaret.get() ? rangeCount - 1 : 0);
+    nsRange* range = selection->GetRangeAt(rangeIndex);
+    range->SetIsGenerated(true);
+  }
+
   // Move caret position.
   nsIFrame* scrollable =
     nsLayoutUtils::GetClosestFrameOfType(anchorFrame, nsGkAtoms::scrollFrame);
