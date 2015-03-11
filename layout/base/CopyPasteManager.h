@@ -72,7 +72,7 @@ protected:
   virtual nsresult SelectWord(nsIFrame* aFrame, const nsPoint& aPoint);
   virtual void SetSelectionDragState(bool aState);
   virtual void SetSelectionDirection(nsDirection aDir);
-  virtual nsIFrame* FindFirstNodeWithFrame(bool aBackward, int* aOutOffset);
+  virtual nsIFrame* FindFirstNodeWithFrame(bool aBackward, int32_t* aOutOffset);
   virtual nsresult DragCaretInternal(const nsPoint& aPoint);
   nsPoint AdjustDragBoundary(const nsPoint& aPoint);
 
