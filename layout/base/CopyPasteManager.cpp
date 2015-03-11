@@ -33,8 +33,8 @@ namespace mozilla {
 #endif // #ifdef PR_LOGGING
 
 using namespace dom;
-typedef AccessibleCaret::Appearance Appearance;
-typedef AccessibleCaret::PositionChangedResult PositionChangedResult;
+using Appearance = AccessibleCaret::Appearance;
+using PositionChangedResult = AccessibleCaret::PositionChangedResult;
 
 CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
   : mOffsetYToCaretLogicalPosition(0)
