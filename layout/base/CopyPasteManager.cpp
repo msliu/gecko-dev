@@ -168,10 +168,10 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
 {
   CP_LOGV("%s, selection: %p", __FUNCTION__, GetSelection());
 
-  int32_t startOffset;
+  int32_t startOffset = 0;
   nsIFrame* startFrame = FindFirstNodeWithFrame(false, &startOffset);
 
-  int32_t endOffset;
+  int32_t endOffset = 0;
   nsIFrame* endFrame = FindFirstNodeWithFrame(true, &endOffset);
 
   if(!startFrame || !endFrame ||
@@ -554,7 +554,7 @@ CopyPasteManager::SetSelectionDirection(nsDirection aDir)
 }
 
 nsIFrame*
-CopyPasteManager::FindFirstNodeWithFrame(bool aBackward, int* aOutOffset)
+CopyPasteManager::FindFirstNodeWithFrame(bool aBackward, int32_t* aOutOffset)
 {
   if (!mPresShell) {
     return nullptr;
