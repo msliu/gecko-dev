@@ -521,7 +521,7 @@ NS_IMPL_STATE_CLASS_GETTER(LongTapState)
 
 CopyPasteEventHub::CopyPasteEventHub()
   : mInitialized(false)
-  , mAsyncPanZoomEnabled(false)
+  , mUseAsyncPanZoom(false)
   , mState(NoActionState())
   , mPresShell(nullptr)
   , mPressPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE)
@@ -550,8 +550,9 @@ CopyPasteEventHub::Init(nsIPresShell* aPresShell)
     return;
   }
 
-  docShell->GetAsyncPanZoomEnabled(&mAsyncPanZoomEnabled);
-  mAsyncPanZoomEnabled = mAsyncPanZoomEnabled && gfxPrefs::AsyncPanZoomEnabled();
+#if defined(MOZ_WIDGET_GONK)
+  mUseAsyncPanZoom = gfxPrefs::AsyncPanZoomEnabled();
+#endif
 
   docShell->AddWeakReflowObserver(this);
   docShell->AddWeakScrollObserver(this);
@@ -771,7 +772,7 @@ CopyPasteEventHub::MoveDistanceIsLarge(const nsPoint& aPoint)
 void
 CopyPasteEventHub::LaunchLongTapInjector()
 {
-  if (mAsyncPanZoomEnabled) {
+  if (mUseAsyncPanZoom) {
     return;
   }
 
@@ -787,7 +788,7 @@ CopyPasteEventHub::LaunchLongTapInjector()
 void
 CopyPasteEventHub::CancelLongTapInjector()
 {
-  if (mAsyncPanZoomEnabled) {
+  if (mUseAsyncPanZoom) {
     return;
   }
 
