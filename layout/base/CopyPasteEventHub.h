@@ -102,8 +102,8 @@ protected:
 
   bool mInitialized;
 
-  // True if AsyncPanZoom is enabled
-  bool mAsyncPanZoomEnabled;
+  // True if async-pan-zoom should be used.
+  bool mUseAsyncPanZoom;
 
   State* mState;
 

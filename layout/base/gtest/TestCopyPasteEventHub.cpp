@@ -84,9 +84,9 @@ public:
     return reinterpret_cast<MockCopyPasteManager*>(mHandler.get());
   }
 
-  void SetAsyncPanZoomEnabled(bool aEnabled)
+  void SetUseAsyncPanZoom(bool aUseAsyncPanZoom)
   {
-    mAsyncPanZoomEnabled = aEnabled;
+    mUseAsyncPanZoom = aUseAsyncPanZoom;
   }
 };
 
@@ -551,7 +551,7 @@ CopyPasteEventHubTester::TestEventDrivenAsyncPanZoomScroll(
     EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd());
   }
 
-  mHub->SetAsyncPanZoomEnabled(true);
+  mHub->SetUseAsyncPanZoom(true);
 
   // Receive press event.
   HandleEventAndCheckState(aPressEventCreator(0, 0),
@@ -634,7 +634,7 @@ TEST_F(CopyPasteEventHubTester, TestNoEventAsyncPanZoomScroll)
     EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd());
   }
 
-  mHub->SetAsyncPanZoomEnabled(true);
+  mHub->SetUseAsyncPanZoom(true);
 
   check.Call("1");
 
