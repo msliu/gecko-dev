@@ -206,13 +206,13 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
 
   // XXX: Let's revise this duplicate code later.
   if (firstCaretResult == PositionChangedResult::Invisible) {
-    mFirstCaret->SetAppearance(Appearance::None);
+    mFirstCaret->SetAppearance(Appearance::NormalNotShown);
   } else if (firstCaretResult == PositionChangedResult::Changed) {
     mFirstCaret->SetAppearance(Appearance::Normal);
   }
 
   if (secondCaretResult == PositionChangedResult::Invisible) {
-    mSecondCaret->SetAppearance(Appearance::None);
+    mSecondCaret->SetAppearance(Appearance::NormalNotShown);
   } else if (secondCaretResult == PositionChangedResult::Changed) {
     mSecondCaret->SetAppearance(Appearance::Normal);
   }
