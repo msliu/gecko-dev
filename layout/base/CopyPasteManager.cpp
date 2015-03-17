@@ -927,7 +927,7 @@ CopyPasteManager::DispatchCaretStateChangedEvent(CaretChangedReason aReason)
     commonAncestorNode = sel->GetFrameSelection()->GetAncestorLimiter();
   }
 
-  nsRefPtr<DOMRect>domRect = new DOMRect(ToSupports(doc));
+  nsRefPtr<DOMRect> domRect = new DOMRect(ToSupports(doc));
   nsRect rect = nsContentUtils::GetSelectionBoundingRect(sel);
   if (commonAncestorNode) {
     nsIFrame* commonAncestorFrame = commonAncestorNode->AsContent()->GetPrimaryFrame();
@@ -945,6 +945,20 @@ CopyPasteManager::DispatchCaretStateChangedEvent(CaretChangedReason aReason)
   init.mReason = aReason;
   init.mCollapsed = sel->IsCollapsed();
   init.mCaretVisible = mFirstCaret->IsVisible() || mSecondCaret->IsVisible();
+
+  nsRefPtr<DOMRectList> caretRectList = new DOMRectList(ToSupports(doc));
+
+  auto setLayoutRectForCaret = [&caretRectList, &doc](AccessibleCaret& aCaret) {
+    if (aCaret.IsVisible()) {
+      nsRefPtr<DOMRect> caretRect = new DOMRect(ToSupports(doc));
+      caretRect->SetLayoutRect(aCaret.Rect());
+      caretRectList->Append(caretRect);
+    }
+  };
+
+  setLayoutRectForCaret(*mFirstCaret);
+  setLayoutRectForCaret(*mSecondCaret);
+  init.mCaretClientRects = caretRectList;
 
   nsRefPtr<CaretStateChangedEvent> event =
     CaretStateChangedEvent::Constructor(doc, NS_LITERAL_STRING("mozcaretstatechanged"), init);

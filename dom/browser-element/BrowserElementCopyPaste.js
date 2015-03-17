@@ -69,8 +69,20 @@ let CopyPasteAssistent = {
       reason: e.reason,
       collapsed: e.collapsed,
       caretVisible: e.caretVisible,
-      selectionVisible: e.selectionVisible
+      selectionVisible: e.selectionVisible,
+      caretRects: []
     };
+
+    for (var i = 0; i < e.caretClientRects.length; ++i) {
+      detail.caretRects.push({
+        width: e.caretClientRects[i].width,
+        height: e.caretClientRects[i].height,
+        top: e.caretClientRects[i].top,
+        bottom: e.caretClientRects[i].bottom,
+        left: e.caretClientRects[i].left,
+        right: e.caretClientRects[i].right,
+      });
+    }
 
     // Get correct geometry information if we have nested iframe.
     let currentWindow = e.target.defaultView;
@@ -80,6 +92,12 @@ let CopyPasteAssistent = {
       detail.rect.bottom += currentRect.top;
       detail.rect.left += currentRect.left;
       detail.rect.right += currentRect.left;
+      for (var i = 0; i < detail.caretRects.length; ++i) {
+        detail.caretRects[i].top += currentRect.top;
+        detail.caretRects[i].bottom += currentRect.top;
+        detail.caretRects[i].left += currentRect.left;
+        detail.caretRects[i].right += currentRect.left;
+      }
       currentWindow = currentWindow.realFrameElement.ownerDocument.defaultView;
     }
 

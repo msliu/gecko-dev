@@ -256,6 +256,12 @@ AccessibleCaret::LogicalPosition() const
   return mImaginaryCaretRect.Center();
 }
 
+nsRect
+AccessibleCaret::Rect() const
+{
+  return nsLayoutUtils::GetRectRelativeToFrame(CaretElement(), RootFrame());
+}
+
 /* static */ nsPoint
 AccessibleCaret::CaretElementPosition(const nsRect& aRect)
 {

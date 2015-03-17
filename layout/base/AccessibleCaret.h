@@ -60,6 +60,7 @@ public:
   // The geometry center of a imaginary caret to which this AccessibleCaret is
   // attached. It is needed when dragging the caret.
   nsPoint LogicalPosition() const;
+  nsRect Rect() const;
 
 private:
   void SetCaretElementPosition(nsIFrame* aFrame, const nsPoint& aPosition);
