@@ -187,23 +187,27 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
     return;
   }
 
+  auto updateSingleCaret = [](AccessibleCaret* aCaret, nsIFrame* aFrame,
+                              int32_t aOffset) -> PositionChangedResult {
+    PositionChangedResult result = aCaret->SetPosition(aFrame, aOffset);
+    switch (result) {
+    case PositionChangedResult::NotChanged:
+      // Do nothing
+      break;
+    case PositionChangedResult::Changed:
+      aCaret->SetAppearance(Appearance::Normal);
+      break;
+    case PositionChangedResult::Invisible:
+      aCaret->SetAppearance(Appearance::NormalNotShown);
+      break;
+    }
+    return result;
+  };
+
   PositionChangedResult firstCaretResult =
-    mFirstCaret->SetPosition(startFrame, startOffset);
+    updateSingleCaret(mFirstCaret.get(), startFrame, startOffset);
   PositionChangedResult secondCaretResult =
-    mSecondCaret->SetPosition(endFrame, endOffset);
-
-  // XXX: Let's revise this duplicate code later.
-  if (firstCaretResult == PositionChangedResult::Invisible) {
-    mFirstCaret->SetAppearance(Appearance::NormalNotShown);
-  } else if (firstCaretResult == PositionChangedResult::Changed) {
-    mFirstCaret->SetAppearance(Appearance::Normal);
-  }
-
-  if (secondCaretResult == PositionChangedResult::Invisible) {
-    mSecondCaret->SetAppearance(Appearance::NormalNotShown);
-  } else if (secondCaretResult == PositionChangedResult::Changed) {
-    mSecondCaret->SetAppearance(Appearance::Normal);
-  }
+    updateSingleCaret(mSecondCaret.get(), endFrame, endOffset);
 
   if (firstCaretResult == PositionChangedResult::Changed ||
       secondCaretResult == PositionChangedResult::Changed) {
