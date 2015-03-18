@@ -215,8 +215,13 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
     mPresShell->FlushPendingNotifications(Flush_Layout);
   }
 
-  if (firstCaretResult == PositionChangedResult::Changed ||
-      secondCaretResult == PositionChangedResult::Changed) {
+  UpdateCaretsForTilt();
+}
+
+void
+CopyPasteManager::UpdateCaretsForTilt()
+{
+  if (mFirstCaret->IsVisuallyVisible() && mSecondCaret->IsVisuallyVisible()) {
     if (mFirstCaret->Intersects(*mSecondCaret)) {
       if (mFirstCaret->LogicalPosition().x <=
           mSecondCaret->LogicalPosition().x) {
