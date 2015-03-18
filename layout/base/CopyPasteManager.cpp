@@ -149,10 +149,6 @@ CopyPasteManager::UpdateCaretsForCursorMode()
     return;
   }
 
-  if (frame->GetStateBits() & NS_FRAME_IS_DIRTY) {
-    mPresShell->FlushPendingNotifications(Flush_Layout);
-  }
-
   Element* editingHost = frame->GetContent()->GetEditingHost();
   if (!editingHost) {
     HideCarets();
@@ -189,11 +185,6 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
      nsLayoutUtils::CompareTreePosition(startFrame, endFrame) > 0) {
     HideCarets();
     return;
-  }
-
-  if ((startFrame->GetStateBits() & NS_FRAME_IS_DIRTY) ||
-      (endFrame->GetStateBits() & NS_FRAME_IS_DIRTY)) {
-    mPresShell->FlushPendingNotifications(Flush_Layout);
   }
 
   PositionChangedResult firstCaretResult =
