@@ -102,15 +102,17 @@ void
 CopyPasteManager::UpdateCarets()
 {
   mCaretMode = GetCaretMode();
-  if (mCaretMode == CaretMode::None) {
-    HideCarets();
-    return;
-  }
 
-  if (mCaretMode == CaretMode::Cursor) {
+  switch (mCaretMode) {
+  case CaretMode::None:
+    HideCarets();
+    break;
+  case CaretMode::Cursor:
     UpdateCaretsForCursorMode();
-  } else {
+    break;
+  case CaretMode::Selection:
     UpdateCaretsForSelectionMode();
+    break;
   }
 }
 
