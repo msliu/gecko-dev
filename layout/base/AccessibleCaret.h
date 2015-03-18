@@ -43,8 +43,8 @@ public:
     Left,
     Right
   };
-
-  bool IsVisible() const;
+  bool IsVisuallyVisible() const;
+  bool IsLogicallyVisible() const;
   void SetAppearance(Appearance aAppearance);
 
   enum class PositionChangedResult : uint8_t {

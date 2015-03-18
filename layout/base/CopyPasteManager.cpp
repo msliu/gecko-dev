@@ -397,7 +397,7 @@ CopyPasteManager::OnReflow()
     return;
   }
 
-  if (mFirstCaret->IsVisible() || mSecondCaret->IsVisible()) {
+  if (mFirstCaret->IsVisuallyVisible() || mSecondCaret->IsVisuallyVisible()) {
     UpdateCarets();
   }
 }
