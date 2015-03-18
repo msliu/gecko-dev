@@ -93,9 +93,11 @@ void
 CopyPasteManager::HideCarets()
 {
   CP_LOGV("%s", __FUNCTION__);
-  mFirstCaret->SetAppearance(Appearance::None);
-  mSecondCaret->SetAppearance(Appearance::None);
-  CancelTimeoutTimer();
+  if (mFirstCaret->IsLogicallyVisible() || mSecondCaret->IsLogicallyVisible()) {
+    mFirstCaret->SetAppearance(Appearance::None);
+    mSecondCaret->SetAppearance(Appearance::None);
+    CancelTimeoutTimer();
+  }
 }
 
 void
