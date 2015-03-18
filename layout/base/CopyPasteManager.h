@@ -67,6 +67,7 @@ protected:
 
   void UpdateCaretsForCursorMode();
   void UpdateCaretsForSelectionMode();
+  void UpdateCaretsForTilt();
 
   virtual bool ChangeFocus(nsIFrame* aFrame);
   virtual nsresult SelectWord(nsIFrame* aFrame, const nsPoint& aPoint);
