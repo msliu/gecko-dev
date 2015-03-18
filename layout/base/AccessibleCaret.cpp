@@ -48,9 +48,16 @@ AccessibleCaret::~AccessibleCaret()
 }
 
 bool
-AccessibleCaret::IsVisible() const
+AccessibleCaret::IsLogicallyVisible() const
 {
   return mAppearance != Appearance::None;
+}
+
+bool
+AccessibleCaret::IsVisuallyVisible() const
+{
+  return (mAppearance != Appearance::None) &&
+         (mAppearance != Appearance::NormalNotShown);
 }
 
 void
@@ -114,7 +121,7 @@ AccessibleCaret::Intersects(const AccessibleCaret& aCaret)
 {
   MOZ_ASSERT(mPresShell == aCaret.mPresShell);
 
-  if (!IsVisible() || !aCaret.IsVisible()) {
+  if (!IsVisuallyVisible() || !aCaret.IsVisuallyVisible()) {
     return false;
   }
 
@@ -126,7 +133,7 @@ AccessibleCaret::Intersects(const AccessibleCaret& aCaret)
 bool
 AccessibleCaret::Contains(const nsPoint& aPosition)
 {
-  if (!IsVisible()) {
+  if (!IsVisuallyVisible()) {
     return false;
   }
 
