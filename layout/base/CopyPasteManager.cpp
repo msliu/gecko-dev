@@ -107,11 +107,6 @@ CopyPasteManager::UpdateCarets()
     return;
   }
 
-  // XXX: Calling this to force generate nsTextFrame for contents which contains
-  // only newline in test_selectioncarets_multiplerange.html. It should be
-  // removed once we implement event dispatching to Gaia.
-  nsContentUtils::GetSelectionBoundingRect(GetSelection());
-
   if (mCaretMode == CaretMode::Cursor) {
     UpdateCaretsForCursorMode();
   } else {
@@ -769,12 +764,6 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
     return NS_ERROR_FAILURE;
   }
 
-  nsIFrame* anchorFrame;
-  selection->GetPrimaryFrameForAnchorNode(&anchorFrame);
-  if (!anchorFrame) {
-    return NS_ERROR_FAILURE;
-  }
-
   // Clear maintain selection so that we can drag caret freely.
   fs->MaintainSelection(eSelectNoAmount);
 
@@ -788,7 +777,9 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
     range->SetIsGenerated(true);
   }
 
-  // Move caret position.
+  nsIFrame* anchorFrame = nullptr;
+  selection->GetPrimaryFrameForAnchorNode(&anchorFrame);
+
   nsIFrame* scrollable =
     nsLayoutUtils::GetClosestFrameOfType(anchorFrame, nsGkAtoms::scrollFrame);
   nsWeakFrame weakScrollable = scrollable;
@@ -798,7 +789,7 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
                   false,
                   offsets.associate);
   if (!weakScrollable.IsAlive()) {
-    return NS_ERROR_FAILURE;
+    return NS_OK;
   }
 
   // Scroll scrolled frame.
