@@ -68,10 +68,10 @@ private:
   dom::Element* CaretElement() const;
 
   // Element which contains the caret image for 'Contains' test.
-  dom::Element* CaretElementInner() const;
+  dom::Element* CaretImageElement() const;
 
   nsIFrame* RootFrame() const;
-  nsIFrame* ElementContainerFrame() const;
+  nsIFrame* CustomContentContainerFrame() const;
 
   // Transform Appearance to CSS class name in ua.css.
   static nsString AppearanceString(Appearance aAppearance);
