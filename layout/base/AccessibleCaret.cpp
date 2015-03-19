@@ -111,7 +111,7 @@ AccessibleCaret::CaretElement() const
 }
 
 Element*
-AccessibleCaret::CaretElementInner() const
+AccessibleCaret::CaretImageElement() const
 {
   return CaretElement()->GetFirstElementChild();
 }
@@ -137,9 +137,12 @@ AccessibleCaret::Contains(const nsPoint& aPosition)
     return false;
   }
 
-  nsRect rect = nsLayoutUtils::GetRectRelativeToFrame(CaretElementInner(), RootFrame());
+  nsRect rect =
+    nsLayoutUtils::GetRectRelativeToFrame(CaretImageElement(), RootFrame());
+
   // Enlarge caret touch area to top of selection.
   rect.SetTopEdge(mImaginaryCaretRect.y);
+
   return rect.Contains(aPosition);
 }
 
@@ -163,16 +166,20 @@ AccessibleCaret::InjectCaretElement(nsIDocument* aDocument)
 already_AddRefed<Element>
 AccessibleCaret::CreateCaretElement(nsIDocument* aDocument) const
 {
-  nsCOMPtr<Element> element = aDocument->CreateHTMLElement(nsGkAtoms::div);
-  nsCOMPtr<Element> elementInner = aDocument->CreateHTMLElement(nsGkAtoms::div);
-  element->AppendChildTo(elementInner, false);
+  // Content structure of AccessibleCaret
+  // <div class="accessiblecaret">      <- CaretElement()
+  //   <div class="image">              <- CaretImageElement()
 
   ErrorResult rv;
-  element->SetAttribute(NS_LITERAL_STRING("class"),
-                        NS_LITERAL_STRING("moz-accessiblecaret none"), rv);
-  MOZ_ASSERT(!rv.Failed(), "Set default class attribute failed!");
+  nsCOMPtr<Element> parent = aDocument->CreateHTMLElement(nsGkAtoms::div);
+  parent->ClassList()->Add(NS_LITERAL_STRING("moz-accessiblecaret"), rv);
+  parent->ClassList()->Add(NS_LITERAL_STRING("none"), rv);
 
-  return element.forget();
+  nsCOMPtr<Element> image = aDocument->CreateHTMLElement(nsGkAtoms::div);
+  image->ClassList()->Add(NS_LITERAL_STRING("image"), rv);
+  parent->AppendChildTo(image, false);
+
+  return parent.forget();
 }
 
 void
@@ -251,7 +258,7 @@ AccessibleCaret::RootFrame() const
 }
 
 nsIFrame*
-AccessibleCaret::ElementContainerFrame() const
+AccessibleCaret::CustomContentContainerFrame() const
 {
   nsCanvasFrame* canvasFrame = mPresShell->GetCanvasFrame();
   Element* container = canvasFrame->GetCustomContentContainer();
@@ -277,7 +284,8 @@ AccessibleCaret::SetCaretElementPosition(nsIFrame* aFrame,
 {
   // Transform aPosition so that it relatives to containerFrame.
   nsPoint position = aPosition;
-  nsLayoutUtils::TransformPoint(aFrame, ElementContainerFrame(), position);
+  nsLayoutUtils::TransformPoint(aFrame, CustomContentContainerFrame(),
+                                position);
 
   nsAutoString styleStr;
   styleStr.AppendPrintf("left: %dpx; top: %dpx;",

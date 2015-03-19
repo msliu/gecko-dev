@@ -315,7 +315,7 @@ parsererror|sourcetext {
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret,
-div:-moz-native-anonymous.moz-accessiblecaret > div {
+div:-moz-native-anonymous.moz-accessiblecaret > div.image {
   position: absolute;
   width: 44px;
   height: 47px;
@@ -333,7 +333,7 @@ div:-moz-native-anonymous.moz-accessiblecaret {
   background-color: rgba(0, 0, 0, 0.3);
 }
 
-div:-moz-native-anonymous.moz-accessiblecaret > div {
+div:-moz-native-anonymous.moz-accessiblecaret > div.image {
   background-position: center center;
   background-size: 100% 100%;
   cursor: move;
@@ -342,17 +342,17 @@ div:-moz-native-anonymous.moz-accessiblecaret > div {
   background-color: rgba(0, 0, 0, 0.3);
 }
 
-div:-moz-native-anonymous.moz-accessiblecaret.normal > div {
+div:-moz-native-anonymous.moz-accessiblecaret.normal > div.image {
   background-image: url("resource://gre/res/text_caret.png");
   margin-left: 0px;
 }
 
-div:-moz-native-anonymous.moz-accessiblecaret.left > div {
+div:-moz-native-anonymous.moz-accessiblecaret.left > div.image {
   background-image: url("resource://gre/res/text_caret_tilt_left.png");
   margin-left: -17px;
 }
 
-div:-moz-native-anonymous.moz-accessiblecaret.right > div {
+div:-moz-native-anonymous.moz-accessiblecaret.right > div.image {
   background-image: url("resource://gre/res/text_caret_tilt_right.png");
   margin-left: 18px;
 }
@@ -362,43 +362,43 @@ div:-moz-native-anonymous.moz-accessiblecaret.none {
 }
 
 @media (min-resolution: 1.5dppx) {
-  div:-moz-native-anonymous.moz-accessiblecaret.normal > div {
+  div:-moz-native-anonymous.moz-accessiblecaret.normal > div.image {
     background-image: url("resource://gre/res/text_caret@1.5x.png");
   }
 
-  div:-moz-native-anonymous.moz-accessiblecaret.left > div {
+  div:-moz-native-anonymous.moz-accessiblecaret.left > div.image {
     background-image: url("resource://gre/res/text_caret_tilt_left@1.5x.png");
   }
 
-  div:-moz-native-anonymous.moz-accessiblecaret.right > div {
+  div:-moz-native-anonymous.moz-accessiblecaret.right > div.image {
     background-image: url("resource://gre/res/text_caret_tilt_right@1.5x.png");
   }
 }
 
 @media (min-resolution: 2dppx) {
-  div:-moz-native-anonymous.moz-accessiblecaret.normal > div {
+  div:-moz-native-anonymous.moz-accessiblecaret.normal > div.image {
     background-image: url("resource://gre/res/text_caret@2x.png");
   }
 
-  div:-moz-native-anonymous.moz-accessiblecaret.left > div {
+  div:-moz-native-anonymous.moz-accessiblecaret.left > div.image {
     background-image: url("resource://gre/res/text_caret_tilt_left@2x.png");
   }
 
-  div:-moz-native-anonymous.moz-accessiblecaret.right > div {
+  div:-moz-native-anonymous.moz-accessiblecaret.right > div.image {
     background-image: url("resource://gre/res/text_caret_tilt_right@2x.png");
   }
 }
 
 @media (min-resolution: 2.25dppx) {
-  div:-moz-native-anonymous.moz-accessiblecaret.normal > div {
+  div:-moz-native-anonymous.moz-accessiblecaret.normal > div.image {
     background-image: url("resource://gre/res/text_caret@2.25x.png");
   }
 
-  div:-moz-native-anonymous.moz-accessiblecaret.left > div {
+  div:-moz-native-anonymous.moz-accessiblecaret.left > div.image {
     background-image: url("resource://gre/res/text_caret_tilt_left@2.25x.png");
   }
 
-  div:-moz-native-anonymous.moz-accessiblecaret.right > div {
+  div:-moz-native-anonymous.moz-accessiblecaret.right > div.image {
     background-image: url("resource://gre/res/text_caret_tilt_right@2.25x.png");
   }
 }
