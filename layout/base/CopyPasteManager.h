@@ -76,6 +76,7 @@ protected:
   virtual nsIFrame* FindFirstNodeWithFrame(bool aBackward, int32_t* aOutOffset);
   virtual nsresult DragCaretInternal(const nsPoint& aPoint);
   nsPoint AdjustDragBoundary(const nsPoint& aPoint);
+  void ClearMaintainedSelection();
 
   // Utility functions
   dom::Selection* GetSelection();

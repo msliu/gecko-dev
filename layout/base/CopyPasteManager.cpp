@@ -540,12 +540,8 @@ CopyPasteManager::SelectWord(nsIFrame* aFrame, const nsPoint& aPoint)
 #endif
 
   SetSelectionDragState(false);
+  ClearMaintainedSelection();
 
-  // Clear maintain selection otherwise we cannot select less than a word
-  nsRefPtr<nsFrameSelection> fs = GetFrameSelection();
-  if (fs) {
-    fs->MaintainSelection(eSelectNoAmount);
-  }
   return rs;
 }
 
@@ -564,6 +560,17 @@ CopyPasteManager::SetSelectionDirection(nsDirection aDir)
   Selection* selection = GetSelection();
   if (selection) {
     selection->AdjustAnchorFocusForMultiRange(aDir);
+  }
+}
+
+void
+CopyPasteManager::ClearMaintainedSelection()
+{
+  // Selection made by double-clicking for example will maintain the original
+  // word selection. We should clear it so that we can drag caret freely.
+  nsRefPtr<nsFrameSelection> fs = GetFrameSelection();
+  if (fs) {
+    fs->MaintainSelection(eSelectNoAmount);
   }
 }
 
@@ -768,8 +775,7 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
     return NS_ERROR_FAILURE;
   }
 
-  // Clear maintain selection so that we can drag caret freely.
-  fs->MaintainSelection(eSelectNoAmount);
+  ClearMaintainedSelection();
 
   nsIFrame* anchorFrame = nullptr;
   selection->GetPrimaryFrameForAnchorNode(&anchorFrame);
