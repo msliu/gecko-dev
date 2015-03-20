@@ -161,6 +161,7 @@ CopyPasteManager::UpdateCaretsForCursorMode()
   // According to the spec, we need to explicitly hide it after the scrolling is
   // ended.
   mFirstCaret->SetPosition(frame, offset);
+  mFirstCaret->SetBarEnabled(false);
   if (nsContentUtils::HasNonEmptyTextContent(
         editingHost, nsContentUtils::eRecurseIntoChildren)) {
     mFirstCaret->SetAppearance(Appearance::Normal);
@@ -169,7 +170,6 @@ CopyPasteManager::UpdateCaretsForCursorMode()
     mFirstCaret->SetAppearance(Appearance::NormalNotShown);
   }
   mSecondCaret->SetAppearance(Appearance::None);
-
 }
 
 void
@@ -192,6 +192,7 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
   auto updateSingleCaret = [](AccessibleCaret* aCaret, nsIFrame* aFrame,
                               int32_t aOffset) -> PositionChangedResult {
     PositionChangedResult result = aCaret->SetPosition(aFrame, aOffset);
+    aCaret->SetBarEnabled(true);
     switch (result) {
     case PositionChangedResult::NotChanged:
       // Do nothing
