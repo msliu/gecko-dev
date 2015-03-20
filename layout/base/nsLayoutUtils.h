@@ -861,7 +861,8 @@ public:
                                           const nsRect& aRect);
 
   /**
-   * Clamp aRect to scroll frames boundary.
+   * Clamp aRect relative to aFrame to the scroll frames boundary searching from
+   * aFrame.
    */
   static nsRect ClampRectToScrollFrames(nsIFrame* aFrame,
                                         const nsRect& aRect);
