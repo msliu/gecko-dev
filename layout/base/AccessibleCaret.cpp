@@ -199,11 +199,10 @@ AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
   nsRect imaginaryCaretRectInFrame =
     nsCaret::GetGeometryForFrame(aFrame, aOffset, nullptr);
 
-  // Check if the caret rect is visible in scrollport.
-  bool imaginaryCaretRectVisible =
-    nsLayoutUtils::IsRectVisibleInScrollFrames(aFrame, imaginaryCaretRectInFrame);
+  imaginaryCaretRectInFrame =
+    nsLayoutUtils::ClampRectToScrollFrames(aFrame, imaginaryCaretRectInFrame);
 
-  if (!imaginaryCaretRectVisible) {
+  if (imaginaryCaretRectInFrame.IsEmpty()) {
     // Don't bother to set the caret position since it's invisible.
     return PositionChangedResult::Invisible;
   }
@@ -218,37 +217,9 @@ AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
   mImaginaryCaretRect = imaginaryCaretRect;
 
   nsPoint caretElementPosition = CaretElementPosition(imaginaryCaretRectInFrame);
-  caretElementPosition =
-    ClampPositionToScrollFrames(aFrame, caretElementPosition);
   SetCaretElementPosition(aFrame, caretElementPosition);
 
   return PositionChangedResult::Changed;
-}
-
-/* static */ nsPoint
-AccessibleCaret::ClampPositionToScrollFrames(nsIFrame* aFrame,
-                                             const nsPoint& aPosition)
-{
-  nsPoint position = aPosition;
-
-  nsIFrame* closestScrollFrame =
-    nsLayoutUtils::GetClosestFrameOfType(aFrame, nsGkAtoms::scrollFrame);
-
-  while (closestScrollFrame) {
-    nsIScrollableFrame* sf = do_QueryFrame(closestScrollFrame);
-    nsRect closestScrollPortRect = sf->GetScrollPortRect();
-
-    // Clamp the position in the scroll port.
-    nsLayoutUtils::TransformRect(closestScrollFrame, aFrame,
-                                 closestScrollPortRect);
-    position = closestScrollPortRect.ClampPoint(position);
-
-    // Get next ancestor scroll frame.
-    closestScrollFrame = nsLayoutUtils::GetClosestFrameOfType(
-      closestScrollFrame->GetParent(), nsGkAtoms::scrollFrame);
-  }
-
-  return position;
 }
 
 nsIFrame*
