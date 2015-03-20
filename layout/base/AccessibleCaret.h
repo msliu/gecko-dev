@@ -84,9 +84,6 @@ private:
   // attached.
   static nsPoint CaretElementPosition(const nsRect& aRect);
 
-  static nsPoint ClampPositionToScrollFrames(nsIFrame* aFrame,
-                                             const nsPoint& aPosition);
-
   class DummyTouchListener MOZ_FINAL : public nsIDOMEventListener
   {
   public:
