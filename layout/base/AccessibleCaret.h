@@ -62,7 +62,7 @@ public:
   nsPoint LogicalPosition() const;
 
 private:
-  void SetCaretElementPosition(nsIFrame* aFrame, const nsPoint& aPosition);
+  void SetCaretElementPosition(nsIFrame* aFrame, const nsRect& aRect);
 
   // Element for 'Intersects' test.
   dom::Element* CaretElement() const;
