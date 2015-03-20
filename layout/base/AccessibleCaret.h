@@ -46,6 +46,7 @@ public:
   bool IsVisuallyVisible() const;
   bool IsLogicallyVisible() const;
   void SetAppearance(Appearance aAppearance);
+  void SetBarEnabled(bool aEnabled);
 
   enum class PositionChangedResult : uint8_t {
     NotChanged,
@@ -63,12 +64,16 @@ public:
 
 private:
   void SetCaretElementPosition(nsIFrame* aFrame, const nsRect& aRect);
+  void SetCaretBarElementPosition(nsIFrame* aFrame, const nsRect& aRect);
 
-  // Element for 'Intersects' test.
+  // Element for 'Intersects' test. Container of image and bar elements.
   dom::Element* CaretElement() const;
 
   // Element which contains the caret image for 'Contains' test.
   dom::Element* CaretImageElement() const;
+
+  // Element which represents the text selection bar.
+  dom::Element* CaretBarElement() const;
 
   nsIFrame* RootFrame() const;
   nsIFrame* CustomContentContainerFrame() const;
@@ -99,6 +104,7 @@ private:
 
   // Member variables
   Appearance mAppearance;
+  bool mBarEnabled;
   nsIPresShell* mPresShell;
   nsRefPtr<dom::AnonymousContent> mCaretElementHolder;
   nsRect mImaginaryCaretRect;

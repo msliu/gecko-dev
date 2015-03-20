@@ -315,15 +315,20 @@ parsererror|sourcetext {
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret,
-div:-moz-native-anonymous.moz-accessiblecaret > div.image {
+div:-moz-native-anonymous.moz-accessiblecaret > div.image,
+div:-moz-native-anonymous.moz-accessiblecaret > div.bar {
   position: absolute;
-  width: 44px;
-  height: 47px;
   z-index: 2147483647;
 
   /* Override this property in moz-custom-content-container to make dummy touch
    * listener work. */
   pointer-events: auto;
+}
+
+div:-moz-native-anonymous.moz-accessiblecaret,
+div:-moz-native-anonymous.moz-accessiblecaret > div.image {
+  width: 44px;
+  height: 47px;
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret {
@@ -340,6 +345,16 @@ div:-moz-native-anonymous.moz-accessiblecaret > div.image {
 
   /* XXX: Remove this debug background-color when AccessibleCaret is ready. */
   background-color: rgba(0, 0, 0, 0.3);
+}
+
+div:-moz-native-anonymous.moz-accessiblecaret > div.bar {
+  margin-left: 22px;
+  width: 2px;
+  background-color: #008aa0;
+}
+
+div:-moz-native-anonymous.moz-accessiblecaret.nobar > div.bar {
+  display: none;
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret.normal > div.image {

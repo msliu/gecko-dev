@@ -29,6 +29,7 @@ NS_IMPL_ISUPPORTS(AccessibleCaret::DummyTouchListener, nsIDOMEventListener)
 
 AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
   : mAppearance(Appearance::None)
+  , mBarEnabled(false)
   , mPresShell(aPresShell)
   , mDummyTouchListener(new DummyTouchListener())
 {
@@ -82,6 +83,23 @@ AccessibleCaret::SetAppearance(Appearance aAppearance)
   }
 }
 
+void
+AccessibleCaret::SetBarEnabled(bool aEnabled)
+{
+  CP_LOG("%s, enabled %d", __FUNCTION__, aEnabled);
+
+  if (mBarEnabled == aEnabled) {
+    return;
+  }
+
+  ErrorResult rv;
+  CaretElement()->ClassList()->Toggle(NS_LITERAL_STRING("nobar"),
+                                      Optional<bool>(!aEnabled), rv);
+  MOZ_ASSERT(!rv.Failed());
+
+  mBarEnabled = aEnabled;
+}
+
 /* static */ nsString
 AccessibleCaret::AppearanceString(Appearance aAppearance)
 {
@@ -114,6 +132,12 @@ Element*
 AccessibleCaret::CaretImageElement() const
 {
   return CaretElement()->GetFirstElementChild();
+}
+
+Element*
+AccessibleCaret::CaretBarElement() const
+{
+  return CaretElement()->GetLastElementChild();
 }
 
 bool
@@ -169,15 +193,21 @@ AccessibleCaret::CreateCaretElement(nsIDocument* aDocument) const
   // Content structure of AccessibleCaret
   // <div class="accessiblecaret">      <- CaretElement()
   //   <div class="image">              <- CaretImageElement()
+  //   <div class="bar">                <- CaretBarElement()
 
   ErrorResult rv;
   nsCOMPtr<Element> parent = aDocument->CreateHTMLElement(nsGkAtoms::div);
   parent->ClassList()->Add(NS_LITERAL_STRING("moz-accessiblecaret"), rv);
   parent->ClassList()->Add(NS_LITERAL_STRING("none"), rv);
+  parent->ClassList()->Add(NS_LITERAL_STRING("nobar"), rv);
 
   nsCOMPtr<Element> image = aDocument->CreateHTMLElement(nsGkAtoms::div);
   image->ClassList()->Add(NS_LITERAL_STRING("image"), rv);
   parent->AppendChildTo(image, false);
+
+  nsCOMPtr<Element> bar = aDocument->CreateHTMLElement(nsGkAtoms::div);
+  bar->ClassList()->Add(NS_LITERAL_STRING("bar"), rv);
+  parent->AppendChildTo(bar, false);
 
   return parent.forget();
 }
@@ -217,6 +247,7 @@ AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
   mImaginaryCaretRect = imaginaryCaretRect;
 
   SetCaretElementPosition(aFrame, imaginaryCaretRectInFrame);
+  SetCaretBarElementPosition(aFrame, imaginaryCaretRectInFrame);
 
   return PositionChangedResult::Changed;
 }
@@ -266,6 +297,22 @@ AccessibleCaret::SetCaretElementPosition(nsIFrame* aFrame, const nsRect& aRect)
   MOZ_ASSERT(!rv.Failed());
 
   CP_LOG("Set caret style: %s", NS_ConvertUTF16toUTF8(styleStr).get());
+}
+
+void
+AccessibleCaret::SetCaretBarElementPosition(nsIFrame* aFrame,
+                                            const nsRect& aRect)
+{
+  int32_t height = nsPresContext::AppUnitsToIntCSSPixels(aRect.height);
+  nsAutoString barStyleStr;
+  barStyleStr.AppendPrintf("margin-top: -%dpx; height: %dpx;",
+                           height, height);
+
+  ErrorResult rv;
+  CaretBarElement()->SetAttribute(NS_LITERAL_STRING("style"), barStyleStr, rv);
+  MOZ_ASSERT(!rv.Failed());
+
+  CP_LOG("Set bar style: %s", NS_ConvertUTF16toUTF8(barStyleStr).get());
 }
 
 } // namespace mozilla
