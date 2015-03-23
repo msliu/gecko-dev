@@ -762,7 +762,7 @@ CopyPasteEventHub::HandleKeyboardEvent(WidgetKeyboardEvent* aEvent)
 }
 
 bool
-CopyPasteEventHub::MoveDistanceIsLarge(const nsPoint& aPoint)
+CopyPasteEventHub::MoveDistanceIsLarge(const nsPoint& aPoint) const
 {
   nsPoint delta = aPoint - mPressPoint;
   return NS_hypot(delta.x, delta.y) >
@@ -898,7 +898,7 @@ CopyPasteEventHub::NotifyBlur(bool aIsLeavingDocument)
 
 nsPoint
 CopyPasteEventHub::GetTouchEventPosition(WidgetTouchEvent* aEvent,
-                                         int32_t aIdentifier)
+                                         int32_t aIdentifier) const
 {
   for (dom::Touch* touch : aEvent->touches) {
     if (touch->Identifier() == aIdentifier) {
@@ -914,7 +914,7 @@ CopyPasteEventHub::GetTouchEventPosition(WidgetTouchEvent* aEvent,
 }
 
 nsPoint
-CopyPasteEventHub::GetMouseEventPosition(WidgetMouseEvent* aEvent)
+CopyPasteEventHub::GetMouseEventPosition(WidgetMouseEvent* aEvent) const
 {
   LayoutDeviceIntPoint mouseIntPoint = aEvent->AsGUIEvent()->refPoint;
 

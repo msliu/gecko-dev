@@ -65,14 +65,14 @@ public:
   }
 
   virtual nsPoint GetTouchEventPosition(WidgetTouchEvent* aEvent,
-                                        int32_t aIdentifier) override
+                                        int32_t aIdentifier) const override
   {
     // Return the device point directly.
     LayoutDeviceIntPoint touchIntPoint = aEvent->touches[0]->mRefPoint;
     return nsPoint(touchIntPoint.x, touchIntPoint.y);
   }
 
-  virtual nsPoint GetMouseEventPosition(WidgetMouseEvent* aEvent) override
+  virtual nsPoint GetMouseEventPosition(WidgetMouseEvent* aEvent) const override
   {
     // Return the device point directly.
     LayoutDeviceIntPoint mouseIntPoint = aEvent->AsGUIEvent()->refPoint;

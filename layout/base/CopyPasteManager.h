@@ -44,7 +44,7 @@ protected:
     Selection
   };
 
-  CaretMode GetCaretMode();
+  CaretMode GetCaretMode() const;
 
   virtual nsresult PressCaret(const nsPoint& aPoint);
   virtual nsresult DragCaret(const nsPoint& aPoint);
@@ -69,19 +69,18 @@ protected:
   void UpdateCaretsForSelectionMode();
   void UpdateCaretsForTilt();
 
-  virtual bool ChangeFocus(nsIFrame* aFrame);
-  virtual nsresult SelectWord(nsIFrame* aFrame, const nsPoint& aPoint);
-  virtual void SetSelectionDragState(bool aState);
-  virtual void SetSelectionDirection(nsDirection aDir);
-  virtual nsIFrame* FindFirstNodeWithFrame(bool aBackward, int32_t* aOutOffset);
-  virtual nsresult DragCaretInternal(const nsPoint& aPoint);
-  nsPoint AdjustDragBoundary(const nsPoint& aPoint);
-  void ClearMaintainedSelection();
+  bool ChangeFocus(nsIFrame* aFrame) const;
+  nsresult SelectWord(nsIFrame* aFrame, const nsPoint& aPoint) const;
+  void SetSelectionDragState(bool aState) const;
+  void SetSelectionDirection(nsDirection aDir) const;
+  nsIFrame* FindFirstNodeWithFrame(bool aBackward, int32_t* aOutOffset) const;
+  nsresult DragCaretInternal(const nsPoint& aPoint);
+  nsPoint AdjustDragBoundary(const nsPoint& aPoint) const;
+  void ClearMaintainedSelection() const;
 
-  // Utility functions
-  dom::Selection* GetSelection();
-  already_AddRefed<nsFrameSelection> GetFrameSelection();
-  nsIContent* GetFocusedContent();
+  dom::Selection* GetSelection() const;
+  already_AddRefed<nsFrameSelection> GetFrameSelection() const;
+  nsIContent* GetFocusedContent() const;
 
   /*
    * If we're dragging start caret, we do not want to drag over previous
@@ -90,7 +89,7 @@ protected:
    */
   bool CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffsets);
 
-  uint32_t CaretTimeoutMs();
+  uint32_t CaretTimeoutMs() const;
   void LaunchTimeoutTimer();
   void CancelTimeoutTimer();
 

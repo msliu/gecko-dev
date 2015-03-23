@@ -428,7 +428,7 @@ CopyPasteManager::OnKeyboardEvent()
 }
 
 nsIContent*
-CopyPasteManager::GetFocusedContent()
+CopyPasteManager::GetFocusedContent() const
 {
   nsFocusManager* fm = nsFocusManager::GetFocusManager();
   MOZ_ASSERT(fm);
@@ -436,7 +436,7 @@ CopyPasteManager::GetFocusedContent()
 }
 
 Selection*
-CopyPasteManager::GetSelection()
+CopyPasteManager::GetSelection() const
 {
   nsRefPtr<nsFrameSelection> fs = GetFrameSelection();
   if (!fs) {
@@ -446,7 +446,7 @@ CopyPasteManager::GetSelection()
 }
 
 already_AddRefed<nsFrameSelection>
-CopyPasteManager::GetFrameSelection()
+CopyPasteManager::GetFrameSelection() const
 {
   nsIContent* focusedContent = GetFocusedContent();
   if (focusedContent) {
@@ -470,7 +470,7 @@ CopyPasteManager::GetFrameSelection()
 }
 
 CopyPasteManager::CaretMode
-CopyPasteManager::GetCaretMode()
+CopyPasteManager::GetCaretMode() const
 {
   Selection* selection = GetSelection();
   if (!selection) {
@@ -490,7 +490,7 @@ CopyPasteManager::GetCaretMode()
 }
 
 bool
-CopyPasteManager::ChangeFocus(nsIFrame* aFrame)
+CopyPasteManager::ChangeFocus(nsIFrame* aFrame) const
 {
   nsIFrame* currFrame = aFrame;
   nsIContent* newFocusContent = nullptr;
@@ -526,7 +526,7 @@ CopyPasteManager::ChangeFocus(nsIFrame* aFrame)
 }
 
 nsresult
-CopyPasteManager::SelectWord(nsIFrame* aFrame, const nsPoint& aPoint)
+CopyPasteManager::SelectWord(nsIFrame* aFrame, const nsPoint& aPoint) const
 {
   SetSelectionDragState(true);
   nsFrame* frame = static_cast<nsFrame*>(aFrame);
@@ -547,7 +547,7 @@ CopyPasteManager::SelectWord(nsIFrame* aFrame, const nsPoint& aPoint)
 }
 
 void
-CopyPasteManager::SetSelectionDragState(bool aState)
+CopyPasteManager::SetSelectionDragState(bool aState) const
 {
   nsRefPtr<nsFrameSelection> fs = GetFrameSelection();
   if (fs) {
@@ -556,7 +556,7 @@ CopyPasteManager::SetSelectionDragState(bool aState)
 }
 
 void
-CopyPasteManager::SetSelectionDirection(nsDirection aDir)
+CopyPasteManager::SetSelectionDirection(nsDirection aDir) const
 {
   Selection* selection = GetSelection();
   if (selection) {
@@ -565,7 +565,7 @@ CopyPasteManager::SetSelectionDirection(nsDirection aDir)
 }
 
 void
-CopyPasteManager::ClearMaintainedSelection()
+CopyPasteManager::ClearMaintainedSelection() const
 {
   // Selection made by double-clicking for example will maintain the original
   // word selection. We should clear it so that we can drag caret freely.
@@ -576,7 +576,7 @@ CopyPasteManager::ClearMaintainedSelection()
 }
 
 nsIFrame*
-CopyPasteManager::FindFirstNodeWithFrame(bool aBackward, int32_t* aOutOffset)
+CopyPasteManager::FindFirstNodeWithFrame(bool aBackward, int32_t* aOutOffset) const
 {
   if (!mPresShell) {
     return nullptr;
@@ -803,7 +803,7 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
 }
 
 nsPoint
-CopyPasteManager::AdjustDragBoundary(const nsPoint& aPoint)
+CopyPasteManager::AdjustDragBoundary(const nsPoint& aPoint) const
 {
   // Bug 1068474: Adjust the Y-coordinate so that the carets won't be in tilt
   // mode when a caret is being dragged surpass the other caret.
@@ -832,7 +832,7 @@ CopyPasteManager::AdjustDragBoundary(const nsPoint& aPoint)
 }
 
 uint32_t
-CopyPasteManager::CaretTimeoutMs()
+CopyPasteManager::CaretTimeoutMs() const
 {
   static bool added = false;
   static uint32_t caretTimeoutMs = 0;
