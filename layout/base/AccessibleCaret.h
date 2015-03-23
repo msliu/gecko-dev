@@ -30,7 +30,7 @@ class Element;
 
 // All the rect or point used are relative to root frame except being specified
 // explicitly.
-class AccessibleCaret MOZ_FINAL
+class AccessibleCaret final
 {
 public:
   explicit AccessibleCaret(nsIPresShell* aPresShell);
@@ -89,11 +89,11 @@ private:
   // attached.
   static nsPoint CaretElementPosition(const nsRect& aRect);
 
-  class DummyTouchListener MOZ_FINAL : public nsIDOMEventListener
+  class DummyTouchListener final : public nsIDOMEventListener
   {
   public:
     NS_DECL_ISUPPORTS
-    NS_IMETHOD HandleEvent(nsIDOMEvent* aEvent) MOZ_OVERRIDE
+    NS_IMETHOD HandleEvent(nsIDOMEvent* aEvent) override
     {
       return NS_OK;
     }
