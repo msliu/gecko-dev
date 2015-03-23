@@ -119,6 +119,8 @@ public:
   NS_IMPL_STATE_UTILITIES(ScrollState)
 
   virtual void OnScrollEnd(CopyPasteEventHub* aContext) override;
+  virtual void OnBlur(CopyPasteEventHub* aContext,
+                      bool aIsLeavingDocument) override;
 };
 
 //
@@ -136,6 +138,8 @@ public:
   virtual void OnScrollStart(CopyPasteEventHub* aContext) override;
   virtual void OnScrollEnd(CopyPasteEventHub* aContext) override;
   virtual void OnScrolling(CopyPasteEventHub* aContext) override;
+  virtual void OnBlur(CopyPasteEventHub* aContext,
+                      bool aIsLeavingDocument) override;
   virtual void Enter(CopyPasteEventHub* aContext) override;
   virtual void Leave(CopyPasteEventHub* aContext) override;
 };
@@ -426,6 +430,16 @@ CopyPasteEventHub::ScrollState::OnScrollEnd(CopyPasteEventHub* aContext)
   aContext->SetState(aContext->PostScrollState());
 }
 
+void
+CopyPasteEventHub::ScrollState::OnBlur(CopyPasteEventHub* aContext,
+                                       bool aIsLeavingDocument)
+{
+  aContext->mHandler->OnBlur();
+  if (aIsLeavingDocument) {
+    aContext->SetState(aContext->NoActionState());
+  }
+}
+
 nsEventStatus
 CopyPasteEventHub::PostScrollState::OnPress(CopyPasteEventHub* aContext,
                                             const nsPoint& aPoint,
@@ -454,6 +468,16 @@ CopyPasteEventHub::PostScrollState::OnScrolling(CopyPasteEventHub* aContext)
 {
   // Momentum scroll by wheel event.
   aContext->LaunchScrollEndInjector();
+}
+
+void
+CopyPasteEventHub::PostScrollState::OnBlur(CopyPasteEventHub* aContext,
+                                           bool aIsLeavingDocument)
+{
+  aContext->mHandler->OnBlur();
+  if (aIsLeavingDocument) {
+    aContext->SetState(aContext->NoActionState());
+  }
 }
 
 void

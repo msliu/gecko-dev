@@ -45,6 +45,7 @@ public:
   MOCK_METHOD0(OnScrollEnd, void());
   MOCK_METHOD0(OnScrolling, void());
   MOCK_METHOD0(OnScrollPositionChanged, void());
+  MOCK_METHOD0(OnBlur, void());
 };
 
 class MockCopyPasteEventHub : public CopyPasteEventHub
@@ -660,6 +661,53 @@ TEST_F(CopyPasteEventHubTester, TestNoEventAsyncPanZoomScroll)
 
   // Simulate scroll end fired by timer.
   MockCopyPasteEventHub::FireScrollEnd(nullptr, mHub);
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::NoActionState());
+}
+
+TEST_F(CopyPasteEventHubTester, TestAsyncPanZoomScrollStartedThenBlur)
+{
+  {
+    InSequence dummy;
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollStart());
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd()).Times(0);
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnBlur());
+  }
+
+  mHub->SetUseAsyncPanZoom(true);
+
+  mHub->AsyncPanZoomStarted(CSSIntPoint(150, 150));
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+
+  mHub->ScrollPositionChanged();
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+
+  mHub->NotifyBlur(true);
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::NoActionState());
+}
+
+TEST_F(CopyPasteEventHubTester, TestAsyncPanZoomScrollEndedThenBlur)
+{
+  {
+    InSequence dummy;
+
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollStart());
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd()).Times(0);
+    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnBlur());
+  }
+
+  mHub->SetUseAsyncPanZoom(true);
+
+  mHub->AsyncPanZoomStarted(CSSIntPoint(150, 150));
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+
+  mHub->ScrollPositionChanged();
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+
+  mHub->AsyncPanZoomStopped(CSSIntPoint(200, 200));
+  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::PostScrollState());
+
+  mHub->NotifyBlur(true);
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::NoActionState());
 }
 
