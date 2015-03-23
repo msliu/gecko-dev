@@ -164,9 +164,6 @@ AccessibleCaret::Contains(const nsPoint& aPosition)
   nsRect rect =
     nsLayoutUtils::GetRectRelativeToFrame(CaretImageElement(), RootFrame());
 
-  // Enlarge caret touch area to top of selection.
-  rect.SetTopEdge(mImaginaryCaretRect.y);
-
   return rect.Contains(aPosition);
 }
 
