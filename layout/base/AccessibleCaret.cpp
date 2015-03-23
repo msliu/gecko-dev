@@ -141,7 +141,7 @@ AccessibleCaret::CaretBarElement() const
 }
 
 bool
-AccessibleCaret::Intersects(const AccessibleCaret& aCaret)
+AccessibleCaret::Intersects(const AccessibleCaret& aCaret) const
 {
   MOZ_ASSERT(mPresShell == aCaret.mPresShell);
 
@@ -155,7 +155,7 @@ AccessibleCaret::Intersects(const AccessibleCaret& aCaret)
 }
 
 bool
-AccessibleCaret::Contains(const nsPoint& aPosition)
+AccessibleCaret::Contains(const nsPoint& aPosition) const
 {
   if (!IsVisuallyVisible()) {
     return false;

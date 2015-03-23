@@ -87,10 +87,10 @@ protected:
   nsEventStatus HandleKeyboardEvent(WidgetKeyboardEvent* aEvent);
 
   virtual nsPoint GetTouchEventPosition(WidgetTouchEvent* aEvent,
-                                        int32_t aIdentifier);
-  virtual nsPoint GetMouseEventPosition(WidgetMouseEvent* aEvent);
+                                        int32_t aIdentifier) const;
+  virtual nsPoint GetMouseEventPosition(WidgetMouseEvent* aEvent) const;
 
-  bool MoveDistanceIsLarge(const nsPoint& aPoint);
+  bool MoveDistanceIsLarge(const nsPoint& aPoint) const;
 
   void LaunchLongTapInjector();
   void CancelLongTapInjector();
@@ -100,6 +100,7 @@ protected:
   void CancelScrollEndInjector();
   static void FireScrollEnd(nsITimer* aTimer, void* aCopyPasteEventHub);
 
+  // Member variables
   bool mInitialized;
 
   // True if async-pan-zoom should be used.

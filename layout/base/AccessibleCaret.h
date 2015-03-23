@@ -55,8 +55,8 @@ public:
   };
   PositionChangedResult SetPosition(nsIFrame* aFrame, int32_t aOffset);
 
-  bool Intersects(const AccessibleCaret& rhs);
-  bool Contains(const nsPoint& aPosition);
+  bool Intersects(const AccessibleCaret& rhs) const;
+  bool Contains(const nsPoint& aPosition) const;
 
   // The geometry center of a imaginary caret to which this AccessibleCaret is
   // attached. It is needed when dragging the caret.
