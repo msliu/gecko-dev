@@ -65,14 +65,14 @@ public:
   }
 
   virtual nsPoint GetTouchEventPosition(WidgetTouchEvent* aEvent,
-                                        int32_t aIdentifier) MOZ_OVERRIDE
+                                        int32_t aIdentifier) override
   {
     // Return the device point directly.
     LayoutDeviceIntPoint touchIntPoint = aEvent->touches[0]->mRefPoint;
     return nsPoint(touchIntPoint.x, touchIntPoint.y);
   }
 
-  virtual nsPoint GetMouseEventPosition(WidgetMouseEvent* aEvent) MOZ_OVERRIDE
+  virtual nsPoint GetMouseEventPosition(WidgetMouseEvent* aEvent) override
   {
     // Return the device point directly.
     LayoutDeviceIntPoint mouseIntPoint = aEvent->AsGUIEvent()->refPoint;

@@ -49,9 +49,9 @@ public:
   NS_DECL_NSISELECTIONLISTENER
 
   // nsIScrollObserver
-  virtual void ScrollPositionChanged() MOZ_OVERRIDE;
-  virtual void AsyncPanZoomStarted(const CSSIntPoint aScrollPos) MOZ_OVERRIDE;
-  virtual void AsyncPanZoomStopped(const CSSIntPoint aScrollPos) MOZ_OVERRIDE;
+  virtual void ScrollPositionChanged() override;
+  virtual void AsyncPanZoomStarted(const CSSIntPoint aScrollPos) override;
+  virtual void AsyncPanZoomStopped(const CSSIntPoint aScrollPos) override;
 
   // Base state
   class State;

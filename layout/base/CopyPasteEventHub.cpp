@@ -45,17 +45,17 @@ public:
 
   virtual nsEventStatus OnPress(CopyPasteEventHub* aContext,
                                 const nsPoint& aPoint,
-                                int32_t aTouchId) MOZ_OVERRIDE;
-  virtual void OnScrollStart(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
-  virtual void OnScrolling(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
-  virtual void OnScrollPositionChanged(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+                                int32_t aTouchId) override;
+  virtual void OnScrollStart(CopyPasteEventHub* aContext) override;
+  virtual void OnScrolling(CopyPasteEventHub* aContext) override;
+  virtual void OnScrollPositionChanged(CopyPasteEventHub* aContext) override;
   virtual void OnSelectionChanged(CopyPasteEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
-                                  int16_t aReason) MOZ_OVERRIDE;
+                                  int16_t aReason) override;
   virtual void OnBlur(CopyPasteEventHub* aContext,
-                      bool aIsLeavingDocument) MOZ_OVERRIDE;
-  virtual void OnReflow(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
-  virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+                      bool aIsLeavingDocument) override;
+  virtual void OnReflow(CopyPasteEventHub* aContext) override;
+  virtual void Enter(CopyPasteEventHub* aContext) override;
 };
 
 //
@@ -67,10 +67,10 @@ public:
   NS_IMPL_STATE_UTILITIES(PressCaretState)
 
   virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
-                               const nsPoint& aPoint) MOZ_OVERRIDE;
-  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+                               const nsPoint& aPoint) override;
+  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) override;
   virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
-                                  const nsPoint& aPoint) MOZ_OVERRIDE;
+                                  const nsPoint& aPoint) override;
 };
 
 //
@@ -82,8 +82,8 @@ public:
   NS_IMPL_STATE_UTILITIES(DragCaretState)
 
   virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
-                               const nsPoint& aPoint) MOZ_OVERRIDE;
-  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+                               const nsPoint& aPoint) override;
+  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) override;
 };
 
 //
@@ -95,19 +95,19 @@ public:
   NS_IMPL_STATE_UTILITIES(PressNoCaretState)
 
   virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
-                               const nsPoint& aPoint) MOZ_OVERRIDE;
-  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+                               const nsPoint& aPoint) override;
+  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) override;
   virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
-                                  const nsPoint& aPoint) MOZ_OVERRIDE;
-  virtual void OnScrollStart(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+                                  const nsPoint& aPoint) override;
+  virtual void OnScrollStart(CopyPasteEventHub* aContext) override;
   virtual void OnBlur(CopyPasteEventHub* aContext,
-                      bool aIsLeavingDocument) MOZ_OVERRIDE;
+                      bool aIsLeavingDocument) override;
   virtual void OnSelectionChanged(CopyPasteEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
-                                  int16_t aReason) MOZ_OVERRIDE;
-  virtual void OnReflow(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
-  virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
-  virtual void Leave(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+                                  int16_t aReason) override;
+  virtual void OnReflow(CopyPasteEventHub* aContext) override;
+  virtual void Enter(CopyPasteEventHub* aContext) override;
+  virtual void Leave(CopyPasteEventHub* aContext) override;
 };
 
 //
@@ -118,7 +118,7 @@ class CopyPasteEventHub::ScrollState : public CopyPasteEventHub::State
 public:
   NS_IMPL_STATE_UTILITIES(ScrollState)
 
-  virtual void OnScrollEnd(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+  virtual void OnScrollEnd(CopyPasteEventHub* aContext) override;
 };
 
 //
@@ -132,12 +132,12 @@ public:
 
   virtual nsEventStatus OnPress(CopyPasteEventHub* aContext,
                                 const nsPoint& aPoint,
-                                int32_t aTouchId) MOZ_OVERRIDE;
-  virtual void OnScrollStart(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
-  virtual void OnScrollEnd(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
-  virtual void OnScrolling(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
-  virtual void Enter(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
-  virtual void Leave(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+                                int32_t aTouchId) override;
+  virtual void OnScrollStart(CopyPasteEventHub* aContext) override;
+  virtual void OnScrollEnd(CopyPasteEventHub* aContext) override;
+  virtual void OnScrolling(CopyPasteEventHub* aContext) override;
+  virtual void Enter(CopyPasteEventHub* aContext) override;
+  virtual void Leave(CopyPasteEventHub* aContext) override;
 };
 
 class CopyPasteEventHub::LongTapState : public CopyPasteEventHub::State
@@ -146,8 +146,8 @@ public:
   NS_IMPL_STATE_UTILITIES(LongTapState)
 
   virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
-                                  const nsPoint& aPoint) MOZ_OVERRIDE;
-  virtual void OnReflow(CopyPasteEventHub* aContext) MOZ_OVERRIDE;
+                                  const nsPoint& aPoint) override;
+  virtual void OnReflow(CopyPasteEventHub* aContext) override;
 };
 
 //
