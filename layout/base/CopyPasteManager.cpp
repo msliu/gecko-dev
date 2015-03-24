@@ -37,8 +37,7 @@ using Appearance = AccessibleCaret::Appearance;
 using PositionChangedResult = AccessibleCaret::PositionChangedResult;
 
 CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
-  : mOffsetYToCaretLogicalPosition(0)
-  , mPresShell(aPresShell)
+  : mPresShell(aPresShell)
   , mActiveCaret(nullptr)
   , mCaretMode(CaretMode::None)
 {
@@ -255,8 +254,7 @@ CopyPasteManager::PressCaret(const nsPoint& aPoint)
   }
 
   if (mActiveCaret) {
-    mOffsetYToCaretLogicalPosition =
-      mActiveCaret->LogicalPosition().y - aPoint.y;
+    mOffsetToCaretLogicalPosition = mActiveCaret->LogicalPosition() - aPoint;
     SetSelectionDragState(true);
     CancelTimeoutTimer();
     rv = NS_OK;
@@ -271,9 +269,22 @@ CopyPasteManager::DragCaret(const nsPoint& aPoint)
   MOZ_ASSERT(mActiveCaret);
   MOZ_ASSERT(GetCaretMode() != CaretMode::None);
 
-  nsPoint point(aPoint.x, aPoint.y + mOffsetYToCaretLogicalPosition);
-  DragCaretInternal(point);
+  Appearance oldAppearance = mActiveCaret->GetAppearance();
+  DragCaretInternal(aPoint + mOffsetToCaretLogicalPosition);
   UpdateCarets();
+
+  // Adjust mOffsetToCaretLogicalPosition when the appearance of the active
+  // caret changing from tilt to normal.
+  Appearance newAppearance = mActiveCaret->GetAppearance();
+  if ((oldAppearance == Appearance::Left || oldAppearance == Appearance::Right) &&
+      (newAppearance == Appearance::Normal)) {
+    nsIFrame* frame = mActiveCaret->CaretElement()->GetPrimaryFrame();
+    if (frame) {
+      nsPoint clampPoint = frame->GetRect().ClampPoint(aPoint);
+      mOffsetToCaretLogicalPosition = mActiveCaret->LogicalPosition() - clampPoint;
+    }
+  }
+
   return NS_OK;
 }
 

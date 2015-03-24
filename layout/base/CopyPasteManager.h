@@ -94,7 +94,7 @@ protected:
   void CancelTimeoutTimer();
 
   // Member variables
-  nscoord mOffsetYToCaretLogicalPosition;
+  nsPoint mOffsetToCaretLogicalPosition{NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE};
   nsIPresShell* mPresShell;
   UniquePtr<AccessibleCaret> mFirstCaret;
   UniquePtr<AccessibleCaret> mSecondCaret;

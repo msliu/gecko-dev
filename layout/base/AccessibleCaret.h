@@ -45,6 +45,7 @@ public:
   };
   bool IsVisuallyVisible() const;
   bool IsLogicallyVisible() const;
+  Appearance GetAppearance() const;
   void SetAppearance(Appearance aAppearance);
   void SetBarEnabled(bool aEnabled);
 
@@ -62,12 +63,12 @@ public:
   // attached. It is needed when dragging the caret.
   nsPoint LogicalPosition() const;
 
+  // Element for 'Intersects' test. Container of image and bar elements.
+  dom::Element* CaretElement() const;
+
 private:
   void SetCaretElementPosition(nsIFrame* aFrame, const nsRect& aRect);
   void SetCaretBarElementPosition(nsIFrame* aFrame, const nsRect& aRect);
-
-  // Element for 'Intersects' test. Container of image and bar elements.
-  dom::Element* CaretElement() const;
 
   // Element which contains the caret image for 'Contains' test.
   dom::Element* CaretImageElement() const;

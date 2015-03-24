@@ -61,6 +61,12 @@ AccessibleCaret::IsVisuallyVisible() const
          (mAppearance != Appearance::NormalNotShown);
 }
 
+AccessibleCaret::Appearance
+AccessibleCaret::GetAppearance() const
+{
+  return mAppearance;
+}
+
 void
 AccessibleCaret::SetAppearance(Appearance aAppearance)
 {
