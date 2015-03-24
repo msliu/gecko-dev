@@ -95,15 +95,15 @@ protected:
 
   // Member variables
   nsPoint mOffsetToCaretLogicalPosition{NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE};
-  nsIPresShell* mPresShell;
+  nsIPresShell* mPresShell = nullptr;
   UniquePtr<AccessibleCaret> mFirstCaret;
   UniquePtr<AccessibleCaret> mSecondCaret;
 
   // The caret being pressed or dragged.
-  AccessibleCaret* mActiveCaret;
+  AccessibleCaret* mActiveCaret = nullptr;
 
   nsCOMPtr<nsITimer> mCaretTimeoutTimer;
-  CaretMode mCaretMode;
+  CaretMode mCaretMode = CaretMode::None;
 
   static const int32_t kAutoScrollTimerDelay = 30;
   friend class CopyPasteEventHub;
