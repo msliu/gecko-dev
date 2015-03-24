@@ -28,10 +28,7 @@ using namespace dom;
 NS_IMPL_ISUPPORTS(AccessibleCaret::DummyTouchListener, nsIDOMEventListener)
 
 AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
-  : mAppearance(Appearance::None)
-  , mBarEnabled(false)
-  , mPresShell(aPresShell)
-  , mDummyTouchListener(new DummyTouchListener())
+  : mPresShell(aPresShell)
 {
   // Check all resources required.
   MOZ_ASSERT(mPresShell);

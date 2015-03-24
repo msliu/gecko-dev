@@ -38,8 +38,6 @@ using PositionChangedResult = AccessibleCaret::PositionChangedResult;
 
 CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
   : mPresShell(aPresShell)
-  , mActiveCaret(nullptr)
-  , mCaretMode(CaretMode::None)
 {
   if (mPresShell) {
     mFirstCaret = MakeUnique<AccessibleCaret>(mPresShell);

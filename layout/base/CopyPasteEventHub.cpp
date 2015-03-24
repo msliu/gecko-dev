@@ -544,12 +544,6 @@ NS_IMPL_STATE_CLASS_GETTER(PostScrollState)
 NS_IMPL_STATE_CLASS_GETTER(LongTapState)
 
 CopyPasteEventHub::CopyPasteEventHub()
-  : mInitialized(false)
-  , mUseAsyncPanZoom(false)
-  , mState(NoActionState())
-  , mPresShell(nullptr)
-  , mPressPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE)
-  , mActiveTouchId(kInvalidTouchId)
 {
 }
 

@@ -11,6 +11,7 @@
 #include "mozilla/UniquePtr.h"
 #include "mozilla/WeakPtr.h"
 #include "nsCOMPtr.h"
+#include "nsIFrame.h"
 #include "nsIReflowObserver.h"
 #include "nsIScrollObserver.h"
 #include "nsISelectionListener.h"
@@ -101,14 +102,14 @@ protected:
   static void FireScrollEnd(nsITimer* aTimer, void* aCopyPasteEventHub);
 
   // Member variables
-  bool mInitialized;
+  bool mInitialized = false;
 
   // True if async-pan-zoom should be used.
-  bool mUseAsyncPanZoom;
+  bool mUseAsyncPanZoom = false;
 
-  State* mState;
+  State* mState = NoActionState();
 
-  nsIPresShell* mPresShell;
+  nsIPresShell* mPresShell = nullptr;
 
   UniquePtr<CopyPasteManager> mHandler;
 
@@ -122,10 +123,10 @@ protected:
   nsCOMPtr<nsITimer> mScrollEndInjectorTimer;
 
   // Last mouse button down event or touch start event point.
-  nsPoint mPressPoint;
+  nsPoint mPressPoint{NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE};
 
   // For filter multitouch event
-  int32_t mActiveTouchId;
+  int32_t mActiveTouchId = kInvalidTouchId;
 
   static const int32_t kScrollEndTimerDelay = 300;
   static const int32_t kMoveStartToleranceInPixel = 5;

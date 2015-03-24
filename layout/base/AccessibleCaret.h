@@ -104,16 +104,15 @@ private:
   };
 
   // Member variables
-  Appearance mAppearance;
-  bool mBarEnabled;
-  nsIPresShell* mPresShell;
+  Appearance mAppearance = Appearance::None;
+  bool mBarEnabled = false;
+  nsIPresShell* mPresShell = nullptr;
   nsRefPtr<dom::AnonymousContent> mCaretElementHolder;
   nsRect mImaginaryCaretRect;
 
   // A no-op touch-start listener which prevents APZ from panning when dragging
   // the caret.
-  nsRefPtr<DummyTouchListener> mDummyTouchListener;
-
+  nsRefPtr<DummyTouchListener> mDummyTouchListener{new DummyTouchListener()};
 
 }; // class AccessibleCaret
 
