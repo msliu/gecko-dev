@@ -600,7 +600,7 @@ CopyPasteManager::FindFirstNodeWithFrame(bool aBackward, int32_t* aOutOffset) co
   nsRefPtr<nsINode> endNode =
     aBackward ? range->GetStartParent() : range->GetEndParent();
   int32_t offset = aBackward ? range->EndOffset() : range->StartOffset();
-  nsIContent* startContent = startNode->AsContent();
+  nsCOMPtr<nsIContent> startContent = do_QueryInterface(startNode);
   CaretAssociationHint hintStart =
     aBackward ? CARET_ASSOCIATE_BEFORE : CARET_ASSOCIATE_AFTER;
   nsIFrame* startFrame =
