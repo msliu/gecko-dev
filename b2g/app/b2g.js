@@ -1076,11 +1076,14 @@ pref("dom.wakelock.enabled", true);
 // Enable webapps add-ons
 pref("dom.apps.customization.enabled", true);
 
-// Enable touch caret by default
-pref("touchcaret.enabled", true);
+// Disable touch caret (obsolete).
+pref("touchcaret.enabled", false);
 
-// Enable selection caret by default
-pref("selectioncaret.enabled", true);
+// Disable selection caret (obsolete).
+pref("selectioncaret.enabled", false);
+
+// Turn on accessible-caret by default.
+pref("layout.accessiblecaret.enabled", true);
 
 // Enable sync and mozId with Firefox Accounts.
 pref("services.sync.fxaccounts.enabled", true);

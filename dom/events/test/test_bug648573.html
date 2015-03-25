@@ -19,12 +19,10 @@
   <script>
   // Touch/Selection caret's pref is checked only when PresShell is initialized.
   // To turn off the pref, we test bug 648573 in an iframe.
-  SpecialPowers.pushPrefEnv({"set": [['touchcaret.enabled', false]]}, function() {
-    SpecialPowers.pushPrefEnv({"set": [['selectioncaret.enabled', false]]}, function() {
-      var iframe = document.createElement("iframe");
-      iframe.src = "bug648573.html";
-      document.getElementById('container').appendChild(iframe);
-    });
+  SpecialPowers.pushPrefEnv({"set": [['layout.accessiblecaret.enabled', false]]}, function() {
+    var iframe = document.createElement("iframe");
+    iframe.src = "bug648573.html";
+    document.getElementById('container').appendChild(iframe);
   });
   </script>
 </html>
