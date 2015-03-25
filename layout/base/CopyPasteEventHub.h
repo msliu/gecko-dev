@@ -56,7 +56,7 @@ public:
 
   // Base state
   class State;
-  State* GetState();
+  State* GetState() const;
 
 protected:
   virtual ~CopyPasteEventHub();
