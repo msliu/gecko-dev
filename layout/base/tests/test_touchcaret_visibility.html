@@ -60,8 +60,8 @@ https://bugzilla.mozilla.org/show_bug.cgi?id=1059165
     element.focus();
     let hasTouchCaret = snapshotWindow(window, snapshotCaret);
 
-    // If touch caret is enabled, the two snapshots should be different.
-    let expected = !SpecialPowers.getBoolPref("touchcaret.enabled");
+    // If accessible-caret is enabled, the two snapshots should be different.
+    let expected = !SpecialPowers.getBoolPref("layout.accessiblecaret.enabled");
     let [result, first, second] = compareSnapshots(noTouchCaret, hasTouchCaret,
                                                    expected);
 
