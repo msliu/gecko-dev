@@ -82,11 +82,10 @@ protected:
   already_AddRefed<nsFrameSelection> GetFrameSelection() const;
   nsIContent* GetFocusedContent() const;
 
-  /*
-   * If we're dragging start caret, we do not want to drag over previous
-   * character of end caret. Same as end caret. So we check if content offset
-   * exceed previous/next character of end/start caret base on aDragMode.
-   */
+  // If we're dragging the first caret, we do not want to drag it over the
+  // previous character of the second caret. Same as the second caret. So we
+  // check if content offset exceeds the previous/next character of second/first
+  // caret base the active caret.
   bool CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffsets);
 
   uint32_t CaretTimeoutMs() const;
