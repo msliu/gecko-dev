@@ -518,7 +518,7 @@ CopyPasteEventHub::LongTapState::OnReflow(CopyPasteEventHub* aContext)
 // Implementation of CopyPasteEventHub
 //
 CopyPasteEventHub::State*
-CopyPasteEventHub::GetState()
+CopyPasteEventHub::GetState() const
 {
   return mState;
 }
