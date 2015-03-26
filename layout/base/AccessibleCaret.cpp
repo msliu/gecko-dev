@@ -220,7 +220,7 @@ AccessibleCaret::RemoveCaretElement(nsIDocument* aDocument)
 
   ErrorResult rv;
   aDocument->RemoveAnonymousContent(*mCaretElementHolder, rv);
-  MOZ_ASSERT(!rv.Failed(), "Remove anonymous content should not fail!");
+  // It's OK rv is failed since nsCanvasFrame might not exists now.
 }
 
 AccessibleCaret::PositionChangedResult
