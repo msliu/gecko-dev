@@ -829,6 +829,10 @@ NS_IMETHODIMP
 CopyPasteEventHub::Reflow(DOMHighResTimeStamp aStart,
                           DOMHighResTimeStamp aEnd)
 {
+  if (!mInitialized) {
+    return NS_OK;
+  }
+
   CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
   mState->OnReflow(this);
   return NS_OK;
@@ -838,12 +842,20 @@ NS_IMETHODIMP
 CopyPasteEventHub::ReflowInterruptible(DOMHighResTimeStamp aStart,
                                        DOMHighResTimeStamp aEnd)
 {
+  if (!mInitialized) {
+    return NS_OK;
+  }
+
   return Reflow(aStart, aEnd);
 }
 
 void
 CopyPasteEventHub::AsyncPanZoomStarted(const CSSIntPoint aScrollPos)
 {
+  if (!mInitialized) {
+    return;
+  }
+
   CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
   mState->OnScrollStart(this);
 }
@@ -851,6 +863,10 @@ CopyPasteEventHub::AsyncPanZoomStarted(const CSSIntPoint aScrollPos)
 void
 CopyPasteEventHub::AsyncPanZoomStopped(const CSSIntPoint aScrollPos)
 {
+  if (!mInitialized) {
+    return;
+  }
+
   CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
   mState->OnScrollEnd(this);
 }
@@ -858,6 +874,10 @@ CopyPasteEventHub::AsyncPanZoomStopped(const CSSIntPoint aScrollPos)
 void
 CopyPasteEventHub::ScrollPositionChanged()
 {
+  if (!mInitialized) {
+    return;
+  }
+
   CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
   mState->OnScrollPositionChanged(this);
 }
