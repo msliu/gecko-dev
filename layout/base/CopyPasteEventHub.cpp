@@ -554,7 +554,8 @@ CopyPasteEventHub::~CopyPasteEventHub()
 void
 CopyPasteEventHub::Init(nsIPresShell* aPresShell)
 {
-  if (mInitialized || !aPresShell || !aPresShell->GetCanvasFrame()) {
+  if (mInitialized || !aPresShell || !aPresShell->GetCanvasFrame() ||
+      !aPresShell->GetCanvasFrame()->GetCustomContentContainer()) {
     return;
   }
 
