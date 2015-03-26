@@ -62,7 +62,7 @@ const browserElementTestHelpers = {
   },
 
   setSelectionChangeEnabledPref: function(value) {
-    this._setPref('layout.accessiblecaret.enabled', value);
+    this._setPref('selectioncaret.enabled', value);
   },
 
   getOOPByDefaultPref: function() {
