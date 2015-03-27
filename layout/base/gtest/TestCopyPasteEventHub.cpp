@@ -566,7 +566,7 @@ CopyPasteEventHubTester::TestEventDrivenAsyncPanZoomScroll(
   check.Call("1");
 
   // Event driven scroll started
-  mHub->AsyncPanZoomStarted(CSSIntPoint(150, 150));
+  mHub->AsyncPanZoomStarted();
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
 
   HandleEventAndCheckState(aMoveEventCreator(160, 160),
@@ -577,7 +577,7 @@ CopyPasteEventHubTester::TestEventDrivenAsyncPanZoomScroll(
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
 
   // Event driven scroll ended
-  mHub->AsyncPanZoomStopped(CSSIntPoint(200, 200));
+  mHub->AsyncPanZoomStopped();
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::PostScrollState());
 
   HandleEventAndCheckState(aReleaseEventCreator(210, 210),
@@ -598,14 +598,14 @@ CopyPasteEventHubTester::TestEventDrivenAsyncPanZoomScroll(
   check.Call("3");
 
   // Another APZ scroll started
-  mHub->AsyncPanZoomStarted(CSSIntPoint(280, 280));
+  mHub->AsyncPanZoomStarted();
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
 
   mHub->ScrollPositionChanged();
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
 
   // Another APZ scroll ended
-  mHub->AsyncPanZoomStopped(CSSIntPoint(300, 300));
+  mHub->AsyncPanZoomStopped();
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::PostScrollState());
 
   HandleEventAndCheckState(aReleaseEventCreator(310, 310),
@@ -639,22 +639,22 @@ TEST_F(CopyPasteEventHubTester, TestNoEventAsyncPanZoomScroll)
 
   check.Call("1");
 
-  mHub->AsyncPanZoomStarted(CSSIntPoint(150, 150));
+  mHub->AsyncPanZoomStarted();
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
 
   mHub->ScrollPositionChanged();
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
 
-  mHub->AsyncPanZoomStopped(CSSIntPoint(200, 200));
+  mHub->AsyncPanZoomStopped();
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::PostScrollState());
 
-  mHub->AsyncPanZoomStarted(CSSIntPoint(210, 210));
+  mHub->AsyncPanZoomStarted();
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
 
   mHub->ScrollPositionChanged();
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
 
-  mHub->AsyncPanZoomStopped(CSSIntPoint(250, 250));
+  mHub->AsyncPanZoomStopped();
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::PostScrollState());
 
   check.Call("2");
@@ -676,7 +676,7 @@ TEST_F(CopyPasteEventHubTester, TestAsyncPanZoomScrollStartedThenBlur)
 
   mHub->SetUseAsyncPanZoom(true);
 
-  mHub->AsyncPanZoomStarted(CSSIntPoint(150, 150));
+  mHub->AsyncPanZoomStarted();
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
 
   mHub->ScrollPositionChanged();
@@ -698,13 +698,13 @@ TEST_F(CopyPasteEventHubTester, TestAsyncPanZoomScrollEndedThenBlur)
 
   mHub->SetUseAsyncPanZoom(true);
 
-  mHub->AsyncPanZoomStarted(CSSIntPoint(150, 150));
+  mHub->AsyncPanZoomStarted();
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
 
   mHub->ScrollPositionChanged();
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
 
-  mHub->AsyncPanZoomStopped(CSSIntPoint(200, 200));
+  mHub->AsyncPanZoomStopped();
   EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::PostScrollState());
 
   mHub->NotifyBlur(true);

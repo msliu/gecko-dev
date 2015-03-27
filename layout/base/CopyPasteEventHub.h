@@ -51,8 +51,8 @@ public:
 
   // nsIScrollObserver
   virtual void ScrollPositionChanged() override;
-  virtual void AsyncPanZoomStarted(const CSSIntPoint aScrollPos) override;
-  virtual void AsyncPanZoomStopped(const CSSIntPoint aScrollPos) override;
+  virtual void AsyncPanZoomStarted() override;
+  virtual void AsyncPanZoomStopped() override;
 
   // Base state
   class State;
