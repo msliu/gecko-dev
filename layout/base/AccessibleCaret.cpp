@@ -178,7 +178,7 @@ AccessibleCaret::InjectCaretElement(nsIDocument* aDocument)
   mCaretElementHolder = aDocument->InsertAnonymousContent(*element, rv);
 
   MOZ_ASSERT(!rv.Failed(), "Insert anonymous content should not fail!");
-  MOZ_ASSERT(mCaretElementHolder, "We must have anonymous content!");
+  MOZ_ASSERT(mCaretElementHolder.get(), "We must have anonymous content!");
 
   // InsertAnonymousContent will clone the element to make an AnonymousContent.
   // Since event listeners are not being cloned when cloning a node, we need to
