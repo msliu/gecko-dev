@@ -191,7 +191,7 @@ already_AddRefed<Element>
 AccessibleCaret::CreateCaretElement(nsIDocument* aDocument) const
 {
   // Content structure of AccessibleCaret
-  // <div class="accessiblecaret">      <- CaretElement()
+  // <div class="moz-accessiblecaret">  <- CaretElement()
   //   <div class="image">              <- CaretImageElement()
   //   <div class="bar">                <- CaretBarElement()
 
