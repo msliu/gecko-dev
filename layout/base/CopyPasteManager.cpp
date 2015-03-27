@@ -352,15 +352,15 @@ CopyPasteManager::OnScrollStart()
 void
 CopyPasteManager::OnScrollEnd()
 {
-  CP_LOG("%s", __FUNCTION__);
-
   if (mCaretMode != GetCaretMode()) {
     return;
   }
 
   if (GetCaretMode() == CaretMode::Cursor) {
+    CP_LOG("%s: HideCarets()", __FUNCTION__);
     HideCarets();
   } else {
+    CP_LOG("%s: UpdateCarets()", __FUNCTION__);
     UpdateCarets();
   }
 }
@@ -368,15 +368,15 @@ CopyPasteManager::OnScrollEnd()
 void
 CopyPasteManager::OnScrolling()
 {
-  CP_LOG("%s", __FUNCTION__);
-
   if (mCaretMode != GetCaretMode()) {
     return;
   }
 
   if (GetCaretMode() == CaretMode::Cursor) {
+    CP_LOG("%s: HideCarets()", __FUNCTION__);
     HideCarets();
   } else {
+    CP_LOG("%s: UpdateCarets()", __FUNCTION__);
     UpdateCarets();
   }
 }
@@ -384,25 +384,23 @@ CopyPasteManager::OnScrolling()
 void
 CopyPasteManager::OnScrollPositionChanged()
 {
-  CP_LOG("%s", __FUNCTION__);
-
   if (mCaretMode != GetCaretMode()) {
     return;
   }
 
+  CP_LOG("%s: UpdateCarets()", __FUNCTION__);
   UpdateCarets();
 }
 
 void
 CopyPasteManager::OnReflow()
 {
-  CP_LOG("%s", __FUNCTION__);
-
   if (mCaretMode != GetCaretMode()) {
     return;
   }
 
   if (mFirstCaret->IsVisuallyVisible() || mSecondCaret->IsVisuallyVisible()) {
+    CP_LOG("%s: UpdateCarets()", __FUNCTION__);
     UpdateCarets();
   }
 }
@@ -410,16 +408,15 @@ CopyPasteManager::OnReflow()
 void
 CopyPasteManager::OnBlur()
 {
-  CP_LOG("%s", __FUNCTION__);
-
+  CP_LOG("%s: HideCarets()", __FUNCTION__);
   HideCarets();
 }
 
 void
 CopyPasteManager::OnKeyboardEvent()
 {
-  CP_LOG("%s", __FUNCTION__);
   if (GetCaretMode() == CaretMode::Cursor) {
+    CP_LOG("%s: HideCarets()", __FUNCTION__);
     HideCarets();
   }
 }
