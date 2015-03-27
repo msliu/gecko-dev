@@ -850,7 +850,7 @@ CopyPasteEventHub::ReflowInterruptible(DOMHighResTimeStamp aStart,
 }
 
 void
-CopyPasteEventHub::AsyncPanZoomStarted(const CSSIntPoint aScrollPos)
+CopyPasteEventHub::AsyncPanZoomStarted()
 {
   if (!mInitialized) {
     return;
@@ -861,7 +861,7 @@ CopyPasteEventHub::AsyncPanZoomStarted(const CSSIntPoint aScrollPos)
 }
 
 void
-CopyPasteEventHub::AsyncPanZoomStopped(const CSSIntPoint aScrollPos)
+CopyPasteEventHub::AsyncPanZoomStopped()
 {
   if (!mInitialized) {
     return;
