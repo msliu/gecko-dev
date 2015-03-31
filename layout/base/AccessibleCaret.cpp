@@ -226,6 +226,10 @@ AccessibleCaret::RemoveCaretElement(nsIDocument* aDocument)
 AccessibleCaret::PositionChangedResult
 AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
 {
+  if (!CustomContentContainerFrame()) {
+    return PositionChangedResult::NotChanged;
+  }
+
   nsRect imaginaryCaretRectInFrame =
     nsCaret::GetGeometryForFrame(aFrame, aOffset, nullptr);
 
