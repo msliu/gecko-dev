@@ -559,6 +559,8 @@ CopyPasteEventHub::Init(nsIPresShell* aPresShell)
     return;
   }
 
+  nsAutoScriptBlocker scriptBlocker;
+
   mPresShell = aPresShell;
 
   nsPresContext* presContext = mPresShell->GetPresContext();
