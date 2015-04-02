@@ -89,11 +89,11 @@ AccessibleCaret::SetAppearance(Appearance aAppearance)
 void
 AccessibleCaret::SetBarEnabled(bool aEnabled)
 {
-  CP_LOG("%s, enabled %d", __FUNCTION__, aEnabled);
-
   if (mBarEnabled == aEnabled) {
     return;
   }
+
+  CP_LOG("%s, enabled %d", __FUNCTION__, aEnabled);
 
   ErrorResult rv;
   CaretElement()->ClassList()->Toggle(NS_LITERAL_STRING("nobar"),

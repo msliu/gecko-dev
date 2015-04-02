@@ -89,8 +89,8 @@ CopyPasteManager::OnSelectionChanged(nsIDOMDocument* aDoc,
 void
 CopyPasteManager::HideCarets()
 {
-  CP_LOGV("%s", __FUNCTION__);
   if (mFirstCaret->IsLogicallyVisible() || mSecondCaret->IsLogicallyVisible()) {
+    CP_LOG("%s", __FUNCTION__);
     mFirstCaret->SetAppearance(Appearance::None);
     mSecondCaret->SetAppearance(Appearance::None);
     CancelTimeoutTimer();
@@ -118,7 +118,7 @@ CopyPasteManager::UpdateCarets()
 void
 CopyPasteManager::UpdateCaretsForCursorMode()
 {
-  CP_LOGV("%s, selection: %p", __FUNCTION__, GetSelection());
+  CP_LOG("%s, selection: %p", __FUNCTION__, GetSelection());
 
   nsRefPtr<nsCaret> caret = mPresShell->GetCaret();
   if (!caret || !caret->IsVisible()) {
@@ -172,7 +172,7 @@ CopyPasteManager::UpdateCaretsForCursorMode()
 void
 CopyPasteManager::UpdateCaretsForSelectionMode()
 {
-  CP_LOGV("%s, selection: %p", __FUNCTION__, GetSelection());
+  CP_LOG("%s, selection: %p", __FUNCTION__, GetSelection());
 
   int32_t startOffset = 0;
   nsIFrame* startFrame = FindFirstNodeWithFrame(false, &startOffset);
