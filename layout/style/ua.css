@@ -319,10 +319,6 @@ div:-moz-native-anonymous.moz-accessiblecaret > div.image,
 div:-moz-native-anonymous.moz-accessiblecaret > div.bar {
   position: absolute;
   z-index: 2147483647;
-
-  /* Override this property in moz-custom-content-container to make dummy touch
-   * listener work. */
-  pointer-events: auto;
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret,
@@ -342,6 +338,10 @@ div:-moz-native-anonymous.moz-accessiblecaret > div.image {
   background-position: center center;
   background-size: 100% 100%;
   cursor: move;
+
+  /* Override this property in moz-custom-content-container to make dummy touch
+   * listener work. */
+  pointer-events: auto;
 
   /* XXX: Remove this debug background-color when AccessibleCaret is ready. */
   background-color: rgba(0, 0, 0, 0.3);
