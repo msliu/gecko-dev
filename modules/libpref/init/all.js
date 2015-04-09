@@ -4495,7 +4495,7 @@ pref("selectioncaret.enabled", false);
 // user click on selection caret or not. In app units.
 pref("selectioncaret.inflatesize.threshold", 40);
 
-// Turn off accessiblecaret by default.
+// New implementation to unify touch-caret and selection-carets.
 pref("layout.accessiblecaret.enabled", false);
 
 // Timeout in milliseconds to hide the accessiblecaret under cursor mode while
