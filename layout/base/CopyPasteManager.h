@@ -41,14 +41,6 @@ public:
   explicit CopyPasteManager(nsIPresShell* aPresShell);
   virtual ~CopyPasteManager();
 
-protected:
-  enum class CaretMode : uint8_t {
-    None,
-    Cursor,
-    Selection
-  };
-  CaretMode GetCaretMode() const;
-
   virtual nsresult PressCaret(const nsPoint& aPoint);
   virtual nsresult DragCaret(const nsPoint& aPoint);
   virtual nsresult ReleaseCaret();
@@ -64,6 +56,14 @@ protected:
                                       nsISelection* aSel,
                                       int16_t aReason);
   virtual void OnKeyboardEvent();
+
+protected:
+  enum class CaretMode : uint8_t {
+    None,
+    Cursor,
+    Selection
+  };
+  CaretMode GetCaretMode() const;
 
   void UpdateCarets();
   void HideCarets();
@@ -108,7 +108,6 @@ protected:
   CaretMode mCaretMode = CaretMode::None;
 
   static const int32_t kAutoScrollTimerDelay = 30;
-  friend class CopyPasteEventHub;
 };
 
 } // namespace mozilla
