@@ -31,6 +31,10 @@ class Selection;
 class AccessibleCaret;
 class CopyPasteEventHub;
 
+// -----------------------------------------------------------------------------
+// CopyPasteManager receives calls from CopyPasteEventHub to manipulate
+// AccessibleCaret.
+//
 class CopyPasteManager
 {
 public:
@@ -43,7 +47,6 @@ protected:
     Cursor,
     Selection
   };
-
   CaretMode GetCaretMode() const;
 
   virtual nsresult PressCaret(const nsPoint& aPoint);
