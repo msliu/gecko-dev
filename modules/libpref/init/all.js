@@ -4507,7 +4507,7 @@ pref("selectioncaret.inflatesize.threshold", 40);
 // Selection carets will fall-back to internal LongTap detector.
 pref("selectioncaret.detects.longtap", true);
 
-// Turn of accessible caret by default
+// New implementation to unify touch-caret and selection-carets.
 pref("layout.accessiblecaret.enabled", false);
 
 // Timeout in milliseconds to hide the accessiblecaret under cursor mode while

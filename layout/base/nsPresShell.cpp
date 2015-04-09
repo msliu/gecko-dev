@@ -912,6 +912,7 @@ PresShell::Init(nsIDocument* aDocument,
   }
 
   if (AccessibleCaretEnabled()) {
+    // Need to happen before nsFrameSelection has been set up.
     mCopyPasteEventHub = new CopyPasteEventHub();
   }
 
