@@ -30,7 +30,7 @@ class SelectionCaretsTest(MarionetteTestCase):
         '''Open html for testing and locate elements, and enable/disable touch
         caret.'''
         self.marionette.execute_async_script(
-            'SpecialPowers.pushPrefEnv({"set": [["layout.accessiblecaret.enabled", %s]]}, marionetteScriptFinished);' %
+            'SpecialPowers.pushPrefEnv({"set": [["selectioncaret.enabled", %s]]}, marionetteScriptFinished);' %
             ('true' if enabled else 'false'))
         test_html = self.marionette.absolute_url('test_selectioncarets.html')
         self.marionette.navigate(test_html)
@@ -45,7 +45,7 @@ class SelectionCaretsTest(MarionetteTestCase):
         '''Open html for testing and locate elements, and enable/disable touch
         caret.'''
         self.marionette.execute_script(
-            'SpecialPowers.setBoolPref("layout.accessiblecaret.enabled", %s);' %
+            'SpecialPowers.setBoolPref("selectioncaret.enabled", %s);' %
             ('true' if enabled else 'false'))
 
         test_html2 = self.marionette.absolute_url('test_selectioncarets_multipleline.html')
