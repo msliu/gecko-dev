@@ -170,7 +170,9 @@ public:
   virtual void Leave(CopyPasteEventHub* aContext);
 
 protected:
-  State() {}
+  explicit State() = default;
+  State(const State&) = delete;
+  void operator=(const State&) = delete;
 };
 
 } // namespace mozilla
