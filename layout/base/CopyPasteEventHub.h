@@ -30,6 +30,11 @@ class WidgetMouseEvent;
 class WidgetTouchEvent;
 class WidgetWheelEvent;
 
+// -----------------------------------------------------------------------------
+// CopyPasteEventHub implements a state patterns. It receives various events and
+// callbacks, and relay the handling to current concrete state. It also
+// synthesize fake events such as long-tap if APZ is not in use.
+//
 class CopyPasteEventHub : public nsIReflowObserver,
                           public nsIScrollObserver,
                           public nsISelectionListener,
@@ -134,8 +139,10 @@ protected:
   static const int32_t kDefaultTouchId = 0; // For mouse event
 };
 
-//
-// Base class for all states
+// -----------------------------------------------------------------------------
+// Base class for state. A concrete state should inherit this class, and
+// override the methods for handling the events or callbacks. A concrete state
+// is also responsible for transforming to the next concrete state.
 //
 class CopyPasteEventHub::State
 {

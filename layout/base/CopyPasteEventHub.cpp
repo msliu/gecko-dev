@@ -35,7 +35,7 @@ namespace mozilla {
 NS_IMPL_ISUPPORTS(CopyPasteEventHub, nsIReflowObserver, nsIScrollObserver,
                   nsISelectionListener, nsISupportsWeakReference);
 
-//
+// -----------------------------------------------------------------------------
 // NoActionState
 //
 class CopyPasteEventHub::NoActionState : public CopyPasteEventHub::State
@@ -58,7 +58,7 @@ public:
   virtual void Enter(CopyPasteEventHub* aContext) override;
 };
 
-//
+// -----------------------------------------------------------------------------
 // PressCaretState
 //
 class CopyPasteEventHub::PressCaretState : public CopyPasteEventHub::State
@@ -73,7 +73,7 @@ public:
                                   const nsPoint& aPoint) override;
 };
 
-//
+// -----------------------------------------------------------------------------
 // DragCaretState
 //
 class CopyPasteEventHub::DragCaretState : public CopyPasteEventHub::State
@@ -86,7 +86,7 @@ public:
   virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) override;
 };
 
-//
+// -----------------------------------------------------------------------------
 // PressNoCaretState
 //
 class CopyPasteEventHub::PressNoCaretState : public CopyPasteEventHub::State
@@ -110,7 +110,7 @@ public:
   virtual void Leave(CopyPasteEventHub* aContext) override;
 };
 
-//
+// -----------------------------------------------------------------------------
 // ScrollState
 //
 class CopyPasteEventHub::ScrollState : public CopyPasteEventHub::State
@@ -123,7 +123,8 @@ public:
                       bool aIsLeavingDocument) override;
 };
 
-//
+
+// -----------------------------------------------------------------------------
 // PostScrollState: In this state, we are waiting for another APZ start, press
 // event, or momentum wheel scroll.
 //
@@ -144,6 +145,9 @@ public:
   virtual void Leave(CopyPasteEventHub* aContext) override;
 };
 
+// -----------------------------------------------------------------------------
+// LongTapState
+//
 class CopyPasteEventHub::LongTapState : public CopyPasteEventHub::State
 {
 public:
@@ -154,8 +158,8 @@ public:
   virtual void OnReflow(CopyPasteEventHub* aContext) override;
 };
 
-//
-// Implementation of all state functions
+// -----------------------------------------------------------------------------
+// Implementation of all concrete state functions
 //
 nsEventStatus
 CopyPasteEventHub::State::OnPress(CopyPasteEventHub* aContext,
@@ -514,8 +518,8 @@ CopyPasteEventHub::LongTapState::OnReflow(CopyPasteEventHub* aContext)
   aContext->mHandler->OnReflow();
 }
 
-//
-// Implementation of CopyPasteEventHub
+// -----------------------------------------------------------------------------
+// Implementation of CopyPasteEventHub methods
 //
 CopyPasteEventHub::State*
 CopyPasteEventHub::GetState() const

@@ -27,6 +27,9 @@ using namespace dom;
 
 NS_IMPL_ISUPPORTS(AccessibleCaret::DummyTouchListener, nsIDOMEventListener)
 
+// -----------------------------------------------------------------------------
+// Implementation of AccessibleCaret methods
+
 AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
   : mPresShell(aPresShell)
 {

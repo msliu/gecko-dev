@@ -28,8 +28,14 @@ class AnonymousContent;
 class Element;
 }
 
+// -----------------------------------------------------------------------------
+// AccessibleCaret is used for the following purpose:
+// 1. Insert DOM Element as an anonymous conent which contains the caret image.
+// 2. Provide functions to change the caret appearance and position.
+//
 // All the rect or point used are relative to root frame except being specified
 // explicitly.
+//
 class AccessibleCaret final
 {
 public:
@@ -59,8 +65,8 @@ public:
   bool Intersects(const AccessibleCaret& rhs) const;
   bool Contains(const nsPoint& aPosition) const;
 
-  // The geometry center of a imaginary caret to which this AccessibleCaret is
-  // attached. It is needed when dragging the caret.
+  // The geometry center of the imaginary caret (nsCaret) to which this
+  // AccessibleCaret is attached. It is needed when dragging the caret.
   nsPoint LogicalPosition() const;
 
   // Element for 'Intersects' test. Container of image and bar elements.
@@ -86,7 +92,7 @@ private:
   already_AddRefed<dom::Element> CreateCaretElement(nsIDocument* aDocument) const;
   void RemoveCaretElement(nsIDocument* aDocument);
 
-  // The bottom-center of a imaginary caret to which this AccessibleCaret is
+  // The bottom-center of the imaginary caret to which this AccessibleCaret is
   // attached.
   static nsPoint CaretElementPosition(const nsRect& aRect);
 
