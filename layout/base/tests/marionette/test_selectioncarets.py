@@ -10,7 +10,7 @@ from marionette_driver.selection import SelectionManager
 from marionette_driver.gestures import long_press_without_contextmenu
 
 
-class SelectionCaretsTest(MarionetteTestCase):
+class CaretsTestBase(object):
     _long_press_time = 1        # 1 second
     _input_selector = (By.ID, 'input')
     _textarea_selector = (By.ID, 'textarea')
@@ -30,8 +30,8 @@ class SelectionCaretsTest(MarionetteTestCase):
         '''Open html for testing and locate elements, and enable/disable touch
         caret.'''
         self.marionette.execute_async_script(
-            'SpecialPowers.pushPrefEnv({"set": [["selectioncaret.enabled", %s]]}, marionetteScriptFinished);' %
-            ('true' if enabled else 'false'))
+            'SpecialPowers.pushPrefEnv({"set": [["%s", %s]]}, marionetteScriptFinished);' %
+            (self.carets_enabled_pref_name, 'true' if enabled else 'false'))
         test_html = self.marionette.absolute_url('test_selectioncarets.html')
         self.marionette.navigate(test_html)
 
@@ -45,8 +45,8 @@ class SelectionCaretsTest(MarionetteTestCase):
         '''Open html for testing and locate elements, and enable/disable touch
         caret.'''
         self.marionette.execute_script(
-            'SpecialPowers.setBoolPref("selectioncaret.enabled", %s);' %
-            ('true' if enabled else 'false'))
+            'SpecialPowers.setBoolPref("%s", %s);' %
+            (self.carets_enabled_pref_name, 'true' if enabled else 'false'))
 
         test_html2 = self.marionette.absolute_url('test_selectioncarets_multipleline.html')
         self.marionette.navigate(test_html2)
@@ -426,3 +426,15 @@ class SelectionCaretsTest(MarionetteTestCase):
     def test_content_non_editable2_minimum_select_one_character(self):
         self.openTestHtml2(enabled=True)
         self._test_minimum_select_one_character(self._content2, self.assertEqual)
+
+
+class SelectionCaretsTest(CaretsTestBase, MarionetteTestCase):
+    def setUp(self):
+        self.carets_enabled_pref_name = 'selectioncaret.enabled'
+        CaretsTestBase.setUp(self)
+
+
+class AccessibleCaretSelectionModeTest(CaretsTestBase, MarionetteTestCase):
+    def setUp(self):
+        self.carets_enabled_pref_name = 'layout.accessiblecaret.enabled'
+        CaretsTestBase.setUp(self)
