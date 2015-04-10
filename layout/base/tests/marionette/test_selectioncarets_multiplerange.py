@@ -10,7 +10,7 @@ from marionette_driver.selection import SelectionManager
 from marionette_driver.gestures import long_press_without_contextmenu
 
 
-class SelectionCaretsMultipleRangeTest(MarionetteTestCase):
+class CaretsMultipleRangeTestBase(object):
     _long_press_time = 1        # 1 second
 
     def setUp(self):
@@ -22,8 +22,8 @@ class SelectionCaretsMultipleRangeTest(MarionetteTestCase):
         # Open html for testing and enable selectioncaret and
         # non-editable support
         self.marionette.execute_async_script(
-            'SpecialPowers.pushPrefEnv({"set": [["selectioncaret.enabled", %s],["selectioncaret.noneditable", %s]]}, marionetteScriptFinished);' %
-            ( ('true' if enabled else 'false'),  ('true' if enabled else 'false')))
+            'SpecialPowers.pushPrefEnv({"set": [["%s", %s]]}, marionetteScriptFinished);' %
+            (self.carets_enabled_pref_name, ('true' if enabled else 'false')))
 
         test_html = self.marionette.absolute_url('test_selectioncarets_multiplerange.html')
         self.marionette.navigate(test_html)
@@ -39,8 +39,8 @@ class SelectionCaretsMultipleRangeTest(MarionetteTestCase):
     def openTestHtmlLongText(self, enabled=True):
         # Open html for testing and enable selectioncaret
         self.marionette.execute_script(
-            'SpecialPowers.setBoolPref("selectioncaret.enabled", %s);' %
-            ('true' if enabled else 'false'))
+            'SpecialPowers.setBoolPref("%s", %s);' %
+            (self.carets_enabled_pref_name, 'true' if enabled else 'false'))
 
         test_html = self.marionette.absolute_url('test_selectioncarets_longtext.html')
         self.marionette.navigate(test_html)
@@ -51,8 +51,8 @@ class SelectionCaretsMultipleRangeTest(MarionetteTestCase):
     def openTestHtmlIframe(self, enabled=True):
         # Open html for testing and enable selectioncaret
         self.marionette.execute_script(
-            'SpecialPowers.setBoolPref("selectioncaret.enabled", %s);' %
-            ('true' if enabled else 'false'))
+            'SpecialPowers.setBoolPref("%s", %s);' %
+            (self.carets_enabled_pref_name, 'true' if enabled else 'false'))
 
         test_html = self.marionette.absolute_url('test_selectioncarets_iframe.html')
         self.marionette.navigate(test_html)
@@ -203,3 +203,15 @@ class SelectionCaretsMultipleRangeTest(MarionetteTestCase):
         long_press_without_contextmenu(self.marionette, self._bottomtext, self._long_press_time)
 
         self.assertNotEqual(self._to_unix_line_ending(sel.selected_content.strip()), '')
+
+
+class SelectionCaretsMultipleRangeTest(CaretsMultipleRangeTestBase, MarionetteTestCase):
+    def setUp(self):
+        self.carets_enabled_pref_name = 'selectioncaret.enabled'
+        CaretsMultipleRangeTestBase.setUp(self)
+
+
+class AccessibleCaretCursorModeMultipleRangeTest(CaretsMultipleRangeTestBase, MarionetteTestCase):
+    def setUp(self):
+        self.carets_enabled_pref_name = 'layout.accessiblecaret.enabled'
+        CaretsMultipleRangeTestBase.setUp(self)

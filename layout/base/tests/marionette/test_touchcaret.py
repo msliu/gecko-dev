@@ -9,7 +9,7 @@ from marionette_driver.selection import SelectionManager
 from marionette import MarionetteTestCase
 
 
-class TouchCaretTest(MarionetteTestCase):
+class CaretTestBase(object):
     _input_selector = (By.ID, 'input')
     _textarea_selector = (By.ID, 'textarea')
     _contenteditable_selector = (By.ID, 'contenteditable')
@@ -30,13 +30,13 @@ class TouchCaretTest(MarionetteTestCase):
     def expiration_time(self):
         'Return touch caret expiration time in milliseconds.'
         return self.marionette.execute_script(
-            'return SpecialPowers.getIntPref("touchcaret.expiration.time");')
+            'return SpecialPowers.getIntPref("%s");' % self.caret_timeout_pref_name)
 
     @expiration_time.setter
     def expiration_time(self, expiration_time):
         'Set touch caret expiration time in milliseconds.'
         self.marionette.execute_script(
-            'SpecialPowers.setIntPref("touchcaret.expiration.time", arguments[0]);',
+            'SpecialPowers.setIntPref("%s", arguments[0]);' % self.caret_timeout_pref_name,
             script_args=[expiration_time])
 
     def openTestHtml(self, enabled=True, expiration_time=None):
@@ -45,8 +45,8 @@ class TouchCaretTest(MarionetteTestCase):
 
         '''
         self.marionette.execute_async_script(
-            'SpecialPowers.pushPrefEnv({"set": [["touchcaret.enabled", %s]]}, marionetteScriptFinished);' %
-            ('true' if enabled else 'false'))
+            'SpecialPowers.pushPrefEnv({"set": [["%s", %s]]}, marionetteScriptFinished);' %
+            (self.caret_enabled_pref_name, 'true' if enabled else 'false'))
 
         # Set a larger expiration time to avoid intermittent test failures.
         if expiration_time is not None:
@@ -280,3 +280,17 @@ class TouchCaretTest(MarionetteTestCase):
     def test_contenteditable_move_caret_to_front_by_dragging_touch_caret_to_top_left_corner_disabled(self):
         self.openTestHtml(enabled=False)
         self._test_move_caret_to_front_by_dragging_touch_caret_to_top_left_corner(self._contenteditable, self.assertNotEqual)
+
+
+class TouchCaretTest(CaretTestBase, MarionetteTestCase):
+    def setUp(self):
+        self.caret_enabled_pref_name = 'touchcaret.enabled'
+        self.caret_timeout_pref_name = 'touchcaret.expiration.time'
+        CaretTestBase.setUp(self)
+
+
+class AccessibleCaretCursorModeTest(CaretTestBase, MarionetteTestCase):
+    def setUp(self):
+        self.caret_enabled_pref_name = 'layout.accessiblecaret.enabled'
+        self.caret_timeout_pref_name = 'layout.accessiblecaret.timeout_ms'
+        CaretTestBase.setUp(self)
