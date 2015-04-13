@@ -25,6 +25,10 @@ using ::testing::MockFunction;
 using ::testing::Return;
 using ::testing::_;
 
+// -----------------------------------------------------------------------------
+// This file test the state transition of CopyPasteEventHub under combinations
+// of events and callbacks.
+
 namespace mozilla
 {
 
