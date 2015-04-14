@@ -32,8 +32,8 @@ class AccessibleCaret;
 class CopyPasteEventHub;
 
 // -----------------------------------------------------------------------------
-// CopyPasteManager receives calls from CopyPasteEventHub to manipulate
-// AccessibleCaret.
+// CopyPasteManager handles events and callbacks from CopyPasteEventHub, and
+// perform the real work to manipulate selection object and AccessibleCaret.
 //
 class CopyPasteManager
 {
