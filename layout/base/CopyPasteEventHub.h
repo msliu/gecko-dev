@@ -31,9 +31,12 @@ class WidgetTouchEvent;
 class WidgetWheelEvent;
 
 // -----------------------------------------------------------------------------
-// CopyPasteEventHub implements a state patterns. It receives various events and
-// callbacks, and relay the handling to current concrete state. It also
-// synthesize fake events such as long-tap if APZ is not in use.
+// CopyPasteEventHub implements state pattern. It receives various events and
+// callbacks, and relay the handling to current concrete state to call needed
+// methods in CopyPasteManager. In this way, CopyPasteManager could concentrate
+// on handling the behavior of selection and carets without worrying about any
+// concrete events. CopyPasteEventHub also synthesizes fake events such as
+// long-tap or scroll-end if APZ is not in use.
 //
 class CopyPasteEventHub : public nsIReflowObserver,
                           public nsIScrollObserver,
