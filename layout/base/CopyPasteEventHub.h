@@ -38,6 +38,9 @@ class WidgetWheelEvent;
 // concrete events. CopyPasteEventHub also synthesizes fake events such as
 // long-tap or scroll-end if APZ is not in use.
 //
+// See this link for state transition diagram on Mozilla wiki.
+// https://wiki.mozilla.org/Copy_n_Paste#CopyPasteEventHub_State_Transition_Diagram
+//
 class CopyPasteEventHub : public nsIReflowObserver,
                           public nsIScrollObserver,
                           public nsISelectionListener,
