@@ -29,9 +29,9 @@ class Element;
 }
 
 // -----------------------------------------------------------------------------
-// AccessibleCaret is used for the following purpose:
-// 1. Insert DOM Element as an anonymous conent which contains the caret image.
-// 2. Provide functions to change the caret appearance and position.
+// Upon the creation of AccessibleCaret, it will insert DOM Element as an
+// anonymous content containing the caret image. The caret appearance and
+// position can be controlled by SetAppearance() and SetPosition().
 //
 // All the rect or point used are relative to root frame except being specified
 // explicitly.
@@ -42,27 +42,62 @@ public:
   explicit AccessibleCaret(nsIPresShell* aPresShell);
   ~AccessibleCaret();
 
+  // This enumeration representing the visibility and visual style of an
+  // AccessibleCaret.
+  //
+  // Use SetAppearance() to change the appearance, and use GetAppearance() to
+  // get the current appearance.
   enum class Appearance : uint8_t {
+    // Do not display the caret at all.
     None,
+
+    // Display the caret in default style.
     Normal,
+
+    // The caret should be displayed logically but it is kept invisible to the
+    // user. This enum is the only difference between "logically visible" and
+    // "visually visible". It can be used for reasons such as:
+    // 1. Out of scroll port.
+    // 2. For UX requirement such as hide a caret in an empty text area.
     NormalNotShown,
+
+    // Display the caret which is tilted to the left.
     Left,
+
+    // Display the caret which is tilted to the right.
     Right
   };
-  bool IsVisuallyVisible() const;
-  bool IsLogicallyVisible() const;
   Appearance GetAppearance() const;
   void SetAppearance(Appearance aAppearance);
+
+  // Return true if current appearance is either Normal, NormalNotShown, Left,
+  // or Right.
+  bool IsLogicallyVisible() const;
+
+  // Return true if current appearance is either Normal, Left, or Right.
+  bool IsVisuallyVisible() const;
+
+  // Control the "Text Selection Bar" described in "Text Selection Visual Spec"
+  // in bug 921965.
   void SetBarEnabled(bool aEnabled);
 
+  // This enumeration representing the result returned by SetPosition().
   enum class PositionChangedResult : uint8_t {
+    // Position is not changed.
     NotChanged,
+
+    // Position is changed.
     Changed,
+
+    // Position is out of scroll port.
     Invisible
   };
   PositionChangedResult SetPosition(nsIFrame* aFrame, int32_t aOffset);
 
+  // Does two AccessibleCarets overlap?
   bool Intersects(const AccessibleCaret& rhs) const;
+
+  // Is the position within the caret's rect?
   bool Contains(const nsPoint& aPosition) const;
 
   // The geometry center of the imaginary caret (nsCaret) to which this
