@@ -58,9 +58,15 @@ public:
   virtual void OnKeyboardEvent();
 
 protected:
+  // This enum representing the number of AccessibleCarets on the screen.
   enum class CaretMode : uint8_t {
+    // No caret on the screen.
     None,
+
+    // One caret, i.e. the selection is collapsed.
     Cursor,
+
+    // Two carets, i.e. the selection is not collapsed.
     Selection
   };
   CaretMode GetCaretMode() const;
@@ -76,7 +82,12 @@ protected:
   nsresult SelectWord(nsIFrame* aFrame, const nsPoint& aPoint) const;
   void SetSelectionDragState(bool aState) const;
   void SetSelectionDirection(nsDirection aDir) const;
+
+  // If aBackward is false, find the first node from the first range in current
+  // selection, and return the frame and the offset into that frame. If aBackward
+  // is true, find the last node from the last range instead.
   nsIFrame* FindFirstNodeWithFrame(bool aBackward, int32_t* aOutOffset) const;
+
   nsresult DragCaretInternal(const nsPoint& aPoint);
   nsPoint AdjustDragBoundary(const nsPoint& aPoint) const;
   void ClearMaintainedSelection() const;
@@ -91,14 +102,22 @@ protected:
   // caret base the active caret.
   bool CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffsets);
 
+  // Timeout in milliseconds to hide the AccessibleCaret under cursor mode while
+  // no one touches it.
   uint32_t CaretTimeoutMs() const;
-  void LaunchTimeoutTimer();
-  void CancelTimeoutTimer();
+  void LaunchCaretTimeoutTimer();
+  void CancelCaretTimeoutTimer();
 
   // Member variables
   nscoord mOffsetYToCaretLogicalPosition = NS_UNCONSTRAINEDSIZE;
   nsIPresShell* mPresShell = nullptr;
+
+  // First caret is attached to nsCaret in cursor mode, and is attached to
+  // selection highlight as the left caret in selection mode.
   UniquePtr<AccessibleCaret> mFirstCaret;
+
+  // Second caret is used solely in selection mode, and is attached to selection
+  // highlight as the right caret.
   UniquePtr<AccessibleCaret> mSecondCaret;
 
   // The caret being pressed or dragged.

@@ -49,7 +49,7 @@ CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
 
 CopyPasteManager::~CopyPasteManager()
 {
-  CancelTimeoutTimer();
+  CancelCaretTimeoutTimer();
 }
 
 nsresult
@@ -93,7 +93,7 @@ CopyPasteManager::HideCarets()
     CP_LOG("%s", __FUNCTION__);
     mFirstCaret->SetAppearance(Appearance::None);
     mSecondCaret->SetAppearance(Appearance::None);
-    CancelTimeoutTimer();
+    CancelCaretTimeoutTimer();
   }
 }
 
@@ -162,7 +162,7 @@ CopyPasteManager::UpdateCaretsForCursorMode()
   if (nsContentUtils::HasNonEmptyTextContent(
         editingHost, nsContentUtils::eRecurseIntoChildren)) {
     mFirstCaret->SetAppearance(Appearance::Normal);
-    LaunchTimeoutTimer();
+    LaunchCaretTimeoutTimer();
   } else {
     mFirstCaret->SetAppearance(Appearance::NormalNotShown);
   }
@@ -255,7 +255,7 @@ CopyPasteManager::PressCaret(const nsPoint& aPoint)
     mOffsetYToCaretLogicalPosition =
       mActiveCaret->LogicalPosition().y - aPoint.y;
     SetSelectionDragState(true);
-    CancelTimeoutTimer();
+    CancelCaretTimeoutTimer();
     rv = NS_OK;
   }
 
@@ -281,7 +281,7 @@ CopyPasteManager::ReleaseCaret()
 
   mActiveCaret = nullptr;
   SetSelectionDragState(false);
-  LaunchTimeoutTimer();
+  LaunchCaretTimeoutTimer();
   return NS_OK;
 }
 
@@ -841,7 +841,7 @@ CopyPasteManager::CaretTimeoutMs() const
 }
 
 void
-CopyPasteManager::LaunchTimeoutTimer()
+CopyPasteManager::LaunchCaretTimeoutTimer()
 {
   if (!mCaretTimeoutTimer || CaretTimeoutMs() == 0 ||
       GetCaretMode() != CaretMode::Cursor || mActiveCaret) {
@@ -860,7 +860,7 @@ CopyPasteManager::LaunchTimeoutTimer()
 }
 
 void
-CopyPasteManager::CancelTimeoutTimer()
+CopyPasteManager::CancelCaretTimeoutTimer()
 {
   if (mCaretTimeoutTimer) {
     mCaretTimeoutTimer->Cancel();
