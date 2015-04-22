@@ -38,8 +38,14 @@ class WidgetWheelEvent;
 // concrete events. CopyPasteEventHub also synthesizes fake events such as
 // long-tap or scroll-end if APZ is not in use.
 //
-// See this link for state transition diagram on Mozilla wiki.
-// https://wiki.mozilla.org/Copy_n_Paste#CopyPasteEventHub_State_Transition_Diagram
+// Each PresShell holds a shared pointer to CopyPasteEventHub, and each
+// CopyPasteEventHub holds a unique pointer to CopyPasteManager. Thus we'll have
+// one CopyPasteManager per PresShell.
+//
+// See this link for the state transition diagram:
+// http://hg.mozilla.org/mozilla-central/file/default/layout/base/doc/AccessibleCaretEventHubStates.png
+// Source code of the diagram:
+// http://hg.mozilla.org/mozilla-central/file/default/layout/base/doc/AccessibleCaretEventHubStates.dot
 //
 class CopyPasteEventHub : public nsIReflowObserver,
                           public nsIScrollObserver,
@@ -60,7 +66,7 @@ public:
   NS_DECL_NSIREFLOWOBSERVER
   NS_DECL_NSISELECTIONLISTENER
 
-  // nsIScrollObserver
+  // Override nsIScrollObserver methods.
   virtual void ScrollPositionChanged() override;
   virtual void AsyncPanZoomStarted() override;
   virtual void AsyncPanZoomStopped() override;
