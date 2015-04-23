@@ -14,23 +14,23 @@ namespace mozilla {
 
 PRLogModuleInfo* GetAccessibleCaretLog();
 
-#ifndef CP_LOG_BASE
-#define CP_LOG_BASE(...) PR_LOG(GetAccessibleCaretLog(), PR_LOG_DEBUG, (__VA_ARGS__));
+#ifndef AC_LOG_BASE
+#define AC_LOG_BASE(...) PR_LOG(GetAccessibleCaretLog(), PR_LOG_DEBUG, (__VA_ARGS__));
 #endif
 
-#ifndef CP_LOGV_BASE
-#define CP_LOGV_BASE(...)                                                      \
+#ifndef AC_LOGV_BASE
+#define AC_LOGV_BASE(...)                                                      \
   PR_LOG(GetAccessibleCaretLog(), PR_LOG_DEBUG + 1, (__VA_ARGS__));
 #endif
 
 #else
 
-#ifndef CP_LOGV_BASE
-#define CP_LOGV_BASE(...)
+#ifndef AC_LOGV_BASE
+#define AC_LOGV_BASE(...)
 #endif
 
-#ifndef CP_LOGV_BASE
-#define CP_LOGV_BASE(...)
+#ifndef AC_LOGV_BASE
+#define AC_LOGV_BASE(...)
 #endif
 
 #endif // PR_LOGGING
