@@ -26,8 +26,8 @@ using ::testing::Return;
 using ::testing::_;
 
 // -----------------------------------------------------------------------------
-// This file test the state transition of AccessibleCaretEventHub under combinations
-// of events and callbacks.
+// This file test the state transitions of AccessibleCaretEventHub under
+// various combination of events and callbacks.
 
 namespace mozilla
 {
@@ -35,8 +35,8 @@ namespace mozilla
 class MockAccessibleCaretManager : public AccessibleCaretManager
 {
 public:
-  explicit MockAccessibleCaretManager(nsIPresShell* aPresShell)
-    : AccessibleCaretManager(aPresShell)
+  explicit MockAccessibleCaretManager()
+    : AccessibleCaretManager(nullptr)
   {
   }
 
@@ -63,9 +63,9 @@ public:
   using AccessibleCaretEventHub::PostScrollState;
   using AccessibleCaretEventHub::FireScrollEnd;
 
-  explicit MockAccessibleCaretEventHub() : AccessibleCaretEventHub()
+  explicit MockAccessibleCaretEventHub()
   {
-    mManager = MakeUnique<MockAccessibleCaretManager>(nullptr);
+    mManager = MakeUnique<MockAccessibleCaretManager>();
     mInitialized = true;
   }
 
@@ -86,7 +86,7 @@ public:
 
   MockAccessibleCaretManager* GetMockAccessibleCaretManager()
   {
-    return reinterpret_cast<MockAccessibleCaretManager*>(mManager.get());
+    return static_cast<MockAccessibleCaretManager*>(mManager.get());
   }
 
   void SetUseAsyncPanZoom(bool aUseAsyncPanZoom)
@@ -95,6 +95,7 @@ public:
   }
 };
 
+// Print the name of the state for debugging.
 ::std::ostream& operator<<(::std::ostream& aOstream,
                            const MockAccessibleCaretEventHub::State* aState)
 {
@@ -104,7 +105,7 @@ public:
 class AccessibleCaretEventHubTester : public ::testing::Test
 {
 public:
-  explicit AccessibleCaretEventHubTester() : mHub(new MockAccessibleCaretEventHub())
+  explicit AccessibleCaretEventHubTester()
   {
     DefaultValue<nsresult>::Set(NS_OK);
     EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::NoActionState());
@@ -231,7 +232,9 @@ public:
     PressEventCreator aPressEventCreator, MoveEventCreator aMoveEventCreator,
     ReleaseEventCreator aReleaseEventCreator);
 
-  nsRefPtr<MockAccessibleCaretEventHub> mHub;
+  // Member variables
+  nsRefPtr<MockAccessibleCaretEventHub> mHub{new MockAccessibleCaretEventHub()};
+
 }; // class AccessibleCaretEventHubTester
 
 TEST_F(AccessibleCaretEventHubTester, TestMousePressReleaseOnNoCaret)
@@ -253,11 +256,9 @@ AccessibleCaretEventHubTester::TestPressReleaseOnNoCaret(
   EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), PressCaret(_))
     .WillOnce(Return(NS_ERROR_FAILURE));
 
-  EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), ReleaseCaret())
-    .Times(0);
+  EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), ReleaseCaret()).Times(0);
 
-  EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), TapCaret(_))
-    .Times(0);
+  EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), TapCaret(_)).Times(0);
 
   HandleEventAndCheckState(aPressEventCreator(0, 0),
                            MockAccessibleCaretEventHub::PressNoCaretState(),
@@ -633,7 +634,8 @@ TEST_F(AccessibleCaretEventHubTester, TestNoEventAsyncPanZoomScroll)
     EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollStart());
 
     EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrolling()).Times(0);
-    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollPositionChanged()).Times(0);
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(),
+                OnScrollPositionChanged()).Times(0);
 
     EXPECT_CALL(check, Call("2"));
     EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollEnd());
