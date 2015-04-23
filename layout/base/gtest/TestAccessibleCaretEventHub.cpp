@@ -65,7 +65,7 @@ public:
 
   explicit MockAccessibleCaretEventHub() : AccessibleCaretEventHub()
   {
-    mHandler = MakeUnique<MockAccessibleCaretManager>(nullptr);
+    mManager = MakeUnique<MockAccessibleCaretManager>(nullptr);
     mInitialized = true;
   }
 
@@ -86,7 +86,7 @@ public:
 
   MockAccessibleCaretManager* GetMockAccessibleCaretManager()
   {
-    return reinterpret_cast<MockAccessibleCaretManager*>(mHandler.get());
+    return reinterpret_cast<MockAccessibleCaretManager*>(mManager.get());
   }
 
   void SetUseAsyncPanZoom(bool aUseAsyncPanZoom)
