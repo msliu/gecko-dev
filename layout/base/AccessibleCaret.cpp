@@ -17,13 +17,13 @@
 namespace mozilla {
 using namespace dom;
 
-#undef CP_LOG
-#define CP_LOG(message, ...)                                                   \
-  CP_LOG_BASE("AccessibleCaret (%p): " message, this, ##__VA_ARGS__);
+#undef AC_LOG
+#define AC_LOG(message, ...)                                                   \
+  AC_LOG_BASE("AccessibleCaret (%p): " message, this, ##__VA_ARGS__);
 
-#undef CP_LOGV
-#define CP_LOGV(message, ...)                                                  \
-  CP_LOGV_BASE("AccessibleCaret (%p): " message, this, ##__VA_ARGS__);
+#undef AC_LOGV
+#define AC_LOGV(message, ...)                                                  \
+  AC_LOGV_BASE("AccessibleCaret (%p): " message, this, ##__VA_ARGS__);
 
 NS_IMPL_ISUPPORTS(AccessibleCaret::DummyTouchListener, nsIDOMEventListener)
 
@@ -96,7 +96,7 @@ AccessibleCaret::SetBarEnabled(bool aEnabled)
     return;
   }
 
-  CP_LOG("%s, enabled %d", __FUNCTION__, aEnabled);
+  AC_LOG("%s, enabled %d", __FUNCTION__, aEnabled);
 
   ErrorResult rv;
   CaretElement()->ClassList()->Toggle(NS_LITERAL_STRING("nobar"),
@@ -303,7 +303,7 @@ AccessibleCaret::SetCaretElementPosition(nsIFrame* aFrame, const nsRect& aRect)
   CaretElement()->SetAttribute(NS_LITERAL_STRING("style"), styleStr, rv);
   MOZ_ASSERT(!rv.Failed());
 
-  CP_LOG("Set caret style: %s", NS_ConvertUTF16toUTF8(styleStr).get());
+  AC_LOG("Set caret style: %s", NS_ConvertUTF16toUTF8(styleStr).get());
 }
 
 void
@@ -319,7 +319,7 @@ AccessibleCaret::SetCaretBarElementPosition(nsIFrame* aFrame,
   CaretBarElement()->SetAttribute(NS_LITERAL_STRING("style"), barStyleStr, rv);
   MOZ_ASSERT(!rv.Failed());
 
-  CP_LOG("Set bar style: %s", NS_ConvertUTF16toUTF8(barStyleStr).get());
+  AC_LOG("Set bar style: %s", NS_ConvertUTF16toUTF8(barStyleStr).get());
 }
 
 } // namespace mozilla
