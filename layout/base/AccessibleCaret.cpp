@@ -6,7 +6,7 @@
 
 #include "AccessibleCaret.h"
 
-#include "CopyPasteLogger.h"
+#include "AccessibleCaretLogger.h"
 #include "mozilla/Preferences.h"
 #include "mozilla/dom/AnonymousContent.h"
 #include "nsCanvasFrame.h"
