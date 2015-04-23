@@ -54,10 +54,10 @@ AccessibleCaretManager::~AccessibleCaretManager()
 
 nsresult
 AccessibleCaretManager::OnSelectionChanged(nsIDOMDocument* aDoc,
-                                     nsISelection* aSel,
-                                     int16_t aReason)
+                                           nsISelection* aSel, int16_t aReason)
 {
-  CP_LOG("aSel: %p, GetSelection(): %p, aReason: %d", aSel, GetSelection(), aReason);
+  CP_LOG("aSel: %p, GetSelection(): %p, aReason: %d", aSel, GetSelection(),
+         aReason);
 
   if (aSel != GetSelection()) {
     return NS_OK;
@@ -180,14 +180,15 @@ AccessibleCaretManager::UpdateCaretsForSelectionMode()
   int32_t endOffset = 0;
   nsIFrame* endFrame = FindFirstNodeWithFrame(true, &endOffset);
 
-  if(!startFrame || !endFrame ||
-     nsLayoutUtils::CompareTreePosition(startFrame, endFrame) > 0) {
+  if (!startFrame || !endFrame ||
+      nsLayoutUtils::CompareTreePosition(startFrame, endFrame) > 0) {
     HideCarets();
     return;
   }
 
-  auto updateSingleCaret = [](AccessibleCaret* aCaret, nsIFrame* aFrame,
-                              int32_t aOffset) -> PositionChangedResult {
+  auto updateSingleCaret = [](AccessibleCaret * aCaret, nsIFrame * aFrame,
+                              int32_t aOffset)->PositionChangedResult
+  {
     PositionChangedResult result = aCaret->SetPosition(aFrame, aOffset);
     aCaret->SetBarEnabled(true);
     switch (result) {
@@ -330,7 +331,7 @@ AccessibleCaretManager::SelectWordOrShortcut(const nsPoint& aPoint)
   nsIContent* editingHost = ptFrame->GetContent()->GetEditingHost();
   if (ChangeFocus(ptFrame) &&
       (editingHost && !nsContentUtils::HasNonEmptyTextContent(
-        editingHost, nsContentUtils::eRecurseIntoChildren))) {
+                         editingHost, nsContentUtils::eRecurseIntoChildren))) {
     // Content is empty. No need to select word.
     CP_LOG("%s, Cannot select word bacause content is empty", __FUNCTION__);
     return NS_OK;
@@ -530,8 +531,7 @@ AccessibleCaretManager::SelectWord(nsIFrame* aFrame, const nsPoint& aPoint) cons
 #ifdef DEBUG_FRAME_DUMP
   nsCString frameTag;
   frame->ListTag(frameTag);
-  CP_LOG("Frame=%s, ptInFrame=(%d, %d)", frameTag.get(), aPoint.x,
-         aPoint.y);
+  CP_LOG("Frame=%s, ptInFrame=(%d, %d)", frameTag.get(), aPoint.x, aPoint.y);
 #endif
 
   SetSelectionDragState(false);
@@ -570,7 +570,8 @@ AccessibleCaretManager::ClearMaintainedSelection() const
 }
 
 nsIFrame*
-AccessibleCaretManager::FindFirstNodeWithFrame(bool aBackward, int32_t* aOutOffset) const
+AccessibleCaretManager::FindFirstNodeWithFrame(bool aBackward,
+                                               int32_t* aOutOffset) const
 {
   if (!mPresShell) {
     return nullptr;
@@ -608,11 +609,8 @@ AccessibleCaretManager::FindFirstNodeWithFrame(bool aBackward, int32_t* aOutOffs
   }
 
   ErrorResult err;
-  nsRefPtr<TreeWalker> walker =
-    mPresShell->GetDocument()->CreateTreeWalker(*startNode,
-                                                nsIDOMNodeFilter::SHOW_ALL,
-                                                nullptr,
-                                                err);
+  nsRefPtr<TreeWalker> walker = mPresShell->GetDocument()->CreateTreeWalker(
+    *startNode, nsIDOMNodeFilter::SHOW_ALL, nullptr, err);
 
   if (!walker) {
     return nullptr;
@@ -661,7 +659,7 @@ AccessibleCaretManager::CompareRangeWithContentOffset(nsIFrame::ContentOffsets& 
     // Check next character of start node offset
     node = range->GetStartParent();
     nodeOffset = range->StartOffset();
-    hint =  CARET_ASSOCIATE_AFTER;
+    hint = CARET_ASSOCIATE_AFTER;
     dir = eDirNext;
   }
   nsCOMPtr<nsIContent> content = do_QueryInterface(node);
@@ -778,10 +776,8 @@ AccessibleCaretManager::DragCaretInternal(const nsPoint& aPoint)
   nsIFrame* scrollable =
     nsLayoutUtils::GetClosestFrameOfType(anchorFrame, nsGkAtoms::scrollFrame);
   nsWeakFrame weakScrollable = scrollable;
-  fs->HandleClick(offsets.content, offsets.StartOffset(),
-                  offsets.EndOffset(),
-                  GetCaretMode() == CaretMode::Selection,
-                  false,
+  fs->HandleClick(offsets.content, offsets.StartOffset(), offsets.EndOffset(),
+                  GetCaretMode() == CaretMode::Selection, false,
                   offsets.associate);
   if (!weakScrollable.IsAlive()) {
     return NS_OK;
@@ -849,7 +845,7 @@ AccessibleCaretManager::LaunchCaretTimeoutTimer()
   }
 
   nsTimerCallbackFunc callback = [](nsITimer* aTimer, void* aClosure) {
-    AccessibleCaretManager* self = static_cast<AccessibleCaretManager*>(aClosure);
+    auto self = static_cast<AccessibleCaretManager*>(aClosure);
     if (self->GetCaretMode() == CaretMode::Cursor) {
       self->HideCarets();
     }
