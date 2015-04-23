@@ -53,8 +53,9 @@ static NS_DEFINE_CID(kFrameTraversalCID, NS_FRAMETRAVERSAL_CID);
 #include "nsCaret.h"
 #include "TouchCaret.h"
 #include "SelectionCarets.h"
-#include "CopyPasteEventHub.h"
-#include "CopyPasteManager.h"
+
+#include "AccessibleCaretEventHub.h"
+#include "AccessibleCaretManager.h"
 
 #include "mozilla/MouseEvents.h"
 #include "mozilla/TextEvents.h"
@@ -822,11 +823,11 @@ nsFrameSelection::Init(nsIPresShell *aShell, nsIContent *aLimiter)
     }
   }
 
-  nsRefPtr<CopyPasteEventHub> copyPasteEventHub = mShell->GetCopyPasteEventHub();
-  if (copyPasteEventHub) {
+  nsRefPtr<AccessibleCaretEventHub> eventHub = mShell->GetAccessibleCaretEventHub();
+  if (eventHub) {
     int8_t index = GetIndexFromSelectionType(nsISelectionController::SELECTION_NORMAL);
     if (mDomSelections[index]) {
-      mDomSelections[index]->AddSelectionListener(copyPasteEventHub);
+      mDomSelections[index]->AddSelectionListener(eventHub);
     }
   }
 }
@@ -3235,10 +3236,10 @@ nsFrameSelection::DisconnectFromPresShell()
     mDomSelections[index]->RemoveSelectionListener(selectionCarets);
   }
 
-  nsRefPtr<CopyPasteEventHub> copyPasteEventHub = mShell->GetCopyPasteEventHub();
-  if (copyPasteEventHub) {
+  nsRefPtr<AccessibleCaretEventHub> eventHub = mShell->GetAccessibleCaretEventHub();
+  if (eventHub) {
     int8_t index = GetIndexFromSelectionType(nsISelectionController::SELECTION_NORMAL);
-    mDomSelections[index]->RemoveSelectionListener(copyPasteEventHub);
+    mDomSelections[index]->RemoveSelectionListener(eventHub);
   }
 
   StopAutoScrollTimer();

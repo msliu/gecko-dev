@@ -59,7 +59,7 @@ class nsCanvasFrame;
 class nsAString;
 class nsCaret;
 namespace mozilla {
-class CopyPasteEventHub;
+class AccessibleCaretEventHub;
 class TouchCaret;
 class SelectionCarets;
 } // namespace mozilla
@@ -810,9 +810,9 @@ public:
   virtual mozilla::dom::Element* GetSelectionCaretsEndElement() const = 0;
 
   /**
-   * Get the CopyPasteEventHub, if it exists. AddRefs it.
+   * Get the AccessibleCaretEventHub, if it exists. AddRefs it.
    */
-  virtual already_AddRefed<mozilla::CopyPasteEventHub> GetCopyPasteEventHub() const = 0;
+  virtual already_AddRefed<mozilla::AccessibleCaretEventHub> GetAccessibleCaretEventHub() const = 0;
 
   /**
    * Get the caret, if it exists. AddRefs it.

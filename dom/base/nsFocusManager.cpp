@@ -7,7 +7,7 @@
 
 #include "nsFocusManager.h"
 
-#include "CopyPasteEventHub.h"
+#include "AccessibleCaretEventHub.h"
 #include "nsIInterfaceRequestorUtils.h"
 #include "nsGkAtoms.h"
 #include "nsContentUtils.h"
@@ -1694,9 +1694,9 @@ nsFocusManager::Blur(nsPIDOMWindow* aWindowToClear,
     selectionCarets->NotifyBlur(aIsLeavingDocument || !mActiveWindow);
   }
 
-  nsRefPtr<CopyPasteEventHub> copyPasteEventHub = presShell->GetCopyPasteEventHub();
-  if (copyPasteEventHub) {
-    copyPasteEventHub->NotifyBlur(aIsLeavingDocument || !mActiveWindow);
+  nsRefPtr<AccessibleCaretEventHub> eventHub = presShell->GetAccessibleCaretEventHub();
+  if (eventHub) {
+    eventHub->NotifyBlur(aIsLeavingDocument || !mActiveWindow);
   }
 
   // at this point, it is expected that this window will be still be

@@ -243,7 +243,7 @@ public:
   virtual mozilla::dom::Element* GetSelectionCaretsStartElement() const override;
   virtual mozilla::dom::Element* GetSelectionCaretsEndElement() const override;
 
-  virtual already_AddRefed<mozilla::CopyPasteEventHub> GetCopyPasteEventHub() const override;
+  virtual already_AddRefed<mozilla::AccessibleCaretEventHub> GetAccessibleCaretEventHub() const override;
 
   // caret handling
   virtual already_AddRefed<nsCaret> GetCaret() const override;
@@ -818,7 +818,7 @@ protected:
   // TouchCaret
   nsRefPtr<mozilla::TouchCaret> mTouchCaret;
   nsRefPtr<mozilla::SelectionCarets> mSelectionCarets;
-  nsRefPtr<mozilla::CopyPasteEventHub> mCopyPasteEventHub;
+  nsRefPtr<mozilla::AccessibleCaretEventHub> mAccessibleCaretEventHub;
 
   // This timer controls painting suppression.  Until it fires
   // or all frames are constructed, we won't paint anything but

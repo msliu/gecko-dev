@@ -76,9 +76,9 @@
 #include "nsIPermissionManager.h"
 #include "nsIMozBrowserFrame.h"
 #include "nsCaret.h"
+#include "AccessibleCaretEventHub.h"
 #include "TouchCaret.h"
 #include "SelectionCarets.h"
-#include "CopyPasteEventHub.h"
 #include "nsIDOMHTMLDocument.h"
 #include "nsFrameManager.h"
 #include "nsXPCOM.h"
@@ -913,7 +913,7 @@ PresShell::Init(nsIDocument* aDocument,
 
   if (AccessibleCaretEnabled()) {
     // Need to happen before nsFrameSelection has been set up.
-    mCopyPasteEventHub = new CopyPasteEventHub();
+    mAccessibleCaretEventHub = new AccessibleCaretEventHub();
   }
 
   mSelection = new nsFrameSelection();
@@ -1184,9 +1184,9 @@ PresShell::Destroy()
     mSelectionCarets = nullptr;
   }
 
-  if (mCopyPasteEventHub) {
-    mCopyPasteEventHub->Terminate();
-    mCopyPasteEventHub = nullptr;
+  if (mAccessibleCaretEventHub) {
+    mAccessibleCaretEventHub->Terminate();
+    mAccessibleCaretEventHub = nullptr;
   }
 
   // release our pref style sheet, if we have one still
@@ -1934,8 +1934,8 @@ PresShell::Initialize(nscoord aWidth, nscoord aHeight)
     }
 
     // Initialize after nsCanvasFrame is created.
-    if (mCopyPasteEventHub) {
-      mCopyPasteEventHub->Init(this);
+    if (mAccessibleCaretEventHub) {
+      mAccessibleCaretEventHub->Init(this);
     }
 
     // nsAutoScriptBlocker going out of scope may have killed us too
@@ -2245,10 +2245,10 @@ already_AddRefed<SelectionCarets> PresShell::GetSelectionCarets() const
   return selectionCaret.forget();
 }
 
-already_AddRefed<CopyPasteEventHub> PresShell::GetCopyPasteEventHub() const
+already_AddRefed<AccessibleCaretEventHub> PresShell::GetAccessibleCaretEventHub() const
 {
-  nsRefPtr<CopyPasteEventHub> copyPasteEventHub = mCopyPasteEventHub;
-  return copyPasteEventHub.forget();
+  nsRefPtr<AccessibleCaretEventHub> eventHub = mAccessibleCaretEventHub;
+  return eventHub.forget();
 }
 
 void PresShell::SetCaret(nsCaret *aNewCaret)
@@ -7303,10 +7303,10 @@ PresShell::HandleEvent(nsIFrame* aFrame,
     nsCOMPtr<nsIPresShell> presShell =
       retargetEventDoc ? retargetEventDoc->GetShell() : nullptr;
 
-    nsRefPtr<CopyPasteEventHub> copyPasteEventHub =
-      presShell ? presShell->GetCopyPasteEventHub() : nullptr;
-    if (copyPasteEventHub) {
-      *aEventStatus = copyPasteEventHub->HandleEvent(aEvent);
+    nsRefPtr<AccessibleCaretEventHub> eventHub =
+      presShell ? presShell->GetAccessibleCaretEventHub() : nullptr;
+    if (eventHub) {
+      *aEventStatus = eventHub->HandleEvent(aEvent);
       if (*aEventStatus == nsEventStatus_eConsumeNoDefault) {
         // If the event is consumed, cancel APZC panning by setting
         // mMultipleActionsPrevented.
