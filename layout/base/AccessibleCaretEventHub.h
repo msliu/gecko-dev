@@ -48,9 +48,9 @@ class WidgetWheelEvent;
 // http://hg.mozilla.org/mozilla-central/file/default/layout/base/doc/AccessibleCaretEventHubStates.dot
 //
 class AccessibleCaretEventHub : public nsIReflowObserver,
-                          public nsIScrollObserver,
-                          public nsISelectionListener,
-                          public nsSupportsWeakReference
+                                public nsIScrollObserver,
+                                public nsISelectionListener,
+                                public nsSupportsWeakReference
 {
 public:
   explicit AccessibleCaretEventHub();
@@ -83,9 +83,9 @@ protected:
   static State* aClassName();
 
 #define NS_IMPL_STATE_CLASS_GETTER(aClassName)                                 \
-  AccessibleCaretEventHub::State* AccessibleCaretEventHub::aClassName()                    \
+  AccessibleCaretEventHub::State* AccessibleCaretEventHub::aClassName()        \
   {                                                                            \
-    return AccessibleCaretEventHub::aClassName::Singleton();                         \
+    return AccessibleCaretEventHub::aClassName::Singleton();                   \
   }
 
   // Concrete state getters
@@ -140,7 +140,7 @@ protected:
   nsCOMPtr<nsITimer> mScrollEndInjectorTimer;
 
   // Last mouse button down event or touch start event point.
-  nsPoint mPressPoint{NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE};
+  nsPoint mPressPoint{ NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE };
 
   // For filter multitouch event
   int32_t mActiveTouchId = kInvalidTouchId;
@@ -180,7 +180,8 @@ public:
   virtual void OnScrollEnd(AccessibleCaretEventHub* aContext);
   virtual void OnScrolling(AccessibleCaretEventHub* aContext);
   virtual void OnScrollPositionChanged(AccessibleCaretEventHub* aContext);
-  virtual void OnBlur(AccessibleCaretEventHub* aContext, bool aIsLeavingDocument);
+  virtual void OnBlur(AccessibleCaretEventHub* aContext,
+                      bool aIsLeavingDocument);
   virtual void OnSelectionChanged(AccessibleCaretEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
                                   int16_t aReason);
@@ -196,4 +197,4 @@ protected:
 
 } // namespace mozilla
 
-#endif //AccessibleCaretEventHub_h
+#endif // AccessibleCaretEventHub_h

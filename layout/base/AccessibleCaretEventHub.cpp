@@ -38,7 +38,8 @@ NS_IMPL_ISUPPORTS(AccessibleCaretEventHub, nsIReflowObserver, nsIScrollObserver,
 // -----------------------------------------------------------------------------
 // NoActionState
 //
-class AccessibleCaretEventHub::NoActionState : public AccessibleCaretEventHub::State
+class AccessibleCaretEventHub::NoActionState
+  : public AccessibleCaretEventHub::State
 {
 public:
   NS_IMPL_STATE_UTILITIES(NoActionState)
@@ -61,7 +62,8 @@ public:
 // -----------------------------------------------------------------------------
 // PressCaretState
 //
-class AccessibleCaretEventHub::PressCaretState : public AccessibleCaretEventHub::State
+class AccessibleCaretEventHub::PressCaretState
+  : public AccessibleCaretEventHub::State
 {
 public:
   NS_IMPL_STATE_UTILITIES(PressCaretState)
@@ -76,7 +78,8 @@ public:
 // -----------------------------------------------------------------------------
 // DragCaretState
 //
-class AccessibleCaretEventHub::DragCaretState : public AccessibleCaretEventHub::State
+class AccessibleCaretEventHub::DragCaretState
+  : public AccessibleCaretEventHub::State
 {
 public:
   NS_IMPL_STATE_UTILITIES(DragCaretState)
@@ -89,7 +92,8 @@ public:
 // -----------------------------------------------------------------------------
 // PressNoCaretState
 //
-class AccessibleCaretEventHub::PressNoCaretState : public AccessibleCaretEventHub::State
+class AccessibleCaretEventHub::PressNoCaretState
+  : public AccessibleCaretEventHub::State
 {
 public:
   NS_IMPL_STATE_UTILITIES(PressNoCaretState)
@@ -113,7 +117,8 @@ public:
 // -----------------------------------------------------------------------------
 // ScrollState
 //
-class AccessibleCaretEventHub::ScrollState : public AccessibleCaretEventHub::State
+class AccessibleCaretEventHub::ScrollState
+  : public AccessibleCaretEventHub::State
 {
 public:
   NS_IMPL_STATE_UTILITIES(ScrollState)
@@ -123,12 +128,12 @@ public:
                       bool aIsLeavingDocument) override;
 };
 
-
 // -----------------------------------------------------------------------------
 // PostScrollState: In this state, we are waiting for another APZ start, press
 // event, or momentum wheel scroll.
 //
-class AccessibleCaretEventHub::PostScrollState : public AccessibleCaretEventHub::State
+class AccessibleCaretEventHub::PostScrollState
+  : public AccessibleCaretEventHub::State
 {
 public:
   NS_IMPL_STATE_UTILITIES(PostScrollState)
@@ -148,7 +153,8 @@ public:
 // -----------------------------------------------------------------------------
 // LongTapState
 //
-class AccessibleCaretEventHub::LongTapState : public AccessibleCaretEventHub::State
+class AccessibleCaretEventHub::LongTapState
+  : public AccessibleCaretEventHub::State
 {
 public:
   NS_IMPL_STATE_UTILITIES(LongTapState)
@@ -163,14 +169,14 @@ public:
 //
 nsEventStatus
 AccessibleCaretEventHub::State::OnPress(AccessibleCaretEventHub* aContext,
-                                  const nsPoint& aPoint,
-                                  int32_t aTouchId)
+                                        const nsPoint& aPoint, int32_t aTouchId)
 {
   return nsEventStatus_eIgnore;
 }
 
 nsEventStatus
-AccessibleCaretEventHub::State::OnMove(AccessibleCaretEventHub* aContext, const nsPoint& aPoint)
+AccessibleCaretEventHub::State::OnMove(AccessibleCaretEventHub* aContext,
+                                       const nsPoint& aPoint)
 {
   return nsEventStatus_eIgnore;
 }
@@ -183,7 +189,7 @@ AccessibleCaretEventHub::State::OnRelease(AccessibleCaretEventHub* aContext)
 
 nsEventStatus
 AccessibleCaretEventHub::State::OnLongTap(AccessibleCaretEventHub* aContext,
-                                    const nsPoint& aPoint)
+                                          const nsPoint& aPoint)
 {
   return nsEventStatus_eIgnore;
 }
@@ -210,7 +216,7 @@ AccessibleCaretEventHub::State::OnScrollPositionChanged(AccessibleCaretEventHub*
 
 void
 AccessibleCaretEventHub::State::OnBlur(AccessibleCaretEventHub* aContext,
-                                 bool aIsLeavingDocument)
+                                       bool aIsLeavingDocument)
 {
 }
 
@@ -825,15 +831,16 @@ AccessibleCaretEventHub::CancelLongTapInjector()
 }
 
 /* static */ void
-AccessibleCaretEventHub::FireLongTap(nsITimer* aTimer, void* aAccessibleCaretEventHub)
+AccessibleCaretEventHub::FireLongTap(nsITimer* aTimer,
+                                     void* aAccessibleCaretEventHub)
 {
-  AccessibleCaretEventHub* self = static_cast<AccessibleCaretEventHub*>(aAccessibleCaretEventHub);
+  auto self = static_cast<AccessibleCaretEventHub*>(aAccessibleCaretEventHub);
   self->mState->OnLongTap(self, self->mPressPoint);
 }
 
 NS_IMETHODIMP
 AccessibleCaretEventHub::Reflow(DOMHighResTimeStamp aStart,
-                          DOMHighResTimeStamp aEnd)
+                                DOMHighResTimeStamp aEnd)
 {
   if (!mInitialized) {
     return NS_OK;
@@ -846,7 +853,7 @@ AccessibleCaretEventHub::Reflow(DOMHighResTimeStamp aStart,
 
 NS_IMETHODIMP
 AccessibleCaretEventHub::ReflowInterruptible(DOMHighResTimeStamp aStart,
-                                       DOMHighResTimeStamp aEnd)
+                                             DOMHighResTimeStamp aEnd)
 {
   if (!mInitialized) {
     return NS_OK;
@@ -910,16 +917,17 @@ AccessibleCaretEventHub::CancelScrollEndInjector()
 }
 
 /* static */ void
-AccessibleCaretEventHub::FireScrollEnd(nsITimer* aTimer, void* aAccessibleCaretEventHub)
+AccessibleCaretEventHub::FireScrollEnd(nsITimer* aTimer,
+                                       void* aAccessibleCaretEventHub)
 {
-  AccessibleCaretEventHub* self = static_cast<AccessibleCaretEventHub*>(aAccessibleCaretEventHub);
+  auto self = static_cast<AccessibleCaretEventHub*>(aAccessibleCaretEventHub);
   self->mState->OnScrollEnd(self);
 }
 
 nsresult
 AccessibleCaretEventHub::NotifySelectionChanged(nsIDOMDocument* aDoc,
-                                          nsISelection* aSel,
-                                          int16_t aReason)
+                                                nsISelection* aSel,
+                                                int16_t aReason)
 {
   if (!mInitialized) {
     return NS_OK;
@@ -943,7 +951,7 @@ AccessibleCaretEventHub::NotifyBlur(bool aIsLeavingDocument)
 
 nsPoint
 AccessibleCaretEventHub::GetTouchEventPosition(WidgetTouchEvent* aEvent,
-                                         int32_t aIdentifier) const
+                                               int32_t aIdentifier) const
 {
   for (dom::Touch* touch : aEvent->touches) {
     if (touch->Identifier() == aIdentifier) {
