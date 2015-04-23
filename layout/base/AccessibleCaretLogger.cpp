@@ -4,19 +4,19 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "CopyPasteLogger.h"
+#include "AccessibleCaretLogger.h"
 
 namespace mozilla {
 
 #ifdef PR_LOGGING
 
 PRLogModuleInfo*
-GetCopyPasteLog()
+GetAccessibleCaretLog()
 {
   static PRLogModuleInfo* log = nullptr;
 
   if (!log) {
-    log = PR_NewLogModule("CopyPaste");
+    log = PR_NewLogModule("AccessibleCaret");
   }
 
   return log;
