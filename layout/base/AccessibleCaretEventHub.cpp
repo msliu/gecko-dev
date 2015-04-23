@@ -244,7 +244,7 @@ AccessibleCaretEventHub::NoActionState::OnPress(AccessibleCaretEventHub* aContex
 {
   nsEventStatus rv = nsEventStatus_eIgnore;
 
-  if (NS_SUCCEEDED(aContext->mHandler->PressCaret(aPoint))) {
+  if (NS_SUCCEEDED(aContext->mManager->PressCaret(aPoint))) {
     aContext->SetState(aContext->PressCaretState());
     rv = nsEventStatus_eConsumeNoDefault;
   } else {
@@ -260,28 +260,28 @@ AccessibleCaretEventHub::NoActionState::OnPress(AccessibleCaretEventHub* aContex
 void
 AccessibleCaretEventHub::NoActionState::OnScrollStart(AccessibleCaretEventHub* aContext)
 {
-  aContext->mHandler->OnScrollStart();
+  aContext->mManager->OnScrollStart();
   aContext->SetState(aContext->ScrollState());
 }
 
 void
 AccessibleCaretEventHub::NoActionState::OnScrolling(AccessibleCaretEventHub* aContext)
 {
-  aContext->mHandler->OnScrolling();
+  aContext->mManager->OnScrolling();
 }
 
 void
 AccessibleCaretEventHub::NoActionState::OnScrollPositionChanged(
   AccessibleCaretEventHub* aContext)
 {
-  aContext->mHandler->OnScrollPositionChanged();
+  aContext->mManager->OnScrollPositionChanged();
 }
 
 void
 AccessibleCaretEventHub::NoActionState::OnBlur(AccessibleCaretEventHub* aContext,
                                          bool aIsLeavingDocument)
 {
-  aContext->mHandler->OnBlur();
+  aContext->mManager->OnBlur();
 }
 
 void
@@ -289,13 +289,13 @@ AccessibleCaretEventHub::NoActionState::OnSelectionChanged(
   AccessibleCaretEventHub* aContext, nsIDOMDocument* aDoc, nsISelection* aSel,
   int16_t aReason)
 {
-  aContext->mHandler->OnSelectionChanged(aDoc, aSel, aReason);
+  aContext->mManager->OnSelectionChanged(aDoc, aSel, aReason);
 }
 
 void
 AccessibleCaretEventHub::NoActionState::OnReflow(AccessibleCaretEventHub* aContext)
 {
-  aContext->mHandler->OnReflow();
+  aContext->mManager->OnReflow();
 }
 
 void
@@ -310,7 +310,7 @@ AccessibleCaretEventHub::PressCaretState::OnMove(AccessibleCaretEventHub* aConte
                                            const nsPoint& aPoint)
 {
   if (aContext->MoveDistanceIsLarge(aPoint)) {
-    if (NS_SUCCEEDED(aContext->mHandler->DragCaret(aPoint))) {
+    if (NS_SUCCEEDED(aContext->mManager->DragCaret(aPoint))) {
       aContext->SetState(aContext->DragCaretState());
     }
   }
@@ -322,8 +322,8 @@ AccessibleCaretEventHub::PressCaretState::OnMove(AccessibleCaretEventHub* aConte
 nsEventStatus
 AccessibleCaretEventHub::PressCaretState::OnRelease(AccessibleCaretEventHub* aContext)
 {
-  aContext->mHandler->ReleaseCaret();
-  aContext->mHandler->TapCaret(aContext->mPressPoint);
+  aContext->mManager->ReleaseCaret();
+  aContext->mManager->TapCaret(aContext->mPressPoint);
   aContext->SetState(aContext->NoActionState());
 
   // We should always consume the event since we've pressed on the caret.
@@ -342,7 +342,7 @@ nsEventStatus
 AccessibleCaretEventHub::DragCaretState::OnMove(AccessibleCaretEventHub* aContext,
                                           const nsPoint& aPoint)
 {
-  aContext->mHandler->DragCaret(aPoint);
+  aContext->mManager->DragCaret(aPoint);
 
   // We should always consume the event since we've pressed on the caret.
   return nsEventStatus_eConsumeNoDefault;
@@ -351,7 +351,7 @@ AccessibleCaretEventHub::DragCaretState::OnMove(AccessibleCaretEventHub* aContex
 nsEventStatus
 AccessibleCaretEventHub::DragCaretState::OnRelease(AccessibleCaretEventHub* aContext)
 {
-  aContext->mHandler->ReleaseCaret();
+  aContext->mManager->ReleaseCaret();
   aContext->SetState(aContext->NoActionState());
 
   // We should always consume the event since we've pressed on the caret.
@@ -388,21 +388,21 @@ AccessibleCaretEventHub::PressNoCaretState::OnLongTap(AccessibleCaretEventHub* a
 void
 AccessibleCaretEventHub::PressNoCaretState::OnScrollStart(AccessibleCaretEventHub* aContext)
 {
-  aContext->mHandler->OnScrollStart();
+  aContext->mManager->OnScrollStart();
   aContext->SetState(aContext->ScrollState());
 }
 
 void
 AccessibleCaretEventHub::PressNoCaretState::OnReflow(AccessibleCaretEventHub* aContext)
 {
-  aContext->mHandler->OnReflow();
+  aContext->mManager->OnReflow();
 }
 
 void
 AccessibleCaretEventHub::PressNoCaretState::OnBlur(AccessibleCaretEventHub* aContext,
                                              bool aIsLeavingDocument)
 {
-  aContext->mHandler->OnBlur();
+  aContext->mManager->OnBlur();
   if (aIsLeavingDocument) {
     aContext->SetState(aContext->NoActionState());
   }
@@ -413,7 +413,7 @@ AccessibleCaretEventHub::PressNoCaretState::OnSelectionChanged(
   AccessibleCaretEventHub* aContext, nsIDOMDocument* aDoc, nsISelection* aSel,
   int16_t aReason)
 {
-  aContext->mHandler->OnSelectionChanged(aDoc, aSel, aReason);
+  aContext->mManager->OnSelectionChanged(aDoc, aSel, aReason);
 }
 
 void
@@ -438,7 +438,7 @@ void
 AccessibleCaretEventHub::ScrollState::OnBlur(AccessibleCaretEventHub* aContext,
                                        bool aIsLeavingDocument)
 {
-  aContext->mHandler->OnBlur();
+  aContext->mManager->OnBlur();
   if (aIsLeavingDocument) {
     aContext->SetState(aContext->NoActionState());
   }
@@ -449,7 +449,7 @@ AccessibleCaretEventHub::PostScrollState::OnPress(AccessibleCaretEventHub* aCont
                                             const nsPoint& aPoint,
                                             int32_t aTouchId)
 {
-  aContext->mHandler->OnScrollEnd();
+  aContext->mManager->OnScrollEnd();
   aContext->SetState(aContext->NoActionState());
   return aContext->GetState()->OnPress(aContext, aPoint, aTouchId);
 }
@@ -463,7 +463,7 @@ AccessibleCaretEventHub::PostScrollState::OnScrollStart(AccessibleCaretEventHub*
 void
 AccessibleCaretEventHub::PostScrollState::OnScrollEnd(AccessibleCaretEventHub* aContext)
 {
-  aContext->mHandler->OnScrollEnd();
+  aContext->mManager->OnScrollEnd();
   aContext->SetState(aContext->NoActionState());
 }
 
@@ -478,7 +478,7 @@ void
 AccessibleCaretEventHub::PostScrollState::OnBlur(AccessibleCaretEventHub* aContext,
                                            bool aIsLeavingDocument)
 {
-  aContext->mHandler->OnBlur();
+  aContext->mManager->OnBlur();
   if (aIsLeavingDocument) {
     aContext->SetState(aContext->NoActionState());
   }
@@ -503,7 +503,7 @@ AccessibleCaretEventHub::LongTapState::OnLongTap(AccessibleCaretEventHub* aConte
 {
   nsEventStatus rv = nsEventStatus_eIgnore;
 
-  if (NS_SUCCEEDED(aContext->mHandler->SelectWordOrShortcut(aPoint))) {
+  if (NS_SUCCEEDED(aContext->mManager->SelectWordOrShortcut(aPoint))) {
     rv = nsEventStatus_eConsumeNoDefault;
   }
 
@@ -515,7 +515,7 @@ AccessibleCaretEventHub::LongTapState::OnLongTap(AccessibleCaretEventHub* aConte
 void
 AccessibleCaretEventHub::LongTapState::OnReflow(AccessibleCaretEventHub* aContext)
 {
-  aContext->mHandler->OnReflow();
+  aContext->mManager->OnReflow();
 }
 
 // -----------------------------------------------------------------------------
@@ -587,7 +587,7 @@ AccessibleCaretEventHub::Init(nsIPresShell* aPresShell)
   mLongTapInjectorTimer = do_CreateInstance("@mozilla.org/timer;1");
   mScrollEndInjectorTimer = do_CreateInstance("@mozilla.org/timer;1");
 
-  mHandler = MakeUnique<AccessibleCaretManager>(mPresShell);
+  mManager = MakeUnique<AccessibleCaretManager>(mPresShell);
 
   mInitialized = true;
 }
@@ -613,7 +613,7 @@ AccessibleCaretEventHub::Terminate()
     mScrollEndInjectorTimer->Cancel();
   }
 
-  mHandler = nullptr;
+  mManager = nullptr;
   mInitialized = false;
 }
 
@@ -776,7 +776,7 @@ AccessibleCaretEventHub::HandleKeyboardEvent(WidgetKeyboardEvent* aEvent)
   case NS_KEY_UP:
   case NS_KEY_DOWN:
   case NS_KEY_PRESS:
-    mHandler->OnKeyboardEvent();
+    mManager->OnKeyboardEvent();
     break;
 
   default:

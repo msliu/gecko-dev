@@ -128,7 +128,7 @@ protected:
 
   nsIPresShell* mPresShell = nullptr;
 
-  UniquePtr<AccessibleCaretManager> mHandler;
+  UniquePtr<AccessibleCaretManager> mManager;
 
   WeakPtr<nsDocShell> mDocShell;
 
