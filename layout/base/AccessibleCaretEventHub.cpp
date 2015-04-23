@@ -22,13 +22,13 @@ namespace mozilla {
 
 #ifdef PR_LOGGING
 
-#undef CP_LOG
-#define CP_LOG(message, ...)                                                   \
-  CP_LOG_BASE("AccessibleCaretEventHub (%p): " message, this, ##__VA_ARGS__);
+#undef AC_LOG
+#define AC_LOG(message, ...)                                                   \
+  AC_LOG_BASE("AccessibleCaretEventHub (%p): " message, this, ##__VA_ARGS__);
 
-#undef CP_LOGV
-#define CP_LOGV(message, ...)                                                  \
-  CP_LOGV_BASE("AccessibleCaretEventHub (%p): " message, this, ##__VA_ARGS__);
+#undef AC_LOGV
+#define AC_LOGV(message, ...)                                                  \
+  AC_LOGV_BASE("AccessibleCaretEventHub (%p): " message, this, ##__VA_ARGS__);
 
 #endif // #ifdef PR_LOGGING
 
@@ -349,6 +349,7 @@ public:
     aContext->mManager->OnReflow();
   }
 };
+
 // -----------------------------------------------------------------------------
 // Implementation of AccessibleCaretEventHub methods
 //
@@ -363,7 +364,7 @@ AccessibleCaretEventHub::SetState(State* aState)
 {
   MOZ_ASSERT(aState);
 
-  CP_LOG("%s -> %s", mState->Name(), aState->Name());
+  AC_LOG("%s -> %s", mState->Name(), aState->Name());
 
   mState->Leave(this);
   mState = aState;
@@ -496,29 +497,29 @@ AccessibleCaretEventHub::HandleMouseEvent(WidgetMouseEvent* aEvent)
 
   switch (aEvent->message) {
   case NS_MOUSE_BUTTON_DOWN:
-    CP_LOGV("Before NS_MOUSE_BUTTON_DOWN, state: %s", mState->Name());
+    AC_LOGV("Before NS_MOUSE_BUTTON_DOWN, state: %s", mState->Name());
     rv = mState->OnPress(this, point, id);
-    CP_LOGV("After NS_MOUSE_BUTTON_DOWN, state: %s, consume: %d",
+    AC_LOGV("After NS_MOUSE_BUTTON_DOWN, state: %s, consume: %d",
             mState->Name(), rv);
     break;
 
   case NS_MOUSE_MOVE:
-    CP_LOGV("Before NS_MOUSE_MOVE, state: %s", mState->Name());
+    AC_LOGV("Before NS_MOUSE_MOVE, state: %s", mState->Name());
     rv = mState->OnMove(this, point);
-    CP_LOGV("After NS_MOUSE_MOVE, state: %s, consume: %d", mState->Name(), rv);
+    AC_LOGV("After NS_MOUSE_MOVE, state: %s, consume: %d", mState->Name(), rv);
     break;
 
   case NS_MOUSE_BUTTON_UP:
-    CP_LOGV("Before NS_MOUSE_BUTTON_UP, state: %s", mState->Name());
+    AC_LOGV("Before NS_MOUSE_BUTTON_UP, state: %s", mState->Name());
     rv = mState->OnRelease(this);
-    CP_LOGV("After NS_MOUSE_BUTTON_UP, state: %s, consume: %d", mState->Name(),
+    AC_LOGV("After NS_MOUSE_BUTTON_UP, state: %s, consume: %d", mState->Name(),
             rv);
     break;
 
   case NS_MOUSE_MOZLONGTAP:
-    CP_LOGV("Before NS_MOUSE_MOZLONGTAP, state: %s", mState->Name());
+    AC_LOGV("Before NS_MOUSE_MOZLONGTAP, state: %s", mState->Name());
     rv = mState->OnLongTap(this, point);
-    CP_LOGV("After NS_MOUSE_MOZLONGTAP, state: %s, consume: %d", mState->Name(),
+    AC_LOGV("After NS_MOUSE_MOZLONGTAP, state: %s, consume: %d", mState->Name(),
             rv);
     break;
 
@@ -534,18 +535,18 @@ AccessibleCaretEventHub::HandleWheelEvent(WidgetWheelEvent* aEvent)
 {
   switch (aEvent->message) {
   case NS_WHEEL_WHEEL:
-    CP_LOGV("NS_WHEEL_WHEEL, isMomentum %d, state: %s", aEvent->isMomentum,
+    AC_LOGV("NS_WHEEL_WHEEL, isMomentum %d, state: %s", aEvent->isMomentum,
             mState->Name());
     mState->OnScrolling(this);
     break;
 
   case NS_WHEEL_START:
-    CP_LOGV("NS_WHEEL_START, state: %s", mState->Name());
+    AC_LOGV("NS_WHEEL_START, state: %s", mState->Name());
     mState->OnScrollStart(this);
     break;
 
   case NS_WHEEL_STOP:
-    CP_LOGV("NS_WHEEL_STOP, state: %s", mState->Name());
+    AC_LOGV("NS_WHEEL_STOP, state: %s", mState->Name());
     mState->OnScrollEnd(this);
     break;
 
@@ -569,27 +570,27 @@ AccessibleCaretEventHub::HandleTouchEvent(WidgetTouchEvent* aEvent)
 
   switch (aEvent->message) {
   case NS_TOUCH_START:
-    CP_LOGV("Before NS_TOUCH_START, state: %s", mState->Name());
+    AC_LOGV("Before NS_TOUCH_START, state: %s", mState->Name());
     rv = mState->OnPress(this, point, id);
-    CP_LOGV("After NS_TOUCH_START, state: %s, consume: %d", mState->Name(), rv);
+    AC_LOGV("After NS_TOUCH_START, state: %s, consume: %d", mState->Name(), rv);
     break;
 
   case NS_TOUCH_MOVE:
-    CP_LOGV("Before NS_TOUCH_MOVE, state: %s", mState->Name());
+    AC_LOGV("Before NS_TOUCH_MOVE, state: %s", mState->Name());
     rv = mState->OnMove(this, point);
-    CP_LOGV("After NS_TOUCH_MOVE, state: %s, consume: %d", mState->Name(), rv);
+    AC_LOGV("After NS_TOUCH_MOVE, state: %s, consume: %d", mState->Name(), rv);
     break;
 
   case NS_TOUCH_END:
-    CP_LOGV("Before NS_TOUCH_END, state: %s", mState->Name());
+    AC_LOGV("Before NS_TOUCH_END, state: %s", mState->Name());
     rv = mState->OnRelease(this);
-    CP_LOGV("After NS_TOUCH_END, state: %s, consume: %d", mState->Name(), rv);
+    AC_LOGV("After NS_TOUCH_END, state: %s, consume: %d", mState->Name(), rv);
     break;
 
   case NS_TOUCH_CANCEL:
-    CP_LOGV("Before NS_TOUCH_CANCEL, state: %s", mState->Name());
+    AC_LOGV("Before NS_TOUCH_CANCEL, state: %s", mState->Name());
     rv = mState->OnRelease(this);
-    CP_LOGV("After NS_TOUCH_CANCEL, state: %s, consume: %d", mState->Name(),
+    AC_LOGV("After NS_TOUCH_CANCEL, state: %s, consume: %d", mState->Name(),
             rv);
     break;
 
@@ -671,7 +672,7 @@ AccessibleCaretEventHub::Reflow(DOMHighResTimeStamp aStart,
     return NS_OK;
   }
 
-  CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
+  AC_LOG("%s, state: %s", __FUNCTION__, mState->Name());
   mState->OnReflow(this);
   return NS_OK;
 }
@@ -694,7 +695,7 @@ AccessibleCaretEventHub::AsyncPanZoomStarted()
     return;
   }
 
-  CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
+  AC_LOG("%s, state: %s", __FUNCTION__, mState->Name());
   mState->OnScrollStart(this);
 }
 
@@ -705,7 +706,7 @@ AccessibleCaretEventHub::AsyncPanZoomStopped()
     return;
   }
 
-  CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
+  AC_LOG("%s, state: %s", __FUNCTION__, mState->Name());
   mState->OnScrollEnd(this);
 }
 
@@ -716,7 +717,7 @@ AccessibleCaretEventHub::ScrollPositionChanged()
     return;
   }
 
-  CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
+  AC_LOG("%s, state: %s", __FUNCTION__, mState->Name());
   mState->OnScrollPositionChanged(this);
 }
 
@@ -758,7 +759,7 @@ AccessibleCaretEventHub::NotifySelectionChanged(nsIDOMDocument* aDoc,
     return NS_OK;
   }
 
-  CP_LOG("%s, state: %s, reason: %d", __FUNCTION__, mState->Name(), aReason);
+  AC_LOG("%s, state: %s, reason: %d", __FUNCTION__, mState->Name(), aReason);
   mState->OnSelectionChanged(this, aDoc, aSel, aReason);
   return NS_OK;
 }
@@ -770,7 +771,7 @@ AccessibleCaretEventHub::NotifyBlur(bool aIsLeavingDocument)
     return;
   }
 
-  CP_LOG("%s, state: %s", __FUNCTION__, mState->Name());
+  AC_LOG("%s, state: %s", __FUNCTION__, mState->Name());
   mState->OnBlur(this, aIsLeavingDocument);
 }
 
