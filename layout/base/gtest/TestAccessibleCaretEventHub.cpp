@@ -10,8 +10,8 @@
 #include <iostream>
 #include <string>
 
-#include "CopyPasteEventHub.h"
-#include "CopyPasteManager.h"
+#include "AccessibleCaretEventHub.h"
+#include "AccessibleCaretManager.h"
 #include "gfxPrefs.h"
 #include "mozilla/BasicEvents.h"
 #include "mozilla/MouseEvents.h"
@@ -26,17 +26,17 @@ using ::testing::Return;
 using ::testing::_;
 
 // -----------------------------------------------------------------------------
-// This file test the state transition of CopyPasteEventHub under combinations
+// This file test the state transition of AccessibleCaretEventHub under combinations
 // of events and callbacks.
 
 namespace mozilla
 {
 
-class MockCopyPasteManager : public CopyPasteManager
+class MockAccessibleCaretManager : public AccessibleCaretManager
 {
 public:
-  explicit MockCopyPasteManager(nsIPresShell* aPresShell)
-    : CopyPasteManager(aPresShell)
+  explicit MockAccessibleCaretManager(nsIPresShell* aPresShell)
+    : AccessibleCaretManager(aPresShell)
   {
   }
 
@@ -52,20 +52,20 @@ public:
   MOCK_METHOD0(OnBlur, void());
 };
 
-class MockCopyPasteEventHub : public CopyPasteEventHub
+class MockAccessibleCaretEventHub : public AccessibleCaretEventHub
 {
 public:
-  using CopyPasteEventHub::NoActionState;
-  using CopyPasteEventHub::PressCaretState;
-  using CopyPasteEventHub::DragCaretState;
-  using CopyPasteEventHub::PressNoCaretState;
-  using CopyPasteEventHub::ScrollState;
-  using CopyPasteEventHub::PostScrollState;
-  using CopyPasteEventHub::FireScrollEnd;
+  using AccessibleCaretEventHub::NoActionState;
+  using AccessibleCaretEventHub::PressCaretState;
+  using AccessibleCaretEventHub::DragCaretState;
+  using AccessibleCaretEventHub::PressNoCaretState;
+  using AccessibleCaretEventHub::ScrollState;
+  using AccessibleCaretEventHub::PostScrollState;
+  using AccessibleCaretEventHub::FireScrollEnd;
 
-  explicit MockCopyPasteEventHub() : CopyPasteEventHub()
+  explicit MockAccessibleCaretEventHub() : AccessibleCaretEventHub()
   {
-    mHandler = MakeUnique<MockCopyPasteManager>(nullptr);
+    mHandler = MakeUnique<MockAccessibleCaretManager>(nullptr);
     mInitialized = true;
   }
 
@@ -84,9 +84,9 @@ public:
     return nsPoint(mouseIntPoint.x, mouseIntPoint.y);
   }
 
-  MockCopyPasteManager* GetMockCopyPasteManager()
+  MockAccessibleCaretManager* GetMockAccessibleCaretManager()
   {
-    return reinterpret_cast<MockCopyPasteManager*>(mHandler.get());
+    return reinterpret_cast<MockAccessibleCaretManager*>(mHandler.get());
   }
 
   void SetUseAsyncPanZoom(bool aUseAsyncPanZoom)
@@ -96,18 +96,18 @@ public:
 };
 
 ::std::ostream& operator<<(::std::ostream& aOstream,
-                           const MockCopyPasteEventHub::State* aState)
+                           const MockAccessibleCaretEventHub::State* aState)
 {
   return aOstream << aState->Name();
 }
 
-class CopyPasteEventHubTester : public ::testing::Test
+class AccessibleCaretEventHubTester : public ::testing::Test
 {
 public:
-  explicit CopyPasteEventHubTester() : mHub(new MockCopyPasteEventHub())
+  explicit AccessibleCaretEventHubTester() : mHub(new MockAccessibleCaretEventHub())
   {
     DefaultValue<nsresult>::Set(NS_OK);
-    EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::NoActionState());
+    EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::NoActionState());
   }
 
   static UniquePtr<WidgetEvent> CreateMouseEvent(uint32_t aMessage, nscoord aX,
@@ -182,7 +182,7 @@ public:
   }
 
   void HandleEventAndCheckState(UniquePtr<WidgetEvent> aEvent,
-                                MockCopyPasteEventHub::State* aExpectedState,
+                                MockAccessibleCaretEventHub::State* aExpectedState,
                                 nsEventStatus aExpectedEventStatus)
   {
     nsEventStatus rv = mHub->HandleEvent(aEvent.get());
@@ -190,7 +190,7 @@ public:
     EXPECT_EQ(rv, aExpectedEventStatus);
   }
 
-  void CheckState(MockCopyPasteEventHub::State* aExpectedState)
+  void CheckState(MockAccessibleCaretEventHub::State* aExpectedState)
   {
     EXPECT_EQ(mHub->GetState(), aExpectedState);
   }
@@ -231,92 +231,92 @@ public:
     PressEventCreator aPressEventCreator, MoveEventCreator aMoveEventCreator,
     ReleaseEventCreator aReleaseEventCreator);
 
-  nsRefPtr<MockCopyPasteEventHub> mHub;
-}; // class CopyPasteEventHubTester
+  nsRefPtr<MockAccessibleCaretEventHub> mHub;
+}; // class AccessibleCaretEventHubTester
 
-TEST_F(CopyPasteEventHubTester, TestMousePressReleaseOnNoCaret)
+TEST_F(AccessibleCaretEventHubTester, TestMousePressReleaseOnNoCaret)
 {
   TestPressReleaseOnNoCaret(CreateMousePressEvent, CreateMouseReleaseEvent);
 }
 
-TEST_F(CopyPasteEventHubTester, TestTouchPressReleaseOnNoCaret)
+TEST_F(AccessibleCaretEventHubTester, TestTouchPressReleaseOnNoCaret)
 {
   TestPressReleaseOnNoCaret(CreateTouchPressEvent, CreateTouchReleaseEvent);
 }
 
 template <typename PressEventCreator, typename ReleaseEventCreator>
 void
-CopyPasteEventHubTester::TestPressReleaseOnNoCaret(
+AccessibleCaretEventHubTester::TestPressReleaseOnNoCaret(
   PressEventCreator aPressEventCreator,
   ReleaseEventCreator aReleaseEventCreator)
 {
-  EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+  EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), PressCaret(_))
     .WillOnce(Return(NS_ERROR_FAILURE));
 
-  EXPECT_CALL(*mHub->GetMockCopyPasteManager(), ReleaseCaret())
+  EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), ReleaseCaret())
     .Times(0);
 
-  EXPECT_CALL(*mHub->GetMockCopyPasteManager(), TapCaret(_))
+  EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), TapCaret(_))
     .Times(0);
 
   HandleEventAndCheckState(aPressEventCreator(0, 0),
-                           MockCopyPasteEventHub::PressNoCaretState(),
+                           MockAccessibleCaretEventHub::PressNoCaretState(),
                            nsEventStatus_eIgnore);
 
   HandleEventAndCheckState(aReleaseEventCreator(0, 0),
-                           MockCopyPasteEventHub::NoActionState(),
+                           MockAccessibleCaretEventHub::NoActionState(),
                            nsEventStatus_eIgnore);
 }
 
-TEST_F(CopyPasteEventHubTester, TestMousePressReleaseOnCaret)
+TEST_F(AccessibleCaretEventHubTester, TestMousePressReleaseOnCaret)
 {
   TestPressReleaseOnCaret(CreateMousePressEvent, CreateMouseReleaseEvent);
 }
 
-TEST_F(CopyPasteEventHubTester, TestTouchPressReleaseOnCaret)
+TEST_F(AccessibleCaretEventHubTester, TestTouchPressReleaseOnCaret)
 {
   TestPressReleaseOnCaret(CreateTouchPressEvent, CreateTouchReleaseEvent);
 }
 
 template <typename PressEventCreator, typename ReleaseEventCreator>
 void
-CopyPasteEventHubTester::TestPressReleaseOnCaret(
+AccessibleCaretEventHubTester::TestPressReleaseOnCaret(
   PressEventCreator aPressEventCreator,
   ReleaseEventCreator aReleaseEventCreator)
 {
   {
     InSequence dummy;
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), PressCaret(_))
       .WillOnce(Return(NS_OK));
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), SelectWordOrShortcut(_))
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), SelectWordOrShortcut(_))
       .Times(0);
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), ReleaseCaret());
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), TapCaret(_));
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), ReleaseCaret());
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), TapCaret(_));
   }
 
   HandleEventAndCheckState(aPressEventCreator(0, 0),
-                           MockCopyPasteEventHub::PressCaretState(),
+                           MockAccessibleCaretEventHub::PressCaretState(),
                            nsEventStatus_eConsumeNoDefault);
 
   HandleEventAndCheckState(CreateLongTapEvent(0, 0),
-                           MockCopyPasteEventHub::PressCaretState(),
+                           MockAccessibleCaretEventHub::PressCaretState(),
                            nsEventStatus_eConsumeNoDefault);
 
   HandleEventAndCheckState(aReleaseEventCreator(0, 0),
-                           MockCopyPasteEventHub::NoActionState(),
+                           MockAccessibleCaretEventHub::NoActionState(),
                            nsEventStatus_eConsumeNoDefault);
 }
 
-TEST_F(CopyPasteEventHubTester, TestMousePressMoveReleaseOnNoCaret)
+TEST_F(AccessibleCaretEventHubTester, TestMousePressMoveReleaseOnNoCaret)
 {
   TestPressMoveReleaseOnNoCaret(CreateMousePressEvent, CreateMouseMoveEvent,
                                 CreateMouseReleaseEvent);
 }
 
-TEST_F(CopyPasteEventHubTester, TestTouchPressMoveReleaseOnNoCaret)
+TEST_F(AccessibleCaretEventHubTester, TestTouchPressMoveReleaseOnNoCaret)
 {
   TestPressMoveReleaseOnNoCaret(CreateTouchPressEvent, CreateTouchMoveEvent,
                                 CreateTouchReleaseEvent);
@@ -325,7 +325,7 @@ TEST_F(CopyPasteEventHubTester, TestTouchPressMoveReleaseOnNoCaret)
 template <typename PressEventCreator, typename MoveEventCreator,
           typename ReleaseEventCreator>
 void
-CopyPasteEventHubTester::TestPressMoveReleaseOnNoCaret(
+AccessibleCaretEventHubTester::TestPressMoveReleaseOnNoCaret(
   PressEventCreator aPressEventCreator, MoveEventCreator aMoveEventCreator,
   ReleaseEventCreator aReleaseEventCreator)
 {
@@ -337,40 +337,40 @@ CopyPasteEventHubTester::TestPressMoveReleaseOnNoCaret(
   {
     InSequence dummy;
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), PressCaret(_))
       .WillOnce(Return(NS_ERROR_FAILURE));
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), DragCaret(_)).Times(0);
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), DragCaret(_)).Times(0);
   }
 
   HandleEventAndCheckState(aPressEventCreator(x0, y0),
-                           MockCopyPasteEventHub::PressNoCaretState(),
+                           MockAccessibleCaretEventHub::PressNoCaretState(),
                            nsEventStatus_eIgnore);
 
   // A small move with the distance between (x0, y0) and (x1, y1) below the
   // tolerance value.
   HandleEventAndCheckState(aMoveEventCreator(x1, y1),
-                           MockCopyPasteEventHub::PressNoCaretState(),
+                           MockAccessibleCaretEventHub::PressNoCaretState(),
                            nsEventStatus_eIgnore);
 
   // A large move to simulate a dragging to select text since the distance
   // between (x0, y0) and (x2, y2) is above the tolerance value.
   HandleEventAndCheckState(aMoveEventCreator(x2, y2),
-                           MockCopyPasteEventHub::NoActionState(),
+                           MockAccessibleCaretEventHub::NoActionState(),
                            nsEventStatus_eIgnore);
 
   HandleEventAndCheckState(aReleaseEventCreator(x3, y3),
-                           MockCopyPasteEventHub::NoActionState(),
+                           MockAccessibleCaretEventHub::NoActionState(),
                            nsEventStatus_eIgnore);
 }
 
-TEST_F(CopyPasteEventHubTester, TestMousePressMoveReleaseOnCaret)
+TEST_F(AccessibleCaretEventHubTester, TestMousePressMoveReleaseOnCaret)
 {
   TestPressMoveReleaseOnCaret(CreateMousePressEvent, CreateMouseMoveEvent,
                               CreateMouseReleaseEvent);
 }
 
-TEST_F(CopyPasteEventHubTester, TestTouchPressMoveReleaseOnCaret)
+TEST_F(AccessibleCaretEventHubTester, TestTouchPressMoveReleaseOnCaret)
 {
   TestPressMoveReleaseOnCaret(CreateTouchPressEvent, CreateTouchMoveEvent,
                               CreateTouchReleaseEvent);
@@ -379,7 +379,7 @@ TEST_F(CopyPasteEventHubTester, TestTouchPressMoveReleaseOnCaret)
 template <typename PressEventCreator, typename MoveEventCreator,
           typename ReleaseEventCreator>
 void
-CopyPasteEventHubTester::TestPressMoveReleaseOnCaret(
+AccessibleCaretEventHubTester::TestPressMoveReleaseOnCaret(
   PressEventCreator aPressEventCreator, MoveEventCreator aMoveEventCreator,
   ReleaseEventCreator aReleaseEventCreator)
 {
@@ -391,52 +391,52 @@ CopyPasteEventHubTester::TestPressMoveReleaseOnCaret(
   {
     InSequence dummy;
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), PressCaret(_))
       .WillOnce(Return(NS_OK));
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), DragCaret(_))
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), DragCaret(_))
       .Times(2) // two valid drag operations
       .WillRepeatedly(Return(NS_OK));
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), ReleaseCaret())
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), ReleaseCaret())
       .WillOnce(Return(NS_OK));
   }
 
   HandleEventAndCheckState(aPressEventCreator(x0, y0),
-                           MockCopyPasteEventHub::PressCaretState(),
+                           MockAccessibleCaretEventHub::PressCaretState(),
                            nsEventStatus_eConsumeNoDefault);
 
   // A small move with the distance between (x0, y0) and (x1, y1) below the
   // tolerance value.
   HandleEventAndCheckState(aMoveEventCreator(x1, y1),
-                           MockCopyPasteEventHub::PressCaretState(),
+                           MockAccessibleCaretEventHub::PressCaretState(),
                            nsEventStatus_eConsumeNoDefault);
 
   // A large move forms a valid drag since the distance between (x0, y0) and
   // (x2, y2) is above the tolerance value.
   HandleEventAndCheckState(aMoveEventCreator(x2, y2),
-                           MockCopyPasteEventHub::DragCaretState(),
+                           MockAccessibleCaretEventHub::DragCaretState(),
                            nsEventStatus_eConsumeNoDefault);
 
   // Also a valid drag since the distance between (x0, y0) and (x3, y3) above
   // the tolerance value even if the distance between (x2, y2) and (x3, y3) is
   // below the tolerance value.
   HandleEventAndCheckState(aMoveEventCreator(x3, y3),
-                           MockCopyPasteEventHub::DragCaretState(),
+                           MockAccessibleCaretEventHub::DragCaretState(),
                            nsEventStatus_eConsumeNoDefault);
 
   HandleEventAndCheckState(aReleaseEventCreator(x3, y3),
-                           MockCopyPasteEventHub::NoActionState(),
+                           MockAccessibleCaretEventHub::NoActionState(),
                            nsEventStatus_eConsumeNoDefault);
 }
 
-TEST_F(CopyPasteEventHubTester, TestMouseLongTapWithSelectWordSuccessful)
+TEST_F(AccessibleCaretEventHubTester, TestMouseLongTapWithSelectWordSuccessful)
 {
   TestLongTapWithSelectWordSuccessful(CreateMousePressEvent,
                                       CreateMouseReleaseEvent);
 }
 
-TEST_F(CopyPasteEventHubTester, TestTouchLongTapWithSelectWordSuccessful)
+TEST_F(AccessibleCaretEventHubTester, TestTouchLongTapWithSelectWordSuccessful)
 {
   TestLongTapWithSelectWordSuccessful(CreateTouchPressEvent,
                                       CreateTouchReleaseEvent);
@@ -444,40 +444,40 @@ TEST_F(CopyPasteEventHubTester, TestTouchLongTapWithSelectWordSuccessful)
 
 template <typename PressEventCreator, typename ReleaseEventCreator>
 void
-CopyPasteEventHubTester::TestLongTapWithSelectWordSuccessful(
+AccessibleCaretEventHubTester::TestLongTapWithSelectWordSuccessful(
   PressEventCreator aPressEventCreator,
   ReleaseEventCreator aReleaseEventCreator)
 {
   {
     InSequence dummy;
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), PressCaret(_))
       .WillOnce(Return(NS_ERROR_FAILURE));
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), SelectWordOrShortcut(_))
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), SelectWordOrShortcut(_))
       .WillOnce(Return(NS_OK));
   }
 
   HandleEventAndCheckState(aPressEventCreator(0, 0),
-                           MockCopyPasteEventHub::PressNoCaretState(),
+                           MockAccessibleCaretEventHub::PressNoCaretState(),
                            nsEventStatus_eIgnore);
 
   HandleEventAndCheckState(CreateLongTapEvent(0, 0),
-                           MockCopyPasteEventHub::NoActionState(),
+                           MockAccessibleCaretEventHub::NoActionState(),
                            nsEventStatus_eConsumeNoDefault);
 
   HandleEventAndCheckState(aReleaseEventCreator(0, 0),
-                           MockCopyPasteEventHub::NoActionState(),
+                           MockAccessibleCaretEventHub::NoActionState(),
                            nsEventStatus_eIgnore);
 }
 
-TEST_F(CopyPasteEventHubTester, TestMouseLongTapWithSelectWordFailed)
+TEST_F(AccessibleCaretEventHubTester, TestMouseLongTapWithSelectWordFailed)
 {
   TestLongTapWithSelectWordFailed(CreateMousePressEvent,
                                   CreateMouseReleaseEvent);
 }
 
-TEST_F(CopyPasteEventHubTester, TestTouchLongTapWithSelectWordFailed)
+TEST_F(AccessibleCaretEventHubTester, TestTouchLongTapWithSelectWordFailed)
 {
   TestLongTapWithSelectWordFailed(CreateTouchPressEvent,
                                   CreateTouchReleaseEvent);
@@ -485,40 +485,40 @@ TEST_F(CopyPasteEventHubTester, TestTouchLongTapWithSelectWordFailed)
 
 template <typename PressEventCreator, typename ReleaseEventCreator>
 void
-CopyPasteEventHubTester::TestLongTapWithSelectWordFailed(
+AccessibleCaretEventHubTester::TestLongTapWithSelectWordFailed(
   PressEventCreator aPressEventCreator,
   ReleaseEventCreator aReleaseEventCreator)
 {
   {
     InSequence dummy;
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), PressCaret(_))
       .WillOnce(Return(NS_ERROR_FAILURE));
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), SelectWordOrShortcut(_))
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), SelectWordOrShortcut(_))
       .WillOnce(Return(NS_ERROR_FAILURE));
   }
 
   HandleEventAndCheckState(aPressEventCreator(0, 0),
-                           MockCopyPasteEventHub::PressNoCaretState(),
+                           MockAccessibleCaretEventHub::PressNoCaretState(),
                            nsEventStatus_eIgnore);
 
   HandleEventAndCheckState(CreateLongTapEvent(0, 0),
-                           MockCopyPasteEventHub::NoActionState(),
+                           MockAccessibleCaretEventHub::NoActionState(),
                            nsEventStatus_eIgnore);
 
   HandleEventAndCheckState(aReleaseEventCreator(0, 0),
-                           MockCopyPasteEventHub::NoActionState(),
+                           MockAccessibleCaretEventHub::NoActionState(),
                            nsEventStatus_eIgnore);
 }
 
-TEST_F(CopyPasteEventHubTester, TestTouchEventDrivenAsyncPanZoomScroll)
+TEST_F(AccessibleCaretEventHubTester, TestTouchEventDrivenAsyncPanZoomScroll)
 {
   TestEventDrivenAsyncPanZoomScroll(CreateTouchPressEvent, CreateTouchMoveEvent,
                                     CreateTouchReleaseEvent);
 }
 
-TEST_F(CopyPasteEventHubTester, TestMouseEventDrivenAsyncPanZoomScroll)
+TEST_F(AccessibleCaretEventHubTester, TestMouseEventDrivenAsyncPanZoomScroll)
 {
   TestEventDrivenAsyncPanZoomScroll(CreateMousePressEvent, CreateMouseMoveEvent,
                                     CreateMouseReleaseEvent);
@@ -527,7 +527,7 @@ TEST_F(CopyPasteEventHubTester, TestMouseEventDrivenAsyncPanZoomScroll)
 template <typename PressEventCreator, typename MoveEventCreator,
           typename ReleaseEventCreator>
 void
-CopyPasteEventHubTester::TestEventDrivenAsyncPanZoomScroll(
+AccessibleCaretEventHubTester::TestEventDrivenAsyncPanZoomScroll(
   PressEventCreator aPressEventCreator, MoveEventCreator aMoveEventCreator,
   ReleaseEventCreator aReleaseEventCreator)
 {
@@ -535,108 +535,108 @@ CopyPasteEventHubTester::TestEventDrivenAsyncPanZoomScroll(
   {
     InSequence dummy;
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), PressCaret(_))
       .WillOnce(Return(NS_ERROR_FAILURE));
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), DragCaret(_)).Times(0);
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), DragCaret(_)).Times(0);
 
     EXPECT_CALL(check, Call("1"));
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollStart());
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollStart());
 
     EXPECT_CALL(check, Call("2"));
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd());
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollEnd());
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), PressCaret(_))
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), PressCaret(_))
       .WillOnce(Return(NS_ERROR_FAILURE));
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), DragCaret(_)).Times(0);
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), DragCaret(_)).Times(0);
 
     EXPECT_CALL(check, Call("3"));
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollStart());
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollStart());
 
     EXPECT_CALL(check, Call("4"));
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd());
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollEnd());
   }
 
   mHub->SetUseAsyncPanZoom(true);
 
   // Receive press event.
   HandleEventAndCheckState(aPressEventCreator(0, 0),
-                           MockCopyPasteEventHub::PressNoCaretState(),
+                           MockAccessibleCaretEventHub::PressNoCaretState(),
                            nsEventStatus_eIgnore);
 
   HandleEventAndCheckState(aMoveEventCreator(100, 100),
-                           MockCopyPasteEventHub::PressNoCaretState(),
+                           MockAccessibleCaretEventHub::PressNoCaretState(),
                            nsEventStatus_eIgnore);
 
   check.Call("1");
 
   // Event driven scroll started
   mHub->AsyncPanZoomStarted();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::ScrollState());
 
   HandleEventAndCheckState(aMoveEventCreator(160, 160),
-                           MockCopyPasteEventHub::ScrollState(),
+                           MockAccessibleCaretEventHub::ScrollState(),
                            nsEventStatus_eIgnore);
 
   mHub->ScrollPositionChanged();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::ScrollState());
 
   // Event driven scroll ended
   mHub->AsyncPanZoomStopped();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::PostScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::PostScrollState());
 
   HandleEventAndCheckState(aReleaseEventCreator(210, 210),
-                           MockCopyPasteEventHub::PostScrollState(),
+                           MockAccessibleCaretEventHub::PostScrollState(),
                            nsEventStatus_eIgnore);
 
   check.Call("2");
 
   // Receive another press event.
   HandleEventAndCheckState(aPressEventCreator(220, 220),
-                           MockCopyPasteEventHub::PressNoCaretState(),
+                           MockAccessibleCaretEventHub::PressNoCaretState(),
                            nsEventStatus_eIgnore);
 
   HandleEventAndCheckState(aMoveEventCreator(230, 230),
-                           MockCopyPasteEventHub::PressNoCaretState(),
+                           MockAccessibleCaretEventHub::PressNoCaretState(),
                            nsEventStatus_eIgnore);
 
   check.Call("3");
 
   // Another APZ scroll started
   mHub->AsyncPanZoomStarted();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::ScrollState());
 
   mHub->ScrollPositionChanged();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::ScrollState());
 
   // Another APZ scroll ended
   mHub->AsyncPanZoomStopped();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::PostScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::PostScrollState());
 
   HandleEventAndCheckState(aReleaseEventCreator(310, 310),
-                           MockCopyPasteEventHub::PostScrollState(),
+                           MockAccessibleCaretEventHub::PostScrollState(),
                            nsEventStatus_eIgnore);
 
   check.Call("4");
 
   // Simulate scroll end fired by timer.
-  MockCopyPasteEventHub::FireScrollEnd(nullptr, mHub);
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::NoActionState());
+  MockAccessibleCaretEventHub::FireScrollEnd(nullptr, mHub);
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::NoActionState());
 }
 
-TEST_F(CopyPasteEventHubTester, TestNoEventAsyncPanZoomScroll)
+TEST_F(AccessibleCaretEventHubTester, TestNoEventAsyncPanZoomScroll)
 {
   MockFunction<void(::std::string aCheckPointName)> check;
   {
     InSequence dummy;
 
     EXPECT_CALL(check, Call("1"));
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollStart());
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollStart());
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrolling()).Times(0);
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollPositionChanged()).Times(0);
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrolling()).Times(0);
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollPositionChanged()).Times(0);
 
     EXPECT_CALL(check, Call("2"));
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd());
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollEnd());
   }
 
   mHub->SetUseAsyncPanZoom(true);
@@ -644,116 +644,116 @@ TEST_F(CopyPasteEventHubTester, TestNoEventAsyncPanZoomScroll)
   check.Call("1");
 
   mHub->AsyncPanZoomStarted();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::ScrollState());
 
   mHub->ScrollPositionChanged();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::ScrollState());
 
   mHub->AsyncPanZoomStopped();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::PostScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::PostScrollState());
 
   mHub->AsyncPanZoomStarted();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::ScrollState());
 
   mHub->ScrollPositionChanged();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::ScrollState());
 
   mHub->AsyncPanZoomStopped();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::PostScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::PostScrollState());
 
   check.Call("2");
 
   // Simulate scroll end fired by timer.
-  MockCopyPasteEventHub::FireScrollEnd(nullptr, mHub);
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::NoActionState());
+  MockAccessibleCaretEventHub::FireScrollEnd(nullptr, mHub);
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::NoActionState());
 }
 
-TEST_F(CopyPasteEventHubTester, TestAsyncPanZoomScrollStartedThenBlur)
+TEST_F(AccessibleCaretEventHubTester, TestAsyncPanZoomScrollStartedThenBlur)
 {
   {
     InSequence dummy;
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollStart());
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd()).Times(0);
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnBlur());
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollStart());
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollEnd()).Times(0);
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnBlur());
   }
 
   mHub->SetUseAsyncPanZoom(true);
 
   mHub->AsyncPanZoomStarted();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::ScrollState());
 
   mHub->ScrollPositionChanged();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::ScrollState());
 
   mHub->NotifyBlur(true);
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::NoActionState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::NoActionState());
 }
 
-TEST_F(CopyPasteEventHubTester, TestAsyncPanZoomScrollEndedThenBlur)
+TEST_F(AccessibleCaretEventHubTester, TestAsyncPanZoomScrollEndedThenBlur)
 {
   {
     InSequence dummy;
 
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollStart());
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd()).Times(0);
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnBlur());
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollStart());
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollEnd()).Times(0);
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnBlur());
   }
 
   mHub->SetUseAsyncPanZoom(true);
 
   mHub->AsyncPanZoomStarted();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::ScrollState());
 
   mHub->ScrollPositionChanged();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::ScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::ScrollState());
 
   mHub->AsyncPanZoomStopped();
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::PostScrollState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::PostScrollState());
 
   mHub->NotifyBlur(true);
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::NoActionState());
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::NoActionState());
 }
 
-TEST_F(CopyPasteEventHubTester, TestWheelEventScroll)
+TEST_F(AccessibleCaretEventHubTester, TestWheelEventScroll)
 {
   MockFunction<void(::std::string aCheckPointName)> check;
   {
     InSequence dummy;
 
     EXPECT_CALL(check, Call("1"));
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollStart());
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollStart());
 
     EXPECT_CALL(check, Call("2"));
-    EXPECT_CALL(*mHub->GetMockCopyPasteManager(), OnScrollEnd());
+    EXPECT_CALL(*mHub->GetMockAccessibleCaretManager(), OnScrollEnd());
   }
 
   check.Call("1");
 
   HandleEventAndCheckState(CreateWheelEvent(NS_WHEEL_START),
-                           MockCopyPasteEventHub::ScrollState(),
+                           MockAccessibleCaretEventHub::ScrollState(),
                            nsEventStatus_eIgnore);
 
   HandleEventAndCheckState(CreateWheelEvent(NS_WHEEL_WHEEL),
-                           MockCopyPasteEventHub::ScrollState(),
+                           MockAccessibleCaretEventHub::ScrollState(),
                            nsEventStatus_eIgnore);
 
   mHub->ScrollPositionChanged();
 
   HandleEventAndCheckState(CreateWheelEvent(NS_WHEEL_STOP),
-                           MockCopyPasteEventHub::PostScrollState(),
+                           MockAccessibleCaretEventHub::PostScrollState(),
                            nsEventStatus_eIgnore);
 
   // Momentum scroll
   HandleEventAndCheckState(CreateWheelEvent(NS_WHEEL_WHEEL),
-                           MockCopyPasteEventHub::PostScrollState(),
+                           MockAccessibleCaretEventHub::PostScrollState(),
                            nsEventStatus_eIgnore);
 
   check.Call("2");
 
   // Simulate scroll end fired by timer.
-  MockCopyPasteEventHub::FireScrollEnd(nullptr, mHub);
-  EXPECT_EQ(mHub->GetState(), MockCopyPasteEventHub::NoActionState());
+  MockAccessibleCaretEventHub::FireScrollEnd(nullptr, mHub);
+  EXPECT_EQ(mHub->GetState(), MockAccessibleCaretEventHub::NoActionState());
 }
 
 }; // namespace mozilla
