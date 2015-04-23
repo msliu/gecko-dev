@@ -22,13 +22,13 @@ namespace mozilla {
 
 #ifdef PR_LOGGING
 
-#undef CP_LOG
-#define CP_LOG(message, ...)                                                   \
-  CP_LOG_BASE("AccessibleCaretManager (%p): " message, this, ##__VA_ARGS__);
+#undef AC_LOG
+#define AC_LOG(message, ...)                                                   \
+  AC_LOG_BASE("AccessibleCaretManager (%p): " message, this, ##__VA_ARGS__);
 
-#undef CP_LOGV
-#define CP_LOGV(message, ...)                                                  \
-  CP_LOGV_BASE("AccessibleCaretManager (%p): " message, this, ##__VA_ARGS__);
+#undef AC_LOGV
+#define AC_LOGV(message, ...)                                                  \
+  AC_LOGV_BASE("AccessibleCaretManager (%p): " message, this, ##__VA_ARGS__);
 
 #endif // #ifdef PR_LOGGING
 
@@ -56,7 +56,7 @@ nsresult
 AccessibleCaretManager::OnSelectionChanged(nsIDOMDocument* aDoc,
                                            nsISelection* aSel, int16_t aReason)
 {
-  CP_LOG("aSel: %p, GetSelection(): %p, aReason: %d", aSel, GetSelection(),
+  AC_LOG("aSel: %p, GetSelection(): %p, aReason: %d", aSel, GetSelection(),
          aReason);
 
   if (aSel != GetSelection()) {
@@ -90,7 +90,7 @@ void
 AccessibleCaretManager::HideCarets()
 {
   if (mFirstCaret->IsLogicallyVisible() || mSecondCaret->IsLogicallyVisible()) {
-    CP_LOG("%s", __FUNCTION__);
+    AC_LOG("%s", __FUNCTION__);
     mFirstCaret->SetAppearance(Appearance::None);
     mSecondCaret->SetAppearance(Appearance::None);
     CancelCaretTimeoutTimer();
@@ -118,7 +118,7 @@ AccessibleCaretManager::UpdateCarets()
 void
 AccessibleCaretManager::UpdateCaretsForCursorMode()
 {
-  CP_LOG("%s, selection: %p", __FUNCTION__, GetSelection());
+  AC_LOG("%s, selection: %p", __FUNCTION__, GetSelection());
 
   nsRefPtr<nsCaret> caret = mPresShell->GetCaret();
   if (!caret || !caret->IsVisible()) {
@@ -172,7 +172,7 @@ AccessibleCaretManager::UpdateCaretsForCursorMode()
 void
 AccessibleCaretManager::UpdateCaretsForSelectionMode()
 {
-  CP_LOG("%s, selection: %p", __FUNCTION__, GetSelection());
+  AC_LOG("%s, selection: %p", __FUNCTION__, GetSelection());
 
   int32_t startOffset = 0;
   nsIFrame* startFrame = FindFirstNodeWithFrame(false, &startOffset);
@@ -333,7 +333,7 @@ AccessibleCaretManager::SelectWordOrShortcut(const nsPoint& aPoint)
       (editingHost && !nsContentUtils::HasNonEmptyTextContent(
                          editingHost, nsContentUtils::eRecurseIntoChildren))) {
     // Content is empty. No need to select word.
-    CP_LOG("%s, Cannot select word bacause content is empty", __FUNCTION__);
+    AC_LOG("%s, Cannot select word bacause content is empty", __FUNCTION__);
     return NS_OK;
   }
 
@@ -345,7 +345,7 @@ AccessibleCaretManager::SelectWordOrShortcut(const nsPoint& aPoint)
 void
 AccessibleCaretManager::OnScrollStart()
 {
-  CP_LOG("%s", __FUNCTION__);
+  AC_LOG("%s", __FUNCTION__);
 
   HideCarets();
 }
@@ -358,10 +358,10 @@ AccessibleCaretManager::OnScrollEnd()
   }
 
   if (GetCaretMode() == CaretMode::Cursor) {
-    CP_LOG("%s: HideCarets()", __FUNCTION__);
+    AC_LOG("%s: HideCarets()", __FUNCTION__);
     HideCarets();
   } else {
-    CP_LOG("%s: UpdateCarets()", __FUNCTION__);
+    AC_LOG("%s: UpdateCarets()", __FUNCTION__);
     UpdateCarets();
   }
 }
@@ -374,10 +374,10 @@ AccessibleCaretManager::OnScrolling()
   }
 
   if (GetCaretMode() == CaretMode::Cursor) {
-    CP_LOG("%s: HideCarets()", __FUNCTION__);
+    AC_LOG("%s: HideCarets()", __FUNCTION__);
     HideCarets();
   } else {
-    CP_LOG("%s: UpdateCarets()", __FUNCTION__);
+    AC_LOG("%s: UpdateCarets()", __FUNCTION__);
     UpdateCarets();
   }
 }
@@ -389,7 +389,7 @@ AccessibleCaretManager::OnScrollPositionChanged()
     return;
   }
 
-  CP_LOG("%s: UpdateCarets()", __FUNCTION__);
+  AC_LOG("%s: UpdateCarets()", __FUNCTION__);
   UpdateCarets();
 }
 
@@ -401,7 +401,7 @@ AccessibleCaretManager::OnReflow()
   }
 
   if (mFirstCaret->IsVisuallyVisible() || mSecondCaret->IsVisuallyVisible()) {
-    CP_LOG("%s: UpdateCarets()", __FUNCTION__);
+    AC_LOG("%s: UpdateCarets()", __FUNCTION__);
     UpdateCarets();
   }
 }
@@ -409,7 +409,7 @@ AccessibleCaretManager::OnReflow()
 void
 AccessibleCaretManager::OnBlur()
 {
-  CP_LOG("%s: HideCarets()", __FUNCTION__);
+  AC_LOG("%s: HideCarets()", __FUNCTION__);
   HideCarets();
 }
 
@@ -417,7 +417,7 @@ void
 AccessibleCaretManager::OnKeyboardEvent()
 {
   if (GetCaretMode() == CaretMode::Cursor) {
-    CP_LOG("%s: HideCarets()", __FUNCTION__);
+    AC_LOG("%s: HideCarets()", __FUNCTION__);
     HideCarets();
   }
 }
@@ -531,7 +531,7 @@ AccessibleCaretManager::SelectWord(nsIFrame* aFrame, const nsPoint& aPoint) cons
 #ifdef DEBUG_FRAME_DUMP
   nsCString frameTag;
   frame->ListTag(frameTag);
-  CP_LOG("Frame=%s, ptInFrame=(%d, %d)", frameTag.get(), aPoint.x, aPoint.y);
+  AC_LOG("Frame=%s, ptInFrame=(%d, %d)", frameTag.get(), aPoint.x, aPoint.y);
 #endif
 
   SetSelectionDragState(false);
