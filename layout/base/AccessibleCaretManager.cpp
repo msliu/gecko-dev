@@ -4,11 +4,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "CopyPasteManager.h"
+#include "AccessibleCaretManager.h"
 
 #include "AccessibleCaret.h"
-#include "CopyPasteEventHub.h"
-#include "CopyPasteLogger.h"
+#include "AccessibleCaretEventHub.h"
+#include "AccessibleCaretLogger.h"
 #include "mozilla/dom/Element.h"
 #include "mozilla/dom/Selection.h"
 #include "mozilla/dom/TreeWalker.h"
@@ -24,11 +24,11 @@ namespace mozilla {
 
 #undef CP_LOG
 #define CP_LOG(message, ...)                                                   \
-  CP_LOG_BASE("CopyPasteManager (%p): " message, this, ##__VA_ARGS__);
+  CP_LOG_BASE("AccessibleCaretManager (%p): " message, this, ##__VA_ARGS__);
 
 #undef CP_LOGV
 #define CP_LOGV(message, ...)                                                  \
-  CP_LOGV_BASE("CopyPasteManager (%p): " message, this, ##__VA_ARGS__);
+  CP_LOGV_BASE("AccessibleCaretManager (%p): " message, this, ##__VA_ARGS__);
 
 #endif // #ifdef PR_LOGGING
 
@@ -36,7 +36,7 @@ using namespace dom;
 using Appearance = AccessibleCaret::Appearance;
 using PositionChangedResult = AccessibleCaret::PositionChangedResult;
 
-CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
+AccessibleCaretManager::AccessibleCaretManager(nsIPresShell* aPresShell)
   : mPresShell(aPresShell)
 {
   if (mPresShell) {
@@ -47,13 +47,13 @@ CopyPasteManager::CopyPasteManager(nsIPresShell* aPresShell)
   }
 }
 
-CopyPasteManager::~CopyPasteManager()
+AccessibleCaretManager::~AccessibleCaretManager()
 {
   CancelCaretTimeoutTimer();
 }
 
 nsresult
-CopyPasteManager::OnSelectionChanged(nsIDOMDocument* aDoc,
+AccessibleCaretManager::OnSelectionChanged(nsIDOMDocument* aDoc,
                                      nsISelection* aSel,
                                      int16_t aReason)
 {
@@ -87,7 +87,7 @@ CopyPasteManager::OnSelectionChanged(nsIDOMDocument* aDoc,
 }
 
 void
-CopyPasteManager::HideCarets()
+AccessibleCaretManager::HideCarets()
 {
   if (mFirstCaret->IsLogicallyVisible() || mSecondCaret->IsLogicallyVisible()) {
     CP_LOG("%s", __FUNCTION__);
@@ -98,7 +98,7 @@ CopyPasteManager::HideCarets()
 }
 
 void
-CopyPasteManager::UpdateCarets()
+AccessibleCaretManager::UpdateCarets()
 {
   mCaretMode = GetCaretMode();
 
@@ -116,7 +116,7 @@ CopyPasteManager::UpdateCarets()
 }
 
 void
-CopyPasteManager::UpdateCaretsForCursorMode()
+AccessibleCaretManager::UpdateCaretsForCursorMode()
 {
   CP_LOG("%s, selection: %p", __FUNCTION__, GetSelection());
 
@@ -170,7 +170,7 @@ CopyPasteManager::UpdateCaretsForCursorMode()
 }
 
 void
-CopyPasteManager::UpdateCaretsForSelectionMode()
+AccessibleCaretManager::UpdateCaretsForSelectionMode()
 {
   CP_LOG("%s, selection: %p", __FUNCTION__, GetSelection());
 
@@ -219,7 +219,7 @@ CopyPasteManager::UpdateCaretsForSelectionMode()
 }
 
 void
-CopyPasteManager::UpdateCaretsForTilt()
+AccessibleCaretManager::UpdateCaretsForTilt()
 {
   if (mFirstCaret->IsVisuallyVisible() && mSecondCaret->IsVisuallyVisible()) {
     if (mFirstCaret->Intersects(*mSecondCaret)) {
@@ -239,7 +239,7 @@ CopyPasteManager::UpdateCaretsForTilt()
 }
 
 nsresult
-CopyPasteManager::PressCaret(const nsPoint& aPoint)
+AccessibleCaretManager::PressCaret(const nsPoint& aPoint)
 {
   nsresult rv = NS_ERROR_FAILURE;
 
@@ -263,7 +263,7 @@ CopyPasteManager::PressCaret(const nsPoint& aPoint)
 }
 
 nsresult
-CopyPasteManager::DragCaret(const nsPoint& aPoint)
+AccessibleCaretManager::DragCaret(const nsPoint& aPoint)
 {
   MOZ_ASSERT(mActiveCaret);
   MOZ_ASSERT(GetCaretMode() != CaretMode::None);
@@ -275,7 +275,7 @@ CopyPasteManager::DragCaret(const nsPoint& aPoint)
 }
 
 nsresult
-CopyPasteManager::ReleaseCaret()
+AccessibleCaretManager::ReleaseCaret()
 {
   MOZ_ASSERT(mActiveCaret);
 
@@ -286,7 +286,7 @@ CopyPasteManager::ReleaseCaret()
 }
 
 nsresult
-CopyPasteManager::TapCaret(const nsPoint& aPoint)
+AccessibleCaretManager::TapCaret(const nsPoint& aPoint)
 {
   MOZ_ASSERT(GetCaretMode() != CaretMode::None);
 
@@ -300,7 +300,7 @@ CopyPasteManager::TapCaret(const nsPoint& aPoint)
 }
 
 nsresult
-CopyPasteManager::SelectWordOrShortcut(const nsPoint& aPoint)
+AccessibleCaretManager::SelectWordOrShortcut(const nsPoint& aPoint)
 {
   if (!mPresShell) {
     return NS_ERROR_UNEXPECTED;
@@ -342,7 +342,7 @@ CopyPasteManager::SelectWordOrShortcut(const nsPoint& aPoint)
 }
 
 void
-CopyPasteManager::OnScrollStart()
+AccessibleCaretManager::OnScrollStart()
 {
   CP_LOG("%s", __FUNCTION__);
 
@@ -350,7 +350,7 @@ CopyPasteManager::OnScrollStart()
 }
 
 void
-CopyPasteManager::OnScrollEnd()
+AccessibleCaretManager::OnScrollEnd()
 {
   if (mCaretMode != GetCaretMode()) {
     return;
@@ -366,7 +366,7 @@ CopyPasteManager::OnScrollEnd()
 }
 
 void
-CopyPasteManager::OnScrolling()
+AccessibleCaretManager::OnScrolling()
 {
   if (mCaretMode != GetCaretMode()) {
     return;
@@ -382,7 +382,7 @@ CopyPasteManager::OnScrolling()
 }
 
 void
-CopyPasteManager::OnScrollPositionChanged()
+AccessibleCaretManager::OnScrollPositionChanged()
 {
   if (mCaretMode != GetCaretMode()) {
     return;
@@ -393,7 +393,7 @@ CopyPasteManager::OnScrollPositionChanged()
 }
 
 void
-CopyPasteManager::OnReflow()
+AccessibleCaretManager::OnReflow()
 {
   if (mCaretMode != GetCaretMode()) {
     return;
@@ -406,14 +406,14 @@ CopyPasteManager::OnReflow()
 }
 
 void
-CopyPasteManager::OnBlur()
+AccessibleCaretManager::OnBlur()
 {
   CP_LOG("%s: HideCarets()", __FUNCTION__);
   HideCarets();
 }
 
 void
-CopyPasteManager::OnKeyboardEvent()
+AccessibleCaretManager::OnKeyboardEvent()
 {
   if (GetCaretMode() == CaretMode::Cursor) {
     CP_LOG("%s: HideCarets()", __FUNCTION__);
@@ -422,7 +422,7 @@ CopyPasteManager::OnKeyboardEvent()
 }
 
 nsIContent*
-CopyPasteManager::GetFocusedContent() const
+AccessibleCaretManager::GetFocusedContent() const
 {
   nsFocusManager* fm = nsFocusManager::GetFocusManager();
   MOZ_ASSERT(fm);
@@ -430,7 +430,7 @@ CopyPasteManager::GetFocusedContent() const
 }
 
 Selection*
-CopyPasteManager::GetSelection() const
+AccessibleCaretManager::GetSelection() const
 {
   nsRefPtr<nsFrameSelection> fs = GetFrameSelection();
   if (!fs) {
@@ -440,7 +440,7 @@ CopyPasteManager::GetSelection() const
 }
 
 already_AddRefed<nsFrameSelection>
-CopyPasteManager::GetFrameSelection() const
+AccessibleCaretManager::GetFrameSelection() const
 {
   nsIContent* focusedContent = GetFocusedContent();
   if (focusedContent) {
@@ -463,8 +463,8 @@ CopyPasteManager::GetFrameSelection() const
   }
 }
 
-CopyPasteManager::CaretMode
-CopyPasteManager::GetCaretMode() const
+AccessibleCaretManager::CaretMode
+AccessibleCaretManager::GetCaretMode() const
 {
   Selection* selection = GetSelection();
   if (!selection) {
@@ -484,7 +484,7 @@ CopyPasteManager::GetCaretMode() const
 }
 
 bool
-CopyPasteManager::ChangeFocus(nsIFrame* aFrame) const
+AccessibleCaretManager::ChangeFocus(nsIFrame* aFrame) const
 {
   nsIFrame* currFrame = aFrame;
   nsIContent* newFocusContent = nullptr;
@@ -520,7 +520,7 @@ CopyPasteManager::ChangeFocus(nsIFrame* aFrame) const
 }
 
 nsresult
-CopyPasteManager::SelectWord(nsIFrame* aFrame, const nsPoint& aPoint) const
+AccessibleCaretManager::SelectWord(nsIFrame* aFrame, const nsPoint& aPoint) const
 {
   SetSelectionDragState(true);
   nsFrame* frame = static_cast<nsFrame*>(aFrame);
@@ -541,7 +541,7 @@ CopyPasteManager::SelectWord(nsIFrame* aFrame, const nsPoint& aPoint) const
 }
 
 void
-CopyPasteManager::SetSelectionDragState(bool aState) const
+AccessibleCaretManager::SetSelectionDragState(bool aState) const
 {
   nsRefPtr<nsFrameSelection> fs = GetFrameSelection();
   if (fs) {
@@ -550,7 +550,7 @@ CopyPasteManager::SetSelectionDragState(bool aState) const
 }
 
 void
-CopyPasteManager::SetSelectionDirection(nsDirection aDir) const
+AccessibleCaretManager::SetSelectionDirection(nsDirection aDir) const
 {
   Selection* selection = GetSelection();
   if (selection) {
@@ -559,7 +559,7 @@ CopyPasteManager::SetSelectionDirection(nsDirection aDir) const
 }
 
 void
-CopyPasteManager::ClearMaintainedSelection() const
+AccessibleCaretManager::ClearMaintainedSelection() const
 {
   // Selection made by double-clicking for example will maintain the original
   // word selection. We should clear it so that we can drag caret freely.
@@ -570,7 +570,7 @@ CopyPasteManager::ClearMaintainedSelection() const
 }
 
 nsIFrame*
-CopyPasteManager::FindFirstNodeWithFrame(bool aBackward, int32_t* aOutOffset) const
+AccessibleCaretManager::FindFirstNodeWithFrame(bool aBackward, int32_t* aOutOffset) const
 {
   if (!mPresShell) {
     return nullptr;
@@ -633,7 +633,7 @@ CopyPasteManager::FindFirstNodeWithFrame(bool aBackward, int32_t* aOutOffset) co
 }
 
 bool
-CopyPasteManager::CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffsets)
+AccessibleCaretManager::CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffsets)
 {
   Selection* selection = GetSelection();
   if (!selection) {
@@ -711,7 +711,7 @@ CopyPasteManager::CompareRangeWithContentOffset(nsIFrame::ContentOffsets& aOffse
 }
 
 nsresult
-CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
+AccessibleCaretManager::DragCaretInternal(const nsPoint& aPoint)
 {
   if (!mPresShell) {
     return NS_ERROR_NULL_POINTER;
@@ -797,7 +797,7 @@ CopyPasteManager::DragCaretInternal(const nsPoint& aPoint)
 }
 
 nsPoint
-CopyPasteManager::AdjustDragBoundary(const nsPoint& aPoint) const
+AccessibleCaretManager::AdjustDragBoundary(const nsPoint& aPoint) const
 {
   // Bug 1068474: Adjust the Y-coordinate so that the carets won't be in tilt
   // mode when a caret is being dragged surpass the other caret.
@@ -826,7 +826,7 @@ CopyPasteManager::AdjustDragBoundary(const nsPoint& aPoint) const
 }
 
 uint32_t
-CopyPasteManager::CaretTimeoutMs() const
+AccessibleCaretManager::CaretTimeoutMs() const
 {
   static bool added = false;
   static uint32_t caretTimeoutMs = 0;
@@ -841,7 +841,7 @@ CopyPasteManager::CaretTimeoutMs() const
 }
 
 void
-CopyPasteManager::LaunchCaretTimeoutTimer()
+AccessibleCaretManager::LaunchCaretTimeoutTimer()
 {
   if (!mCaretTimeoutTimer || CaretTimeoutMs() == 0 ||
       GetCaretMode() != CaretMode::Cursor || mActiveCaret) {
@@ -849,7 +849,7 @@ CopyPasteManager::LaunchCaretTimeoutTimer()
   }
 
   nsTimerCallbackFunc callback = [](nsITimer* aTimer, void* aClosure) {
-    CopyPasteManager* self = static_cast<CopyPasteManager*>(aClosure);
+    AccessibleCaretManager* self = static_cast<AccessibleCaretManager*>(aClosure);
     if (self->GetCaretMode() == CaretMode::Cursor) {
       self->HideCarets();
     }
@@ -860,7 +860,7 @@ CopyPasteManager::LaunchCaretTimeoutTimer()
 }
 
 void
-CopyPasteManager::CancelCaretTimeoutTimer()
+AccessibleCaretManager::CancelCaretTimeoutTimer()
 {
   if (mCaretTimeoutTimer) {
     mCaretTimeoutTimer->Cancel();

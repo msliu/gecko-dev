@@ -4,8 +4,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef CopyPasteManager_h__
-#define CopyPasteManager_h__
+#ifndef AccessibleCaretManager_h
+#define AccessibleCaretManager_h
 
 #include "nsCOMPtr.h"
 #include "nsCoord.h"
@@ -29,17 +29,18 @@ class Selection;
 }
 
 class AccessibleCaret;
-class CopyPasteEventHub;
+class AccessibleCaretEventHub;
 
 // -----------------------------------------------------------------------------
-// CopyPasteManager handles events and callbacks from CopyPasteEventHub, and
-// perform the real work to manipulate selection object and AccessibleCaret.
+// AccessibleCaretManager handles events and callbacks from
+// AccessibleCaretEventHub, and perform the real work to manipulate selection
+// object and AccessibleCaret.
 //
-class CopyPasteManager
+class AccessibleCaretManager
 {
 public:
-  explicit CopyPasteManager(nsIPresShell* aPresShell);
-  virtual ~CopyPasteManager();
+  explicit AccessibleCaretManager(nsIPresShell* aPresShell);
+  virtual ~AccessibleCaretManager();
 
   virtual nsresult PressCaret(const nsPoint& aPoint);
   virtual nsresult DragCaret(const nsPoint& aPoint);
@@ -131,4 +132,4 @@ protected:
 
 } // namespace mozilla
 
-#endif // CopyPasteManager_h__
+#endif // AccessibleCaretManager_h
