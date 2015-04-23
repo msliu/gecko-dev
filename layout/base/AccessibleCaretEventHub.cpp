@@ -4,10 +4,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "CopyPasteEventHub.h"
+#include "AccessibleCaretEventHub.h"
 
-#include "CopyPasteLogger.h"
-#include "CopyPasteManager.h"
+#include "AccessibleCaretLogger.h"
+#include "AccessibleCaretManager.h"
 #include "gfxPrefs.h"
 #include "mozilla/MouseEvents.h"
 #include "mozilla/TextEvents.h"
@@ -24,102 +24,102 @@ namespace mozilla {
 
 #undef CP_LOG
 #define CP_LOG(message, ...)                                                   \
-  CP_LOG_BASE("CopyPasteEventHub (%p): " message, this, ##__VA_ARGS__);
+  CP_LOG_BASE("AccessibleCaretEventHub (%p): " message, this, ##__VA_ARGS__);
 
 #undef CP_LOGV
 #define CP_LOGV(message, ...)                                                  \
-  CP_LOGV_BASE("CopyPasteEventHub (%p): " message, this, ##__VA_ARGS__);
+  CP_LOGV_BASE("AccessibleCaretEventHub (%p): " message, this, ##__VA_ARGS__);
 
 #endif // #ifdef PR_LOGGING
 
-NS_IMPL_ISUPPORTS(CopyPasteEventHub, nsIReflowObserver, nsIScrollObserver,
+NS_IMPL_ISUPPORTS(AccessibleCaretEventHub, nsIReflowObserver, nsIScrollObserver,
                   nsISelectionListener, nsISupportsWeakReference);
 
 // -----------------------------------------------------------------------------
 // NoActionState
 //
-class CopyPasteEventHub::NoActionState : public CopyPasteEventHub::State
+class AccessibleCaretEventHub::NoActionState : public AccessibleCaretEventHub::State
 {
 public:
   NS_IMPL_STATE_UTILITIES(NoActionState)
 
-  virtual nsEventStatus OnPress(CopyPasteEventHub* aContext,
+  virtual nsEventStatus OnPress(AccessibleCaretEventHub* aContext,
                                 const nsPoint& aPoint,
                                 int32_t aTouchId) override;
-  virtual void OnScrollStart(CopyPasteEventHub* aContext) override;
-  virtual void OnScrolling(CopyPasteEventHub* aContext) override;
-  virtual void OnScrollPositionChanged(CopyPasteEventHub* aContext) override;
-  virtual void OnSelectionChanged(CopyPasteEventHub* aContext,
+  virtual void OnScrollStart(AccessibleCaretEventHub* aContext) override;
+  virtual void OnScrolling(AccessibleCaretEventHub* aContext) override;
+  virtual void OnScrollPositionChanged(AccessibleCaretEventHub* aContext) override;
+  virtual void OnSelectionChanged(AccessibleCaretEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
                                   int16_t aReason) override;
-  virtual void OnBlur(CopyPasteEventHub* aContext,
+  virtual void OnBlur(AccessibleCaretEventHub* aContext,
                       bool aIsLeavingDocument) override;
-  virtual void OnReflow(CopyPasteEventHub* aContext) override;
-  virtual void Enter(CopyPasteEventHub* aContext) override;
+  virtual void OnReflow(AccessibleCaretEventHub* aContext) override;
+  virtual void Enter(AccessibleCaretEventHub* aContext) override;
 };
 
 // -----------------------------------------------------------------------------
 // PressCaretState
 //
-class CopyPasteEventHub::PressCaretState : public CopyPasteEventHub::State
+class AccessibleCaretEventHub::PressCaretState : public AccessibleCaretEventHub::State
 {
 public:
   NS_IMPL_STATE_UTILITIES(PressCaretState)
 
-  virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
+  virtual nsEventStatus OnMove(AccessibleCaretEventHub* aContext,
                                const nsPoint& aPoint) override;
-  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) override;
-  virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
+  virtual nsEventStatus OnRelease(AccessibleCaretEventHub* aContext) override;
+  virtual nsEventStatus OnLongTap(AccessibleCaretEventHub* aContext,
                                   const nsPoint& aPoint) override;
 };
 
 // -----------------------------------------------------------------------------
 // DragCaretState
 //
-class CopyPasteEventHub::DragCaretState : public CopyPasteEventHub::State
+class AccessibleCaretEventHub::DragCaretState : public AccessibleCaretEventHub::State
 {
 public:
   NS_IMPL_STATE_UTILITIES(DragCaretState)
 
-  virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
+  virtual nsEventStatus OnMove(AccessibleCaretEventHub* aContext,
                                const nsPoint& aPoint) override;
-  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) override;
+  virtual nsEventStatus OnRelease(AccessibleCaretEventHub* aContext) override;
 };
 
 // -----------------------------------------------------------------------------
 // PressNoCaretState
 //
-class CopyPasteEventHub::PressNoCaretState : public CopyPasteEventHub::State
+class AccessibleCaretEventHub::PressNoCaretState : public AccessibleCaretEventHub::State
 {
 public:
   NS_IMPL_STATE_UTILITIES(PressNoCaretState)
 
-  virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
+  virtual nsEventStatus OnMove(AccessibleCaretEventHub* aContext,
                                const nsPoint& aPoint) override;
-  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext) override;
-  virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
+  virtual nsEventStatus OnRelease(AccessibleCaretEventHub* aContext) override;
+  virtual nsEventStatus OnLongTap(AccessibleCaretEventHub* aContext,
                                   const nsPoint& aPoint) override;
-  virtual void OnScrollStart(CopyPasteEventHub* aContext) override;
-  virtual void OnBlur(CopyPasteEventHub* aContext,
+  virtual void OnScrollStart(AccessibleCaretEventHub* aContext) override;
+  virtual void OnBlur(AccessibleCaretEventHub* aContext,
                       bool aIsLeavingDocument) override;
-  virtual void OnSelectionChanged(CopyPasteEventHub* aContext,
+  virtual void OnSelectionChanged(AccessibleCaretEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
                                   int16_t aReason) override;
-  virtual void OnReflow(CopyPasteEventHub* aContext) override;
-  virtual void Enter(CopyPasteEventHub* aContext) override;
-  virtual void Leave(CopyPasteEventHub* aContext) override;
+  virtual void OnReflow(AccessibleCaretEventHub* aContext) override;
+  virtual void Enter(AccessibleCaretEventHub* aContext) override;
+  virtual void Leave(AccessibleCaretEventHub* aContext) override;
 };
 
 // -----------------------------------------------------------------------------
 // ScrollState
 //
-class CopyPasteEventHub::ScrollState : public CopyPasteEventHub::State
+class AccessibleCaretEventHub::ScrollState : public AccessibleCaretEventHub::State
 {
 public:
   NS_IMPL_STATE_UTILITIES(ScrollState)
 
-  virtual void OnScrollEnd(CopyPasteEventHub* aContext) override;
-  virtual void OnBlur(CopyPasteEventHub* aContext,
+  virtual void OnScrollEnd(AccessibleCaretEventHub* aContext) override;
+  virtual void OnBlur(AccessibleCaretEventHub* aContext,
                       bool aIsLeavingDocument) override;
 };
 
@@ -128,41 +128,41 @@ public:
 // PostScrollState: In this state, we are waiting for another APZ start, press
 // event, or momentum wheel scroll.
 //
-class CopyPasteEventHub::PostScrollState : public CopyPasteEventHub::State
+class AccessibleCaretEventHub::PostScrollState : public AccessibleCaretEventHub::State
 {
 public:
   NS_IMPL_STATE_UTILITIES(PostScrollState)
 
-  virtual nsEventStatus OnPress(CopyPasteEventHub* aContext,
+  virtual nsEventStatus OnPress(AccessibleCaretEventHub* aContext,
                                 const nsPoint& aPoint,
                                 int32_t aTouchId) override;
-  virtual void OnScrollStart(CopyPasteEventHub* aContext) override;
-  virtual void OnScrollEnd(CopyPasteEventHub* aContext) override;
-  virtual void OnScrolling(CopyPasteEventHub* aContext) override;
-  virtual void OnBlur(CopyPasteEventHub* aContext,
+  virtual void OnScrollStart(AccessibleCaretEventHub* aContext) override;
+  virtual void OnScrollEnd(AccessibleCaretEventHub* aContext) override;
+  virtual void OnScrolling(AccessibleCaretEventHub* aContext) override;
+  virtual void OnBlur(AccessibleCaretEventHub* aContext,
                       bool aIsLeavingDocument) override;
-  virtual void Enter(CopyPasteEventHub* aContext) override;
-  virtual void Leave(CopyPasteEventHub* aContext) override;
+  virtual void Enter(AccessibleCaretEventHub* aContext) override;
+  virtual void Leave(AccessibleCaretEventHub* aContext) override;
 };
 
 // -----------------------------------------------------------------------------
 // LongTapState
 //
-class CopyPasteEventHub::LongTapState : public CopyPasteEventHub::State
+class AccessibleCaretEventHub::LongTapState : public AccessibleCaretEventHub::State
 {
 public:
   NS_IMPL_STATE_UTILITIES(LongTapState)
 
-  virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
+  virtual nsEventStatus OnLongTap(AccessibleCaretEventHub* aContext,
                                   const nsPoint& aPoint) override;
-  virtual void OnReflow(CopyPasteEventHub* aContext) override;
+  virtual void OnReflow(AccessibleCaretEventHub* aContext) override;
 };
 
 // -----------------------------------------------------------------------------
 // Implementation of all concrete state functions
 //
 nsEventStatus
-CopyPasteEventHub::State::OnPress(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::State::OnPress(AccessibleCaretEventHub* aContext,
                                   const nsPoint& aPoint,
                                   int32_t aTouchId)
 {
@@ -170,52 +170,52 @@ CopyPasteEventHub::State::OnPress(CopyPasteEventHub* aContext,
 }
 
 nsEventStatus
-CopyPasteEventHub::State::OnMove(CopyPasteEventHub* aContext, const nsPoint& aPoint)
+AccessibleCaretEventHub::State::OnMove(AccessibleCaretEventHub* aContext, const nsPoint& aPoint)
 {
   return nsEventStatus_eIgnore;
 }
 
 nsEventStatus
-CopyPasteEventHub::State::OnRelease(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::State::OnRelease(AccessibleCaretEventHub* aContext)
 {
   return nsEventStatus_eIgnore;
 }
 
 nsEventStatus
-CopyPasteEventHub::State::OnLongTap(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::State::OnLongTap(AccessibleCaretEventHub* aContext,
                                     const nsPoint& aPoint)
 {
   return nsEventStatus_eIgnore;
 }
 
 void
-CopyPasteEventHub::State::OnScrollStart(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::State::OnScrollStart(AccessibleCaretEventHub* aContext)
 {
 }
 
 void
-CopyPasteEventHub::State::OnScrollEnd(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::State::OnScrollEnd(AccessibleCaretEventHub* aContext)
 {
 }
 
 void
-CopyPasteEventHub::State::OnScrolling(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::State::OnScrolling(AccessibleCaretEventHub* aContext)
 {
 }
 
 void
-CopyPasteEventHub::State::OnScrollPositionChanged(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::State::OnScrollPositionChanged(AccessibleCaretEventHub* aContext)
 {
 }
 
 void
-CopyPasteEventHub::State::OnBlur(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::State::OnBlur(AccessibleCaretEventHub* aContext,
                                  bool aIsLeavingDocument)
 {
 }
 
 void
-CopyPasteEventHub::State::OnSelectionChanged(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::State::OnSelectionChanged(AccessibleCaretEventHub* aContext,
                                              nsIDOMDocument* aDoc,
                                              nsISelection* aSel,
                                              int16_t aReason)
@@ -223,22 +223,22 @@ CopyPasteEventHub::State::OnSelectionChanged(CopyPasteEventHub* aContext,
 }
 
 void
-CopyPasteEventHub::State::OnReflow(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::State::OnReflow(AccessibleCaretEventHub* aContext)
 {
 }
 
 void
-CopyPasteEventHub::State::Enter(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::State::Enter(AccessibleCaretEventHub* aContext)
 {
 }
 
 void
-CopyPasteEventHub::State::Leave(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::State::Leave(AccessibleCaretEventHub* aContext)
 {
 }
 
 nsEventStatus
-CopyPasteEventHub::NoActionState::OnPress(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::NoActionState::OnPress(AccessibleCaretEventHub* aContext,
                                           const nsPoint& aPoint,
                                           int32_t aTouchId)
 {
@@ -258,55 +258,55 @@ CopyPasteEventHub::NoActionState::OnPress(CopyPasteEventHub* aContext,
 }
 
 void
-CopyPasteEventHub::NoActionState::OnScrollStart(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::NoActionState::OnScrollStart(AccessibleCaretEventHub* aContext)
 {
   aContext->mHandler->OnScrollStart();
   aContext->SetState(aContext->ScrollState());
 }
 
 void
-CopyPasteEventHub::NoActionState::OnScrolling(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::NoActionState::OnScrolling(AccessibleCaretEventHub* aContext)
 {
   aContext->mHandler->OnScrolling();
 }
 
 void
-CopyPasteEventHub::NoActionState::OnScrollPositionChanged(
-  CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::NoActionState::OnScrollPositionChanged(
+  AccessibleCaretEventHub* aContext)
 {
   aContext->mHandler->OnScrollPositionChanged();
 }
 
 void
-CopyPasteEventHub::NoActionState::OnBlur(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::NoActionState::OnBlur(AccessibleCaretEventHub* aContext,
                                          bool aIsLeavingDocument)
 {
   aContext->mHandler->OnBlur();
 }
 
 void
-CopyPasteEventHub::NoActionState::OnSelectionChanged(
-  CopyPasteEventHub* aContext, nsIDOMDocument* aDoc, nsISelection* aSel,
+AccessibleCaretEventHub::NoActionState::OnSelectionChanged(
+  AccessibleCaretEventHub* aContext, nsIDOMDocument* aDoc, nsISelection* aSel,
   int16_t aReason)
 {
   aContext->mHandler->OnSelectionChanged(aDoc, aSel, aReason);
 }
 
 void
-CopyPasteEventHub::NoActionState::OnReflow(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::NoActionState::OnReflow(AccessibleCaretEventHub* aContext)
 {
   aContext->mHandler->OnReflow();
 }
 
 void
-CopyPasteEventHub::NoActionState::Enter(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::NoActionState::Enter(AccessibleCaretEventHub* aContext)
 {
   aContext->mPressPoint = nsPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE);
   aContext->mActiveTouchId = kInvalidTouchId;
 }
 
 nsEventStatus
-CopyPasteEventHub::PressCaretState::OnMove(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::PressCaretState::OnMove(AccessibleCaretEventHub* aContext,
                                            const nsPoint& aPoint)
 {
   if (aContext->MoveDistanceIsLarge(aPoint)) {
@@ -320,7 +320,7 @@ CopyPasteEventHub::PressCaretState::OnMove(CopyPasteEventHub* aContext,
 }
 
 nsEventStatus
-CopyPasteEventHub::PressCaretState::OnRelease(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::PressCaretState::OnRelease(AccessibleCaretEventHub* aContext)
 {
   aContext->mHandler->ReleaseCaret();
   aContext->mHandler->TapCaret(aContext->mPressPoint);
@@ -331,7 +331,7 @@ CopyPasteEventHub::PressCaretState::OnRelease(CopyPasteEventHub* aContext)
 }
 
 nsEventStatus
-CopyPasteEventHub::PressCaretState::OnLongTap(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::PressCaretState::OnLongTap(AccessibleCaretEventHub* aContext,
                                               const nsPoint& aPoint)
 {
   // We should always consume the event since we've pressed on the caret.
@@ -339,7 +339,7 @@ CopyPasteEventHub::PressCaretState::OnLongTap(CopyPasteEventHub* aContext,
 }
 
 nsEventStatus
-CopyPasteEventHub::DragCaretState::OnMove(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::DragCaretState::OnMove(AccessibleCaretEventHub* aContext,
                                           const nsPoint& aPoint)
 {
   aContext->mHandler->DragCaret(aPoint);
@@ -349,7 +349,7 @@ CopyPasteEventHub::DragCaretState::OnMove(CopyPasteEventHub* aContext,
 }
 
 nsEventStatus
-CopyPasteEventHub::DragCaretState::OnRelease(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::DragCaretState::OnRelease(AccessibleCaretEventHub* aContext)
 {
   aContext->mHandler->ReleaseCaret();
   aContext->SetState(aContext->NoActionState());
@@ -359,7 +359,7 @@ CopyPasteEventHub::DragCaretState::OnRelease(CopyPasteEventHub* aContext)
 }
 
 nsEventStatus
-CopyPasteEventHub::PressNoCaretState::OnMove(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::PressNoCaretState::OnMove(AccessibleCaretEventHub* aContext,
                                              const nsPoint& aPoint)
 {
   if (aContext->MoveDistanceIsLarge(aPoint)) {
@@ -370,7 +370,7 @@ CopyPasteEventHub::PressNoCaretState::OnMove(CopyPasteEventHub* aContext,
 }
 
 nsEventStatus
-CopyPasteEventHub::PressNoCaretState::OnRelease(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::PressNoCaretState::OnRelease(AccessibleCaretEventHub* aContext)
 {
   aContext->SetState(aContext->NoActionState());
 
@@ -378,7 +378,7 @@ CopyPasteEventHub::PressNoCaretState::OnRelease(CopyPasteEventHub* aContext)
 }
 
 nsEventStatus
-CopyPasteEventHub::PressNoCaretState::OnLongTap(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::PressNoCaretState::OnLongTap(AccessibleCaretEventHub* aContext,
                                                 const nsPoint& aPoint)
 {
   aContext->SetState(aContext->LongTapState());
@@ -386,20 +386,20 @@ CopyPasteEventHub::PressNoCaretState::OnLongTap(CopyPasteEventHub* aContext,
 }
 
 void
-CopyPasteEventHub::PressNoCaretState::OnScrollStart(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::PressNoCaretState::OnScrollStart(AccessibleCaretEventHub* aContext)
 {
   aContext->mHandler->OnScrollStart();
   aContext->SetState(aContext->ScrollState());
 }
 
 void
-CopyPasteEventHub::PressNoCaretState::OnReflow(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::PressNoCaretState::OnReflow(AccessibleCaretEventHub* aContext)
 {
   aContext->mHandler->OnReflow();
 }
 
 void
-CopyPasteEventHub::PressNoCaretState::OnBlur(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::PressNoCaretState::OnBlur(AccessibleCaretEventHub* aContext,
                                              bool aIsLeavingDocument)
 {
   aContext->mHandler->OnBlur();
@@ -409,33 +409,33 @@ CopyPasteEventHub::PressNoCaretState::OnBlur(CopyPasteEventHub* aContext,
 }
 
 void
-CopyPasteEventHub::PressNoCaretState::OnSelectionChanged(
-  CopyPasteEventHub* aContext, nsIDOMDocument* aDoc, nsISelection* aSel,
+AccessibleCaretEventHub::PressNoCaretState::OnSelectionChanged(
+  AccessibleCaretEventHub* aContext, nsIDOMDocument* aDoc, nsISelection* aSel,
   int16_t aReason)
 {
   aContext->mHandler->OnSelectionChanged(aDoc, aSel, aReason);
 }
 
 void
-CopyPasteEventHub::PressNoCaretState::Enter(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::PressNoCaretState::Enter(AccessibleCaretEventHub* aContext)
 {
   aContext->LaunchLongTapInjector();
 }
 
 void
-CopyPasteEventHub::PressNoCaretState::Leave(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::PressNoCaretState::Leave(AccessibleCaretEventHub* aContext)
 {
   aContext->CancelLongTapInjector();
 }
 
 void
-CopyPasteEventHub::ScrollState::OnScrollEnd(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::ScrollState::OnScrollEnd(AccessibleCaretEventHub* aContext)
 {
   aContext->SetState(aContext->PostScrollState());
 }
 
 void
-CopyPasteEventHub::ScrollState::OnBlur(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::ScrollState::OnBlur(AccessibleCaretEventHub* aContext,
                                        bool aIsLeavingDocument)
 {
   aContext->mHandler->OnBlur();
@@ -445,7 +445,7 @@ CopyPasteEventHub::ScrollState::OnBlur(CopyPasteEventHub* aContext,
 }
 
 nsEventStatus
-CopyPasteEventHub::PostScrollState::OnPress(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::PostScrollState::OnPress(AccessibleCaretEventHub* aContext,
                                             const nsPoint& aPoint,
                                             int32_t aTouchId)
 {
@@ -455,27 +455,27 @@ CopyPasteEventHub::PostScrollState::OnPress(CopyPasteEventHub* aContext,
 }
 
 void
-CopyPasteEventHub::PostScrollState::OnScrollStart(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::PostScrollState::OnScrollStart(AccessibleCaretEventHub* aContext)
 {
   aContext->SetState(aContext->ScrollState());
 }
 
 void
-CopyPasteEventHub::PostScrollState::OnScrollEnd(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::PostScrollState::OnScrollEnd(AccessibleCaretEventHub* aContext)
 {
   aContext->mHandler->OnScrollEnd();
   aContext->SetState(aContext->NoActionState());
 }
 
 void
-CopyPasteEventHub::PostScrollState::OnScrolling(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::PostScrollState::OnScrolling(AccessibleCaretEventHub* aContext)
 {
   // Momentum scroll by wheel event.
   aContext->LaunchScrollEndInjector();
 }
 
 void
-CopyPasteEventHub::PostScrollState::OnBlur(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::PostScrollState::OnBlur(AccessibleCaretEventHub* aContext,
                                            bool aIsLeavingDocument)
 {
   aContext->mHandler->OnBlur();
@@ -485,20 +485,20 @@ CopyPasteEventHub::PostScrollState::OnBlur(CopyPasteEventHub* aContext,
 }
 
 void
-CopyPasteEventHub::PostScrollState::Enter(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::PostScrollState::Enter(AccessibleCaretEventHub* aContext)
 {
   // Launch the injector to leave PostScrollState.
   aContext->LaunchScrollEndInjector();
 }
 
 void
-CopyPasteEventHub::PostScrollState::Leave(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::PostScrollState::Leave(AccessibleCaretEventHub* aContext)
 {
   aContext->CancelScrollEndInjector();
 }
 
 nsEventStatus
-CopyPasteEventHub::LongTapState::OnLongTap(CopyPasteEventHub* aContext,
+AccessibleCaretEventHub::LongTapState::OnLongTap(AccessibleCaretEventHub* aContext,
                                            const nsPoint& aPoint)
 {
   nsEventStatus rv = nsEventStatus_eIgnore;
@@ -513,22 +513,22 @@ CopyPasteEventHub::LongTapState::OnLongTap(CopyPasteEventHub* aContext,
 }
 
 void
-CopyPasteEventHub::LongTapState::OnReflow(CopyPasteEventHub* aContext)
+AccessibleCaretEventHub::LongTapState::OnReflow(AccessibleCaretEventHub* aContext)
 {
   aContext->mHandler->OnReflow();
 }
 
 // -----------------------------------------------------------------------------
-// Implementation of CopyPasteEventHub methods
+// Implementation of AccessibleCaretEventHub methods
 //
-CopyPasteEventHub::State*
-CopyPasteEventHub::GetState() const
+AccessibleCaretEventHub::State*
+AccessibleCaretEventHub::GetState() const
 {
   return mState;
 }
 
 void
-CopyPasteEventHub::SetState(State* aState)
+AccessibleCaretEventHub::SetState(State* aState)
 {
   MOZ_ASSERT(aState);
 
@@ -547,16 +547,16 @@ NS_IMPL_STATE_CLASS_GETTER(ScrollState)
 NS_IMPL_STATE_CLASS_GETTER(PostScrollState)
 NS_IMPL_STATE_CLASS_GETTER(LongTapState)
 
-CopyPasteEventHub::CopyPasteEventHub()
+AccessibleCaretEventHub::AccessibleCaretEventHub()
 {
 }
 
-CopyPasteEventHub::~CopyPasteEventHub()
+AccessibleCaretEventHub::~AccessibleCaretEventHub()
 {
 }
 
 void
-CopyPasteEventHub::Init(nsIPresShell* aPresShell)
+AccessibleCaretEventHub::Init(nsIPresShell* aPresShell)
 {
   if (mInitialized || !aPresShell || !aPresShell->GetCanvasFrame() ||
       !aPresShell->GetCanvasFrame()->GetCustomContentContainer()) {
@@ -587,13 +587,13 @@ CopyPasteEventHub::Init(nsIPresShell* aPresShell)
   mLongTapInjectorTimer = do_CreateInstance("@mozilla.org/timer;1");
   mScrollEndInjectorTimer = do_CreateInstance("@mozilla.org/timer;1");
 
-  mHandler = MakeUnique<CopyPasteManager>(mPresShell);
+  mHandler = MakeUnique<AccessibleCaretManager>(mPresShell);
 
   mInitialized = true;
 }
 
 void
-CopyPasteEventHub::Terminate()
+AccessibleCaretEventHub::Terminate()
 {
   if (!mInitialized) {
     return;
@@ -618,7 +618,7 @@ CopyPasteEventHub::Terminate()
 }
 
 nsEventStatus
-CopyPasteEventHub::HandleEvent(WidgetEvent* aEvent)
+AccessibleCaretEventHub::HandleEvent(WidgetEvent* aEvent)
 {
   nsEventStatus status = nsEventStatus_eIgnore;
 
@@ -651,7 +651,7 @@ CopyPasteEventHub::HandleEvent(WidgetEvent* aEvent)
 }
 
 nsEventStatus
-CopyPasteEventHub::HandleMouseEvent(WidgetMouseEvent* aEvent)
+AccessibleCaretEventHub::HandleMouseEvent(WidgetMouseEvent* aEvent)
 {
   nsEventStatus rv = nsEventStatus_eIgnore;
 
@@ -699,7 +699,7 @@ CopyPasteEventHub::HandleMouseEvent(WidgetMouseEvent* aEvent)
 }
 
 nsEventStatus
-CopyPasteEventHub::HandleWheelEvent(WidgetWheelEvent* aEvent)
+AccessibleCaretEventHub::HandleWheelEvent(WidgetWheelEvent* aEvent)
 {
   switch (aEvent->message) {
   case NS_WHEEL_WHEEL:
@@ -728,7 +728,7 @@ CopyPasteEventHub::HandleWheelEvent(WidgetWheelEvent* aEvent)
 }
 
 nsEventStatus
-CopyPasteEventHub::HandleTouchEvent(WidgetTouchEvent* aEvent)
+AccessibleCaretEventHub::HandleTouchEvent(WidgetTouchEvent* aEvent)
 {
   nsEventStatus rv = nsEventStatus_eIgnore;
 
@@ -770,7 +770,7 @@ CopyPasteEventHub::HandleTouchEvent(WidgetTouchEvent* aEvent)
 }
 
 nsEventStatus
-CopyPasteEventHub::HandleKeyboardEvent(WidgetKeyboardEvent* aEvent)
+AccessibleCaretEventHub::HandleKeyboardEvent(WidgetKeyboardEvent* aEvent)
 {
   switch (aEvent->message) {
   case NS_KEY_UP:
@@ -787,7 +787,7 @@ CopyPasteEventHub::HandleKeyboardEvent(WidgetKeyboardEvent* aEvent)
 }
 
 bool
-CopyPasteEventHub::MoveDistanceIsLarge(const nsPoint& aPoint) const
+AccessibleCaretEventHub::MoveDistanceIsLarge(const nsPoint& aPoint) const
 {
   nsPoint delta = aPoint - mPressPoint;
   return NS_hypot(delta.x, delta.y) >
@@ -795,7 +795,7 @@ CopyPasteEventHub::MoveDistanceIsLarge(const nsPoint& aPoint) const
 }
 
 void
-CopyPasteEventHub::LaunchLongTapInjector()
+AccessibleCaretEventHub::LaunchLongTapInjector()
 {
   if (mUseAsyncPanZoom) {
     return;
@@ -811,7 +811,7 @@ CopyPasteEventHub::LaunchLongTapInjector()
 }
 
 void
-CopyPasteEventHub::CancelLongTapInjector()
+AccessibleCaretEventHub::CancelLongTapInjector()
 {
   if (mUseAsyncPanZoom) {
     return;
@@ -825,14 +825,14 @@ CopyPasteEventHub::CancelLongTapInjector()
 }
 
 /* static */ void
-CopyPasteEventHub::FireLongTap(nsITimer* aTimer, void* aCopyPasteEventHub)
+AccessibleCaretEventHub::FireLongTap(nsITimer* aTimer, void* aAccessibleCaretEventHub)
 {
-  CopyPasteEventHub* self = static_cast<CopyPasteEventHub*>(aCopyPasteEventHub);
+  AccessibleCaretEventHub* self = static_cast<AccessibleCaretEventHub*>(aAccessibleCaretEventHub);
   self->mState->OnLongTap(self, self->mPressPoint);
 }
 
 NS_IMETHODIMP
-CopyPasteEventHub::Reflow(DOMHighResTimeStamp aStart,
+AccessibleCaretEventHub::Reflow(DOMHighResTimeStamp aStart,
                           DOMHighResTimeStamp aEnd)
 {
   if (!mInitialized) {
@@ -845,7 +845,7 @@ CopyPasteEventHub::Reflow(DOMHighResTimeStamp aStart,
 }
 
 NS_IMETHODIMP
-CopyPasteEventHub::ReflowInterruptible(DOMHighResTimeStamp aStart,
+AccessibleCaretEventHub::ReflowInterruptible(DOMHighResTimeStamp aStart,
                                        DOMHighResTimeStamp aEnd)
 {
   if (!mInitialized) {
@@ -856,7 +856,7 @@ CopyPasteEventHub::ReflowInterruptible(DOMHighResTimeStamp aStart,
 }
 
 void
-CopyPasteEventHub::AsyncPanZoomStarted()
+AccessibleCaretEventHub::AsyncPanZoomStarted()
 {
   if (!mInitialized) {
     return;
@@ -867,7 +867,7 @@ CopyPasteEventHub::AsyncPanZoomStarted()
 }
 
 void
-CopyPasteEventHub::AsyncPanZoomStopped()
+AccessibleCaretEventHub::AsyncPanZoomStopped()
 {
   if (!mInitialized) {
     return;
@@ -878,7 +878,7 @@ CopyPasteEventHub::AsyncPanZoomStopped()
 }
 
 void
-CopyPasteEventHub::ScrollPositionChanged()
+AccessibleCaretEventHub::ScrollPositionChanged()
 {
   if (!mInitialized) {
     return;
@@ -889,7 +889,7 @@ CopyPasteEventHub::ScrollPositionChanged()
 }
 
 void
-CopyPasteEventHub::LaunchScrollEndInjector()
+AccessibleCaretEventHub::LaunchScrollEndInjector()
 {
   if (!mScrollEndInjectorTimer) {
     return;
@@ -900,7 +900,7 @@ CopyPasteEventHub::LaunchScrollEndInjector()
 }
 
 void
-CopyPasteEventHub::CancelScrollEndInjector()
+AccessibleCaretEventHub::CancelScrollEndInjector()
 {
   if (!mScrollEndInjectorTimer) {
     return;
@@ -910,14 +910,14 @@ CopyPasteEventHub::CancelScrollEndInjector()
 }
 
 /* static */ void
-CopyPasteEventHub::FireScrollEnd(nsITimer* aTimer, void* aCopyPasteEventHub)
+AccessibleCaretEventHub::FireScrollEnd(nsITimer* aTimer, void* aAccessibleCaretEventHub)
 {
-  CopyPasteEventHub* self = static_cast<CopyPasteEventHub*>(aCopyPasteEventHub);
+  AccessibleCaretEventHub* self = static_cast<AccessibleCaretEventHub*>(aAccessibleCaretEventHub);
   self->mState->OnScrollEnd(self);
 }
 
 nsresult
-CopyPasteEventHub::NotifySelectionChanged(nsIDOMDocument* aDoc,
+AccessibleCaretEventHub::NotifySelectionChanged(nsIDOMDocument* aDoc,
                                           nsISelection* aSel,
                                           int16_t aReason)
 {
@@ -931,7 +931,7 @@ CopyPasteEventHub::NotifySelectionChanged(nsIDOMDocument* aDoc,
 }
 
 void
-CopyPasteEventHub::NotifyBlur(bool aIsLeavingDocument)
+AccessibleCaretEventHub::NotifyBlur(bool aIsLeavingDocument)
 {
   if (!mInitialized) {
     return;
@@ -942,7 +942,7 @@ CopyPasteEventHub::NotifyBlur(bool aIsLeavingDocument)
 }
 
 nsPoint
-CopyPasteEventHub::GetTouchEventPosition(WidgetTouchEvent* aEvent,
+AccessibleCaretEventHub::GetTouchEventPosition(WidgetTouchEvent* aEvent,
                                          int32_t aIdentifier) const
 {
   for (dom::Touch* touch : aEvent->touches) {
@@ -959,7 +959,7 @@ CopyPasteEventHub::GetTouchEventPosition(WidgetTouchEvent* aEvent,
 }
 
 nsPoint
-CopyPasteEventHub::GetMouseEventPosition(WidgetMouseEvent* aEvent) const
+AccessibleCaretEventHub::GetMouseEventPosition(WidgetMouseEvent* aEvent) const
 {
   LayoutDeviceIntPoint mouseIntPoint = aEvent->AsGUIEvent()->refPoint;
 

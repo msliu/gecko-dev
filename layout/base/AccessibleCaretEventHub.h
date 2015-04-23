@@ -4,8 +4,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef CopyPasteEventHub_h__
-#define CopyPasteEventHub_h__
+#ifndef AccessibleCaretEventHub_h
+#define AccessibleCaretEventHub_h
 
 #include "mozilla/EventForwards.h"
 #include "mozilla/UniquePtr.h"
@@ -24,36 +24,36 @@ class nsIPresShell;
 class nsITimer;
 
 namespace mozilla {
-class CopyPasteManager;
+class AccessibleCaretManager;
 class WidgetKeyboardEvent;
 class WidgetMouseEvent;
 class WidgetTouchEvent;
 class WidgetWheelEvent;
 
 // -----------------------------------------------------------------------------
-// CopyPasteEventHub implements state pattern. It receives various events and
-// callbacks, and relay the handling to current concrete state to call needed
-// methods in CopyPasteManager. In this way, CopyPasteManager could concentrate
-// on handling the behavior of selection and carets without worrying about any
-// concrete events. CopyPasteEventHub also synthesizes fake events such as
-// long-tap or scroll-end if APZ is not in use.
+// AccessibleCaretEventHub implements state pattern. It receives various events
+// and callbacks, and relay the handling to current concrete state to call
+// needed methods in AccessibleCaretManager. In this way, AccessibleCaretManager
+// could concentrate on handling the behavior of selection and carets without
+// worrying about any concrete events. AccessibleCaretEventHub also synthesizes
+// fake events such as long-tap or scroll-end if APZ is not in use.
 //
-// Each PresShell holds a shared pointer to CopyPasteEventHub, and each
-// CopyPasteEventHub holds a unique pointer to CopyPasteManager. Thus we'll have
-// one CopyPasteManager per PresShell.
+// Each PresShell holds a shared pointer to AccessibleCaretEventHub, and each
+// AccessibleCaretEventHub holds a unique pointer to AccessibleCaretManager.
+// Thus we'll have one AccessibleCaretManager per PresShell.
 //
 // See this link for the state transition diagram:
 // http://hg.mozilla.org/mozilla-central/file/default/layout/base/doc/AccessibleCaretEventHubStates.png
 // Source code of the diagram:
 // http://hg.mozilla.org/mozilla-central/file/default/layout/base/doc/AccessibleCaretEventHubStates.dot
 //
-class CopyPasteEventHub : public nsIReflowObserver,
+class AccessibleCaretEventHub : public nsIReflowObserver,
                           public nsIScrollObserver,
                           public nsISelectionListener,
                           public nsSupportsWeakReference
 {
 public:
-  explicit CopyPasteEventHub();
+  explicit AccessibleCaretEventHub();
   virtual void Init(nsIPresShell* aPresShell);
   virtual void Terminate();
 
@@ -76,16 +76,16 @@ public:
   State* GetState() const;
 
 protected:
-  virtual ~CopyPasteEventHub();
+  virtual ~AccessibleCaretEventHub();
 
 #define NS_DECL_STATE_CLASS_GETTER(aClassName)                                 \
   class aClassName;                                                            \
   static State* aClassName();
 
 #define NS_IMPL_STATE_CLASS_GETTER(aClassName)                                 \
-  CopyPasteEventHub::State* CopyPasteEventHub::aClassName()                    \
+  AccessibleCaretEventHub::State* AccessibleCaretEventHub::aClassName()                    \
   {                                                                            \
-    return CopyPasteEventHub::aClassName::Singleton();                         \
+    return AccessibleCaretEventHub::aClassName::Singleton();                         \
   }
 
   // Concrete state getters
@@ -112,11 +112,11 @@ protected:
 
   void LaunchLongTapInjector();
   void CancelLongTapInjector();
-  static void FireLongTap(nsITimer* aTimer, void* aCopyPasteEventHub);
+  static void FireLongTap(nsITimer* aTimer, void* aAccessibleCaretEventHub);
 
   void LaunchScrollEndInjector();
   void CancelScrollEndInjector();
-  static void FireScrollEnd(nsITimer* aTimer, void* aCopyPasteEventHub);
+  static void FireScrollEnd(nsITimer* aTimer, void* aAccessibleCaretEventHub);
 
   // Member variables
   bool mInitialized = false;
@@ -128,7 +128,7 @@ protected:
 
   nsIPresShell* mPresShell = nullptr;
 
-  UniquePtr<CopyPasteManager> mHandler;
+  UniquePtr<AccessibleCaretManager> mHandler;
 
   WeakPtr<nsDocShell> mDocShell;
 
@@ -156,7 +156,7 @@ protected:
 // override the methods for handling the events or callbacks. A concrete state
 // is also responsible for transforming to the next concrete state.
 //
-class CopyPasteEventHub::State
+class AccessibleCaretEventHub::State
 {
 public:
 #define NS_IMPL_STATE_UTILITIES(aClassName)                                    \
@@ -169,24 +169,24 @@ public:
 
   virtual const char* Name() const { return ""; }
 
-  virtual nsEventStatus OnPress(CopyPasteEventHub* aContext,
+  virtual nsEventStatus OnPress(AccessibleCaretEventHub* aContext,
                                 const nsPoint& aPoint, int32_t aTouchId);
-  virtual nsEventStatus OnMove(CopyPasteEventHub* aContext,
+  virtual nsEventStatus OnMove(AccessibleCaretEventHub* aContext,
                                const nsPoint& aPoint);
-  virtual nsEventStatus OnRelease(CopyPasteEventHub* aContext);
-  virtual nsEventStatus OnLongTap(CopyPasteEventHub* aContext,
+  virtual nsEventStatus OnRelease(AccessibleCaretEventHub* aContext);
+  virtual nsEventStatus OnLongTap(AccessibleCaretEventHub* aContext,
                                   const nsPoint& aPoint);
-  virtual void OnScrollStart(CopyPasteEventHub* aContext);
-  virtual void OnScrollEnd(CopyPasteEventHub* aContext);
-  virtual void OnScrolling(CopyPasteEventHub* aContext);
-  virtual void OnScrollPositionChanged(CopyPasteEventHub* aContext);
-  virtual void OnBlur(CopyPasteEventHub* aContext, bool aIsLeavingDocument);
-  virtual void OnSelectionChanged(CopyPasteEventHub* aContext,
+  virtual void OnScrollStart(AccessibleCaretEventHub* aContext);
+  virtual void OnScrollEnd(AccessibleCaretEventHub* aContext);
+  virtual void OnScrolling(AccessibleCaretEventHub* aContext);
+  virtual void OnScrollPositionChanged(AccessibleCaretEventHub* aContext);
+  virtual void OnBlur(AccessibleCaretEventHub* aContext, bool aIsLeavingDocument);
+  virtual void OnSelectionChanged(AccessibleCaretEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
                                   int16_t aReason);
-  virtual void OnReflow(CopyPasteEventHub* aContext);
-  virtual void Enter(CopyPasteEventHub* aContext);
-  virtual void Leave(CopyPasteEventHub* aContext);
+  virtual void OnReflow(AccessibleCaretEventHub* aContext);
+  virtual void Enter(AccessibleCaretEventHub* aContext);
+  virtual void Leave(AccessibleCaretEventHub* aContext);
 
 protected:
   explicit State() = default;
@@ -196,4 +196,4 @@ protected:
 
 } // namespace mozilla
 
-#endif //CopyPasteEventHub_h__
+#endif //AccessibleCaretEventHub_h
