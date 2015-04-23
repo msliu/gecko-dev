@@ -170,27 +170,44 @@ public:
   virtual const char* Name() const { return ""; }
 
   virtual nsEventStatus OnPress(AccessibleCaretEventHub* aContext,
-                                const nsPoint& aPoint, int32_t aTouchId);
+                                const nsPoint& aPoint, int32_t aTouchId)
+  {
+    return nsEventStatus_eIgnore;
+  }
+
   virtual nsEventStatus OnMove(AccessibleCaretEventHub* aContext,
-                               const nsPoint& aPoint);
-  virtual nsEventStatus OnRelease(AccessibleCaretEventHub* aContext);
+                               const nsPoint& aPoint)
+  {
+    return nsEventStatus_eIgnore;
+  }
+
+  virtual nsEventStatus OnRelease(AccessibleCaretEventHub* aContext)
+  {
+    return nsEventStatus_eIgnore;
+  }
+
   virtual nsEventStatus OnLongTap(AccessibleCaretEventHub* aContext,
-                                  const nsPoint& aPoint);
-  virtual void OnScrollStart(AccessibleCaretEventHub* aContext);
-  virtual void OnScrollEnd(AccessibleCaretEventHub* aContext);
-  virtual void OnScrolling(AccessibleCaretEventHub* aContext);
-  virtual void OnScrollPositionChanged(AccessibleCaretEventHub* aContext);
+                                  const nsPoint& aPoint)
+  {
+    return nsEventStatus_eIgnore;
+  }
+
+  virtual void OnScrollStart(AccessibleCaretEventHub* aContext) {}
+  virtual void OnScrollEnd(AccessibleCaretEventHub* aContext) {}
+  virtual void OnScrolling(AccessibleCaretEventHub* aContext) {}
+  virtual void OnScrollPositionChanged(AccessibleCaretEventHub* aContext) {}
   virtual void OnBlur(AccessibleCaretEventHub* aContext,
-                      bool aIsLeavingDocument);
+                      bool aIsLeavingDocument) {}
   virtual void OnSelectionChanged(AccessibleCaretEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
-                                  int16_t aReason);
-  virtual void OnReflow(AccessibleCaretEventHub* aContext);
-  virtual void Enter(AccessibleCaretEventHub* aContext);
-  virtual void Leave(AccessibleCaretEventHub* aContext);
+                                  int16_t aReason) {}
+  virtual void OnReflow(AccessibleCaretEventHub* aContext) {}
+  virtual void Enter(AccessibleCaretEventHub* aContext) {}
+  virtual void Leave(AccessibleCaretEventHub* aContext) {}
 
 protected:
   explicit State() = default;
+  virtual ~State() = default;
   State(const State&) = delete;
   void operator=(const State&) = delete;
 };

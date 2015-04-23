@@ -46,21 +46,66 @@ public:
 
   virtual nsEventStatus OnPress(AccessibleCaretEventHub* aContext,
                                 const nsPoint& aPoint,
-                                int32_t aTouchId) override;
-  virtual void OnScrollStart(AccessibleCaretEventHub* aContext) override;
-  virtual void OnScrolling(AccessibleCaretEventHub* aContext) override;
-  virtual void OnScrollPositionChanged(AccessibleCaretEventHub* aContext) override;
+                                int32_t aTouchId) override
+  {
+    nsEventStatus rv = nsEventStatus_eIgnore;
+
+    if (NS_SUCCEEDED(aContext->mManager->PressCaret(aPoint))) {
+      aContext->SetState(aContext->PressCaretState());
+      rv = nsEventStatus_eConsumeNoDefault;
+    } else {
+      aContext->SetState(aContext->PressNoCaretState());
+    }
+
+    aContext->mPressPoint = aPoint;
+    aContext->mActiveTouchId = aTouchId;
+
+    return rv;
+  }
+
+  virtual void OnScrollStart(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->mManager->OnScrollStart();
+    aContext->SetState(aContext->ScrollState());
+  }
+
+  virtual void OnScrolling(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->mManager->OnScrolling();
+  }
+
+  virtual void OnScrollPositionChanged(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->mManager->OnScrollPositionChanged();
+  }
+
   virtual void OnSelectionChanged(AccessibleCaretEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
-                                  int16_t aReason) override;
+                                  int16_t aReason) override
+  {
+    aContext->mManager->OnSelectionChanged(aDoc, aSel, aReason);
+  }
+
   virtual void OnBlur(AccessibleCaretEventHub* aContext,
-                      bool aIsLeavingDocument) override;
-  virtual void OnReflow(AccessibleCaretEventHub* aContext) override;
-  virtual void Enter(AccessibleCaretEventHub* aContext) override;
+                      bool aIsLeavingDocument) override
+  {
+    aContext->mManager->OnBlur();
+  }
+
+  virtual void OnReflow(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->mManager->OnReflow();
+  }
+
+  virtual void Enter(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->mPressPoint = nsPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE);
+    aContext->mActiveTouchId = kInvalidTouchId;
+  }
 };
 
 // -----------------------------------------------------------------------------
-// PressCaretState
+// PressCaretState: Always consume the event since we've pressed on the caret.
 //
 class AccessibleCaretEventHub::PressCaretState
   : public AccessibleCaretEventHub::State
@@ -69,14 +114,35 @@ public:
   NS_IMPL_STATE_UTILITIES(PressCaretState)
 
   virtual nsEventStatus OnMove(AccessibleCaretEventHub* aContext,
-                               const nsPoint& aPoint) override;
-  virtual nsEventStatus OnRelease(AccessibleCaretEventHub* aContext) override;
+                               const nsPoint& aPoint) override
+  {
+    if (aContext->MoveDistanceIsLarge(aPoint)) {
+      if (NS_SUCCEEDED(aContext->mManager->DragCaret(aPoint))) {
+        aContext->SetState(aContext->DragCaretState());
+      }
+    }
+
+    return nsEventStatus_eConsumeNoDefault;
+  }
+
+  virtual nsEventStatus OnRelease(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->mManager->ReleaseCaret();
+    aContext->mManager->TapCaret(aContext->mPressPoint);
+    aContext->SetState(aContext->NoActionState());
+
+    return nsEventStatus_eConsumeNoDefault;
+  }
+
   virtual nsEventStatus OnLongTap(AccessibleCaretEventHub* aContext,
-                                  const nsPoint& aPoint) override;
+                                  const nsPoint& aPoint) override
+  {
+    return nsEventStatus_eConsumeNoDefault;
+  }
 };
 
 // -----------------------------------------------------------------------------
-// DragCaretState
+// DragCaretState: Always consume the event since we've pressed on the caret.
 //
 class AccessibleCaretEventHub::DragCaretState
   : public AccessibleCaretEventHub::State
@@ -85,8 +151,20 @@ public:
   NS_IMPL_STATE_UTILITIES(DragCaretState)
 
   virtual nsEventStatus OnMove(AccessibleCaretEventHub* aContext,
-                               const nsPoint& aPoint) override;
-  virtual nsEventStatus OnRelease(AccessibleCaretEventHub* aContext) override;
+                               const nsPoint& aPoint) override
+  {
+    aContext->mManager->DragCaret(aPoint);
+
+    return nsEventStatus_eConsumeNoDefault;
+  }
+
+  virtual nsEventStatus OnRelease(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->mManager->ReleaseCaret();
+    aContext->SetState(aContext->NoActionState());
+
+    return nsEventStatus_eConsumeNoDefault;
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -99,19 +177,66 @@ public:
   NS_IMPL_STATE_UTILITIES(PressNoCaretState)
 
   virtual nsEventStatus OnMove(AccessibleCaretEventHub* aContext,
-                               const nsPoint& aPoint) override;
-  virtual nsEventStatus OnRelease(AccessibleCaretEventHub* aContext) override;
+                               const nsPoint& aPoint) override
+  {
+    if (aContext->MoveDistanceIsLarge(aPoint)) {
+      aContext->SetState(aContext->NoActionState());
+    }
+
+    return nsEventStatus_eIgnore;
+  }
+
+  virtual nsEventStatus OnRelease(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->SetState(aContext->NoActionState());
+
+    return nsEventStatus_eIgnore;
+  }
+
   virtual nsEventStatus OnLongTap(AccessibleCaretEventHub* aContext,
-                                  const nsPoint& aPoint) override;
-  virtual void OnScrollStart(AccessibleCaretEventHub* aContext) override;
+                                  const nsPoint& aPoint) override
+  {
+    aContext->SetState(aContext->LongTapState());
+
+    return aContext->GetState()->OnLongTap(aContext, aPoint);
+  }
+
+  virtual void OnScrollStart(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->mManager->OnScrollStart();
+    aContext->SetState(aContext->ScrollState());
+  }
+
   virtual void OnBlur(AccessibleCaretEventHub* aContext,
-                      bool aIsLeavingDocument) override;
+                      bool aIsLeavingDocument) override
+  {
+    aContext->mManager->OnBlur();
+    if (aIsLeavingDocument) {
+      aContext->SetState(aContext->NoActionState());
+    }
+  }
+
   virtual void OnSelectionChanged(AccessibleCaretEventHub* aContext,
                                   nsIDOMDocument* aDoc, nsISelection* aSel,
-                                  int16_t aReason) override;
-  virtual void OnReflow(AccessibleCaretEventHub* aContext) override;
-  virtual void Enter(AccessibleCaretEventHub* aContext) override;
-  virtual void Leave(AccessibleCaretEventHub* aContext) override;
+                                  int16_t aReason) override
+  {
+    aContext->mManager->OnSelectionChanged(aDoc, aSel, aReason);
+  }
+
+  virtual void OnReflow(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->mManager->OnReflow();
+  }
+
+  virtual void Enter(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->LaunchLongTapInjector();
+  }
+
+  virtual void Leave(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->CancelLongTapInjector();
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -123,9 +248,19 @@ class AccessibleCaretEventHub::ScrollState
 public:
   NS_IMPL_STATE_UTILITIES(ScrollState)
 
-  virtual void OnScrollEnd(AccessibleCaretEventHub* aContext) override;
+  virtual void OnScrollEnd(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->SetState(aContext->PostScrollState());
+  }
+
   virtual void OnBlur(AccessibleCaretEventHub* aContext,
-                      bool aIsLeavingDocument) override;
+                      bool aIsLeavingDocument) override
+  {
+    aContext->mManager->OnBlur();
+    if (aIsLeavingDocument) {
+      aContext->SetState(aContext->NoActionState());
+    }
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -140,14 +275,50 @@ public:
 
   virtual nsEventStatus OnPress(AccessibleCaretEventHub* aContext,
                                 const nsPoint& aPoint,
-                                int32_t aTouchId) override;
-  virtual void OnScrollStart(AccessibleCaretEventHub* aContext) override;
-  virtual void OnScrollEnd(AccessibleCaretEventHub* aContext) override;
-  virtual void OnScrolling(AccessibleCaretEventHub* aContext) override;
+                                int32_t aTouchId) override
+  {
+    aContext->mManager->OnScrollEnd();
+    aContext->SetState(aContext->NoActionState());
+
+    return aContext->GetState()->OnPress(aContext, aPoint, aTouchId);
+  }
+
+  virtual void OnScrollStart(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->SetState(aContext->ScrollState());
+  }
+
+  virtual void OnScrollEnd(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->mManager->OnScrollEnd();
+    aContext->SetState(aContext->NoActionState());
+  }
+
+  virtual void OnScrolling(AccessibleCaretEventHub* aContext) override
+  {
+    // Momentum scroll by wheel event.
+    aContext->LaunchScrollEndInjector();
+  }
+
   virtual void OnBlur(AccessibleCaretEventHub* aContext,
-                      bool aIsLeavingDocument) override;
-  virtual void Enter(AccessibleCaretEventHub* aContext) override;
-  virtual void Leave(AccessibleCaretEventHub* aContext) override;
+                      bool aIsLeavingDocument) override
+  {
+    aContext->mManager->OnBlur();
+    if (aIsLeavingDocument) {
+      aContext->SetState(aContext->NoActionState());
+    }
+  }
+
+  virtual void Enter(AccessibleCaretEventHub* aContext) override
+  {
+    // Launch the injector to leave PostScrollState.
+    aContext->LaunchScrollEndInjector();
+  }
+
+  virtual void Leave(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->CancelScrollEndInjector();
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -160,370 +331,24 @@ public:
   NS_IMPL_STATE_UTILITIES(LongTapState)
 
   virtual nsEventStatus OnLongTap(AccessibleCaretEventHub* aContext,
-                                  const nsPoint& aPoint) override;
-  virtual void OnReflow(AccessibleCaretEventHub* aContext) override;
-};
+                                  const nsPoint& aPoint) override
+  {
+    nsEventStatus rv = nsEventStatus_eIgnore;
 
-// -----------------------------------------------------------------------------
-// Implementation of all concrete state functions
-//
-nsEventStatus
-AccessibleCaretEventHub::State::OnPress(AccessibleCaretEventHub* aContext,
-                                        const nsPoint& aPoint, int32_t aTouchId)
-{
-  return nsEventStatus_eIgnore;
-}
-
-nsEventStatus
-AccessibleCaretEventHub::State::OnMove(AccessibleCaretEventHub* aContext,
-                                       const nsPoint& aPoint)
-{
-  return nsEventStatus_eIgnore;
-}
-
-nsEventStatus
-AccessibleCaretEventHub::State::OnRelease(AccessibleCaretEventHub* aContext)
-{
-  return nsEventStatus_eIgnore;
-}
-
-nsEventStatus
-AccessibleCaretEventHub::State::OnLongTap(AccessibleCaretEventHub* aContext,
-                                          const nsPoint& aPoint)
-{
-  return nsEventStatus_eIgnore;
-}
-
-void
-AccessibleCaretEventHub::State::OnScrollStart(AccessibleCaretEventHub* aContext)
-{
-}
-
-void
-AccessibleCaretEventHub::State::OnScrollEnd(AccessibleCaretEventHub* aContext)
-{
-}
-
-void
-AccessibleCaretEventHub::State::OnScrolling(AccessibleCaretEventHub* aContext)
-{
-}
-
-void
-AccessibleCaretEventHub::State::OnScrollPositionChanged(AccessibleCaretEventHub* aContext)
-{
-}
-
-void
-AccessibleCaretEventHub::State::OnBlur(AccessibleCaretEventHub* aContext,
-                                       bool aIsLeavingDocument)
-{
-}
-
-void
-AccessibleCaretEventHub::State::OnSelectionChanged(AccessibleCaretEventHub* aContext,
-                                             nsIDOMDocument* aDoc,
-                                             nsISelection* aSel,
-                                             int16_t aReason)
-{
-}
-
-void
-AccessibleCaretEventHub::State::OnReflow(AccessibleCaretEventHub* aContext)
-{
-}
-
-void
-AccessibleCaretEventHub::State::Enter(AccessibleCaretEventHub* aContext)
-{
-}
-
-void
-AccessibleCaretEventHub::State::Leave(AccessibleCaretEventHub* aContext)
-{
-}
-
-nsEventStatus
-AccessibleCaretEventHub::NoActionState::OnPress(AccessibleCaretEventHub* aContext,
-                                          const nsPoint& aPoint,
-                                          int32_t aTouchId)
-{
-  nsEventStatus rv = nsEventStatus_eIgnore;
-
-  if (NS_SUCCEEDED(aContext->mManager->PressCaret(aPoint))) {
-    aContext->SetState(aContext->PressCaretState());
-    rv = nsEventStatus_eConsumeNoDefault;
-  } else {
-    aContext->SetState(aContext->PressNoCaretState());
-  }
-
-  aContext->mPressPoint = aPoint;
-  aContext->mActiveTouchId = aTouchId;
-
-  return rv;
-}
-
-void
-AccessibleCaretEventHub::NoActionState::OnScrollStart(AccessibleCaretEventHub* aContext)
-{
-  aContext->mManager->OnScrollStart();
-  aContext->SetState(aContext->ScrollState());
-}
-
-void
-AccessibleCaretEventHub::NoActionState::OnScrolling(AccessibleCaretEventHub* aContext)
-{
-  aContext->mManager->OnScrolling();
-}
-
-void
-AccessibleCaretEventHub::NoActionState::OnScrollPositionChanged(
-  AccessibleCaretEventHub* aContext)
-{
-  aContext->mManager->OnScrollPositionChanged();
-}
-
-void
-AccessibleCaretEventHub::NoActionState::OnBlur(AccessibleCaretEventHub* aContext,
-                                         bool aIsLeavingDocument)
-{
-  aContext->mManager->OnBlur();
-}
-
-void
-AccessibleCaretEventHub::NoActionState::OnSelectionChanged(
-  AccessibleCaretEventHub* aContext, nsIDOMDocument* aDoc, nsISelection* aSel,
-  int16_t aReason)
-{
-  aContext->mManager->OnSelectionChanged(aDoc, aSel, aReason);
-}
-
-void
-AccessibleCaretEventHub::NoActionState::OnReflow(AccessibleCaretEventHub* aContext)
-{
-  aContext->mManager->OnReflow();
-}
-
-void
-AccessibleCaretEventHub::NoActionState::Enter(AccessibleCaretEventHub* aContext)
-{
-  aContext->mPressPoint = nsPoint(NS_UNCONSTRAINEDSIZE, NS_UNCONSTRAINEDSIZE);
-  aContext->mActiveTouchId = kInvalidTouchId;
-}
-
-nsEventStatus
-AccessibleCaretEventHub::PressCaretState::OnMove(AccessibleCaretEventHub* aContext,
-                                           const nsPoint& aPoint)
-{
-  if (aContext->MoveDistanceIsLarge(aPoint)) {
-    if (NS_SUCCEEDED(aContext->mManager->DragCaret(aPoint))) {
-      aContext->SetState(aContext->DragCaretState());
+    if (NS_SUCCEEDED(aContext->mManager->SelectWordOrShortcut(aPoint))) {
+      rv = nsEventStatus_eConsumeNoDefault;
     }
-  }
 
-  // We should always consume the event since we've pressed on the caret.
-  return nsEventStatus_eConsumeNoDefault;
-}
-
-nsEventStatus
-AccessibleCaretEventHub::PressCaretState::OnRelease(AccessibleCaretEventHub* aContext)
-{
-  aContext->mManager->ReleaseCaret();
-  aContext->mManager->TapCaret(aContext->mPressPoint);
-  aContext->SetState(aContext->NoActionState());
-
-  // We should always consume the event since we've pressed on the caret.
-  return nsEventStatus_eConsumeNoDefault;
-}
-
-nsEventStatus
-AccessibleCaretEventHub::PressCaretState::OnLongTap(AccessibleCaretEventHub* aContext,
-                                              const nsPoint& aPoint)
-{
-  // We should always consume the event since we've pressed on the caret.
-  return nsEventStatus_eConsumeNoDefault;
-}
-
-nsEventStatus
-AccessibleCaretEventHub::DragCaretState::OnMove(AccessibleCaretEventHub* aContext,
-                                          const nsPoint& aPoint)
-{
-  aContext->mManager->DragCaret(aPoint);
-
-  // We should always consume the event since we've pressed on the caret.
-  return nsEventStatus_eConsumeNoDefault;
-}
-
-nsEventStatus
-AccessibleCaretEventHub::DragCaretState::OnRelease(AccessibleCaretEventHub* aContext)
-{
-  aContext->mManager->ReleaseCaret();
-  aContext->SetState(aContext->NoActionState());
-
-  // We should always consume the event since we've pressed on the caret.
-  return nsEventStatus_eConsumeNoDefault;
-}
-
-nsEventStatus
-AccessibleCaretEventHub::PressNoCaretState::OnMove(AccessibleCaretEventHub* aContext,
-                                             const nsPoint& aPoint)
-{
-  if (aContext->MoveDistanceIsLarge(aPoint)) {
     aContext->SetState(aContext->NoActionState());
+
+    return rv;
   }
 
-  return nsEventStatus_eIgnore;
-}
-
-nsEventStatus
-AccessibleCaretEventHub::PressNoCaretState::OnRelease(AccessibleCaretEventHub* aContext)
-{
-  aContext->SetState(aContext->NoActionState());
-
-  return nsEventStatus_eIgnore;
-}
-
-nsEventStatus
-AccessibleCaretEventHub::PressNoCaretState::OnLongTap(AccessibleCaretEventHub* aContext,
-                                                const nsPoint& aPoint)
-{
-  aContext->SetState(aContext->LongTapState());
-  return aContext->GetState()->OnLongTap(aContext, aPoint);
-}
-
-void
-AccessibleCaretEventHub::PressNoCaretState::OnScrollStart(AccessibleCaretEventHub* aContext)
-{
-  aContext->mManager->OnScrollStart();
-  aContext->SetState(aContext->ScrollState());
-}
-
-void
-AccessibleCaretEventHub::PressNoCaretState::OnReflow(AccessibleCaretEventHub* aContext)
-{
-  aContext->mManager->OnReflow();
-}
-
-void
-AccessibleCaretEventHub::PressNoCaretState::OnBlur(AccessibleCaretEventHub* aContext,
-                                             bool aIsLeavingDocument)
-{
-  aContext->mManager->OnBlur();
-  if (aIsLeavingDocument) {
-    aContext->SetState(aContext->NoActionState());
+  virtual void OnReflow(AccessibleCaretEventHub* aContext) override
+  {
+    aContext->mManager->OnReflow();
   }
-}
-
-void
-AccessibleCaretEventHub::PressNoCaretState::OnSelectionChanged(
-  AccessibleCaretEventHub* aContext, nsIDOMDocument* aDoc, nsISelection* aSel,
-  int16_t aReason)
-{
-  aContext->mManager->OnSelectionChanged(aDoc, aSel, aReason);
-}
-
-void
-AccessibleCaretEventHub::PressNoCaretState::Enter(AccessibleCaretEventHub* aContext)
-{
-  aContext->LaunchLongTapInjector();
-}
-
-void
-AccessibleCaretEventHub::PressNoCaretState::Leave(AccessibleCaretEventHub* aContext)
-{
-  aContext->CancelLongTapInjector();
-}
-
-void
-AccessibleCaretEventHub::ScrollState::OnScrollEnd(AccessibleCaretEventHub* aContext)
-{
-  aContext->SetState(aContext->PostScrollState());
-}
-
-void
-AccessibleCaretEventHub::ScrollState::OnBlur(AccessibleCaretEventHub* aContext,
-                                       bool aIsLeavingDocument)
-{
-  aContext->mManager->OnBlur();
-  if (aIsLeavingDocument) {
-    aContext->SetState(aContext->NoActionState());
-  }
-}
-
-nsEventStatus
-AccessibleCaretEventHub::PostScrollState::OnPress(AccessibleCaretEventHub* aContext,
-                                            const nsPoint& aPoint,
-                                            int32_t aTouchId)
-{
-  aContext->mManager->OnScrollEnd();
-  aContext->SetState(aContext->NoActionState());
-  return aContext->GetState()->OnPress(aContext, aPoint, aTouchId);
-}
-
-void
-AccessibleCaretEventHub::PostScrollState::OnScrollStart(AccessibleCaretEventHub* aContext)
-{
-  aContext->SetState(aContext->ScrollState());
-}
-
-void
-AccessibleCaretEventHub::PostScrollState::OnScrollEnd(AccessibleCaretEventHub* aContext)
-{
-  aContext->mManager->OnScrollEnd();
-  aContext->SetState(aContext->NoActionState());
-}
-
-void
-AccessibleCaretEventHub::PostScrollState::OnScrolling(AccessibleCaretEventHub* aContext)
-{
-  // Momentum scroll by wheel event.
-  aContext->LaunchScrollEndInjector();
-}
-
-void
-AccessibleCaretEventHub::PostScrollState::OnBlur(AccessibleCaretEventHub* aContext,
-                                           bool aIsLeavingDocument)
-{
-  aContext->mManager->OnBlur();
-  if (aIsLeavingDocument) {
-    aContext->SetState(aContext->NoActionState());
-  }
-}
-
-void
-AccessibleCaretEventHub::PostScrollState::Enter(AccessibleCaretEventHub* aContext)
-{
-  // Launch the injector to leave PostScrollState.
-  aContext->LaunchScrollEndInjector();
-}
-
-void
-AccessibleCaretEventHub::PostScrollState::Leave(AccessibleCaretEventHub* aContext)
-{
-  aContext->CancelScrollEndInjector();
-}
-
-nsEventStatus
-AccessibleCaretEventHub::LongTapState::OnLongTap(AccessibleCaretEventHub* aContext,
-                                           const nsPoint& aPoint)
-{
-  nsEventStatus rv = nsEventStatus_eIgnore;
-
-  if (NS_SUCCEEDED(aContext->mManager->SelectWordOrShortcut(aPoint))) {
-    rv = nsEventStatus_eConsumeNoDefault;
-  }
-
-  aContext->SetState(aContext->NoActionState());
-
-  return rv;
-}
-
-void
-AccessibleCaretEventHub::LongTapState::OnReflow(AccessibleCaretEventHub* aContext)
-{
-  aContext->mManager->OnReflow();
-}
-
+};
 // -----------------------------------------------------------------------------
 // Implementation of AccessibleCaretEventHub methods
 //
