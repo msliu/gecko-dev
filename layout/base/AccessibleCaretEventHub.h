@@ -31,18 +31,27 @@ class WidgetTouchEvent;
 class WidgetWheelEvent;
 
 // -----------------------------------------------------------------------------
-// AccessibleCaretEventHub implements state pattern. It receives various events
-// and callbacks, and relay the handling to current concrete state to call
-// needed methods in AccessibleCaretManager. In this way, AccessibleCaretManager
-// could concentrate on handling the behavior of selection and carets without
-// worrying about any concrete events. AccessibleCaretEventHub also synthesizes
-// fake events such as long-tap or scroll-end if APZ is not in use.
+// Each PresShell holds a shared pointer to an AccessibleCaretEventHub; each
+// AccessibleCaretEventHub holds a unique pointer to an AccessibleCaretManager.
+// Thus, there's one AccessibleCaretManager per PresShell.
 //
-// Each PresShell holds a shared pointer to AccessibleCaretEventHub, and each
-// AccessibleCaretEventHub holds a unique pointer to AccessibleCaretManager.
-// Thus we'll have one AccessibleCaretManager per PresShell.
+// AccessibleCaretEventHub implements a state pattern. It receives events from
+// PresShell and callbacks by observers and listeners, and then relays them to
+// the current concrete state which calls necessary event-handling methods in
+// AccessibleCaretManager.
 //
-// See this link for the state transition diagram:
+// We separate AccessibleCaretEventHub from AccessibleCaretManager to make the
+// state transitions in AccessibleCaretEventHub testable. We put (nearly) all
+// the operations involving PresShell, Selection, and AccessibleCaret
+// manipulation in AccessibleCaretManager so that we can mock methods in
+// AccessibleCaretManager in gtest. We test the correctness of the state
+// transitions by giving events, callbacks, and the return values by mocked
+// methods of AccessibleCaretEventHub. See TestAccessibleCaretEventHub.cpp.
+//
+// Besides dealing with real events, AccessibleCaretEventHub also synthesizes
+// fake events such as scroll-end or long-tap providing APZ is not in use.
+//
+// State transition diagram:
 // http://hg.mozilla.org/mozilla-central/file/default/layout/base/doc/AccessibleCaretEventHubStates.png
 // Source code of the diagram:
 // http://hg.mozilla.org/mozilla-central/file/default/layout/base/doc/AccessibleCaretEventHubStates.dot
@@ -152,9 +161,9 @@ protected:
 };
 
 // -----------------------------------------------------------------------------
-// Base class for state. A concrete state should inherit this class, and
-// override the methods for handling the events or callbacks. A concrete state
-// is also responsible for transforming to the next concrete state.
+// The base class for concrete states. A concrete state should inherit from this
+// class, and override the methods to handle the events or callbacks. A concrete
+// state is also responsible for transforming itself to the next concrete state.
 //
 class AccessibleCaretEventHub::State
 {
