@@ -29,12 +29,15 @@ class Selection;
 }
 
 class AccessibleCaret;
-class AccessibleCaretEventHub;
 
 // -----------------------------------------------------------------------------
-// AccessibleCaretManager handles events and callbacks from
-// AccessibleCaretEventHub, and perform the real work to manipulate selection
-// object and AccessibleCaret.
+// AccessibleCaretManager does not deal with events or callbacks directly. It
+// relies on AccessibleCaretEventHub to call its public methods to do the work.
+// All codes needed to interact with PresShell, Selection, and AccessibleCaret
+// should be written in AccessibleCaretManager.
+//
+// For more information about AccessibleCaretEventHub, see the documentation in
+// AccessibleCaretEventHub.h.
 //
 class AccessibleCaretManager
 {
