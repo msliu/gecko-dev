@@ -329,10 +329,6 @@ div:-moz-native-anonymous.moz-accessiblecaret > div.image {
 
 div:-moz-native-anonymous.moz-accessiblecaret {
   margin-left: -23px;
-
-  /* XXX: Remove this debug background-color when AccessibleCaret is ready. It is
-     useful to distinguish AccessibleCaret from Touch/SelectionCarets. */
-  background-color: rgba(0, 0, 0, 0.3);
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret > div.image {
@@ -343,10 +339,6 @@ div:-moz-native-anonymous.moz-accessiblecaret > div.image {
   /* Override this property in moz-custom-content-container to make dummy touch
    * listener work. */
   pointer-events: auto;
-
-  /* XXX: Remove this debug background-color when AccessibleCaret is ready. It is
-     useful to distinguish AccessibleCaret from Touch/SelectionCarets. */
-  background-color: rgba(0, 0, 0, 0.3);
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret > div.bar {
