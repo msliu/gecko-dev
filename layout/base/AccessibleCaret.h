@@ -79,7 +79,7 @@ public:
 
   // Control the "Text Selection Bar" described in "Text Selection Visual Spec"
   // in bug 921965.
-  void SetBarEnabled(bool aEnabled);
+  void SetSelectionBarEnabled(bool aEnabled);
 
   // This enumeration representing the result returned by SetPosition().
   enum class PositionChangedResult : uint8_t {
@@ -109,13 +109,13 @@ public:
 
 private:
   void SetCaretElementPosition(nsIFrame* aFrame, const nsRect& aRect);
-  void SetCaretBarElementPosition(nsIFrame* aFrame, const nsRect& aRect);
+  void SetSelectionBarElementPosition(nsIFrame* aFrame, const nsRect& aRect);
 
   // Element which contains the caret image for 'Contains' test.
   dom::Element* CaretImageElement() const;
 
   // Element which represents the text selection bar.
-  dom::Element* CaretBarElement() const;
+  dom::Element* SelectionBarElement() const;
 
   nsIFrame* RootFrame() const;
   nsIFrame* CustomContentContainerFrame() const;

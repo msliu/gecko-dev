@@ -90,7 +90,7 @@ AccessibleCaret::SetAppearance(Appearance aAppearance)
 }
 
 void
-AccessibleCaret::SetBarEnabled(bool aEnabled)
+AccessibleCaret::SetSelectionBarEnabled(bool aEnabled)
 {
   if (mBarEnabled == aEnabled) {
     return;
@@ -141,7 +141,7 @@ AccessibleCaret::CaretImageElement() const
 }
 
 Element*
-AccessibleCaret::CaretBarElement() const
+AccessibleCaret::SelectionBarElement() const
 {
   return CaretElement()->GetLastElementChild();
 }
@@ -196,7 +196,7 @@ AccessibleCaret::CreateCaretElement(nsIDocument* aDocument) const
   // Content structure of AccessibleCaret
   // <div class="moz-accessiblecaret">  <- CaretElement()
   //   <div class="image">              <- CaretImageElement()
-  //   <div class="bar">                <- CaretBarElement()
+  //   <div class="bar">                <- SelectionBarElement()
 
   ErrorResult rv;
   nsCOMPtr<Element> parent = aDocument->CreateHTMLElement(nsGkAtoms::div);
@@ -254,7 +254,7 @@ AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
   mImaginaryCaretRect = imaginaryCaretRect;
 
   SetCaretElementPosition(aFrame, imaginaryCaretRectInFrame);
-  SetCaretBarElementPosition(aFrame, imaginaryCaretRectInFrame);
+  SetSelectionBarElementPosition(aFrame, imaginaryCaretRectInFrame);
 
   return PositionChangedResult::Changed;
 }
@@ -307,8 +307,8 @@ AccessibleCaret::SetCaretElementPosition(nsIFrame* aFrame, const nsRect& aRect)
 }
 
 void
-AccessibleCaret::SetCaretBarElementPosition(nsIFrame* aFrame,
-                                            const nsRect& aRect)
+AccessibleCaret::SetSelectionBarElementPosition(nsIFrame* aFrame,
+                                                const nsRect& aRect)
 {
   int32_t height = nsPresContext::AppUnitsToIntCSSPixels(aRect.height);
   nsAutoString barStyleStr;
@@ -316,7 +316,7 @@ AccessibleCaret::SetCaretBarElementPosition(nsIFrame* aFrame,
                            height, height);
 
   ErrorResult rv;
-  CaretBarElement()->SetAttribute(NS_LITERAL_STRING("style"), barStyleStr, rv);
+  SelectionBarElement()->SetAttribute(NS_LITERAL_STRING("style"), barStyleStr, rv);
   MOZ_ASSERT(!rv.Failed());
 
   AC_LOG("Set bar style: %s", NS_ConvertUTF16toUTF8(barStyleStr).get());
