@@ -36,8 +36,9 @@ class AccessibleCaret;
 // All codes needed to interact with PresShell, Selection, and AccessibleCaret
 // should be written in AccessibleCaretManager.
 //
-// For more information about AccessibleCaretEventHub, see the documentation in
-// AccessibleCaretEventHub.h.
+// None the public methods in AccessibleCaretManager will flush layout or style
+// prior to performing its task. The caller must ensure the layout is up to
+// date.
 //
 class AccessibleCaretManager
 {
@@ -45,20 +46,51 @@ public:
   explicit AccessibleCaretManager(nsIPresShell* aPresShell);
   virtual ~AccessibleCaretManager();
 
+  // The aPoint in the following public methods should be relative to root
+  // frame.
+
+  // Press caret on the given point. Return NS_OK if the point is actually on
+  // one of the carets.
   virtual nsresult PressCaret(const nsPoint& aPoint);
+
+  // Drag caret to the given point. It's required to call PressCaret()
+  // beforehand.
   virtual nsresult DragCaret(const nsPoint& aPoint);
+
+  // Release caret from he previous press action. It's required to call
+  // PressCaret() beforehand.
   virtual nsresult ReleaseCaret();
+
+  // A quick single tap on caret on given point without dragging.
   virtual nsresult TapCaret(const nsPoint& aPoint);
+
+  // Select a word or bring up paste shortcut (if Gaia is listening) under the
+  // given point.
   virtual nsresult SelectWordOrShortcut(const nsPoint& aPoint);
+
+  // Handle scroll-start event.
   virtual void OnScrollStart();
+
+  // Handle scroll-end event.
   virtual void OnScrollEnd();
+
+  // Handle NS_WHEEL_WHEEL event.
   virtual void OnScrolling();
+
+  // Handle ScrollPositionChanged from nsIScrollObserver.
   virtual void OnScrollPositionChanged();
+
+  // Handle reflow event from nsIReflowObserver.
   virtual void OnReflow();
+
+  // Handle blur event from nsFocusManager.
   virtual void OnBlur();
+
+  // Handle NotifySelectionChanged event from nsISelectionListener.
   virtual nsresult OnSelectionChanged(nsIDOMDocument* aDoc,
                                       nsISelection* aSel,
                                       int16_t aReason);
+  // Handle key event.
   virtual void OnKeyboardEvent();
 
 protected:
