@@ -321,20 +321,17 @@ div:-moz-native-anonymous.moz-accessiblecaret > div.bar {
   z-index: 2147483647;
 }
 
-div:-moz-native-anonymous.moz-accessiblecaret,
-div:-moz-native-anonymous.moz-accessiblecaret > div.image {
+div:-moz-native-anonymous.moz-accessiblecaret {
   width: 44px;
   height: 47px;
-}
-
-div:-moz-native-anonymous.moz-accessiblecaret {
   margin-left: -23px;
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret > div.image {
   background-position: center center;
   background-size: 100% 100%;
-  cursor: move;
+  width: 100%;
+  height: 100%;
 
   /* Override this property in moz-custom-content-container to make dummy touch
    * listener work. */
@@ -342,7 +339,7 @@ div:-moz-native-anonymous.moz-accessiblecaret > div.image {
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret > div.bar {
-  margin-left: 22px;
+  margin-left: 49%;
   width: 2px;
   background-color: #008aa0;
 }
@@ -353,17 +350,16 @@ div:-moz-native-anonymous.moz-accessiblecaret.nobar > div.bar {
 
 div:-moz-native-anonymous.moz-accessiblecaret.normal > div.image {
   background-image: url("resource://gre/res/text_caret.png");
-  margin-left: 0px;
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret.left > div.image {
   background-image: url("resource://gre/res/text_caret_tilt_left.png");
-  margin-left: -17px;
+  margin-left: -39%;
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret.right > div.image {
   background-image: url("resource://gre/res/text_caret_tilt_right.png");
-  margin-left: 18px;
+  margin-left: 41%;
 }
 
 div:-moz-native-anonymous.moz-accessiblecaret.none {
