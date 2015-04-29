@@ -215,8 +215,13 @@ AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
 
   mImaginaryCaretRect = imaginaryCaretRect;
 
-  SetCaretElementPosition(aFrame, imaginaryCaretRectInFrame);
-  SetSelectionBarElementPosition(aFrame, imaginaryCaretRectInFrame);
+  // SetCaretElementPosition() and SetSelectionBarElementPosition() require the
+  // input rect relative to container frame.
+  nsRect imaginaryCaretRectInContainerFrame = imaginaryCaretRectInFrame;
+  nsLayoutUtils::TransformRect(aFrame, CustomContentContainerFrame(),
+                               imaginaryCaretRectInContainerFrame);
+  SetCaretElementPosition(imaginaryCaretRectInContainerFrame);
+  SetSelectionBarElementPosition(imaginaryCaretRectInContainerFrame);
 
   return PositionChangedResult::Changed;
 }
@@ -231,13 +236,9 @@ AccessibleCaret::CustomContentContainerFrame() const
 }
 
 void
-AccessibleCaret::SetCaretElementPosition(nsIFrame* aFrame, const nsRect& aRect)
+AccessibleCaret::SetCaretElementPosition(const nsRect& aRect)
 {
-  // Transform position so that it relatives to containerFrame.
   nsPoint position = CaretElementPosition(aRect);
-  nsLayoutUtils::TransformPoint(aFrame, CustomContentContainerFrame(),
-                                position);
-
   nsAutoString styleStr;
   styleStr.AppendPrintf("left: %dpx; top: %dpx;",
                         nsPresContext::AppUnitsToIntCSSPixels(position.x),
@@ -251,8 +252,7 @@ AccessibleCaret::SetCaretElementPosition(nsIFrame* aFrame, const nsRect& aRect)
 }
 
 void
-AccessibleCaret::SetSelectionBarElementPosition(nsIFrame* aFrame,
-                                                const nsRect& aRect)
+AccessibleCaret::SetSelectionBarElementPosition(const nsRect& aRect)
 {
   int32_t height = nsPresContext::AppUnitsToIntCSSPixels(aRect.height);
   nsAutoString barStyleStr;

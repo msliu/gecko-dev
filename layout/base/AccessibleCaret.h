@@ -123,8 +123,9 @@ public:
   }
 
 private:
-  void SetCaretElementPosition(nsIFrame* aFrame, const nsRect& aRect);
-  void SetSelectionBarElementPosition(nsIFrame* aFrame, const nsRect& aRect);
+  // Argument aRect should be relative to CustomContentContainerFrame().
+  void SetCaretElementPosition(const nsRect& aRect);
+  void SetSelectionBarElementPosition(const nsRect& aRect);
 
   // Element which contains the caret image for 'Contains' test.
   dom::Element* CaretImageElement() const
