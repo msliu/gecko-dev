@@ -30,8 +30,12 @@ namespace mozilla {
 // anonymous content containing the caret image. The caret appearance and
 // position can be controlled by SetAppearance() and SetPosition().
 //
-// All the rect or point used are relative to root frame except being specified
+// All the rect or point are relative to root frame except being specified
 // explicitly.
+//
+// None of the methods in AccessibleCaret will flush layout or style. To ensure
+// that SetPostion() works correctly, the caller must make sure the layout is up
+// to date.
 //
 class AccessibleCaret final
 {
