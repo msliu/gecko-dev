@@ -79,7 +79,7 @@ AccessibleCaret::SetSelectionBarEnabled(bool aEnabled)
   AC_LOG("%s, enabled %d", __FUNCTION__, aEnabled);
 
   ErrorResult rv;
-  CaretElement()->ClassList()->Toggle(NS_LITERAL_STRING("nobar"),
+  CaretElement()->ClassList()->Toggle(NS_LITERAL_STRING("no-bar"),
                                       Optional<bool>(!aEnabled), rv);
   MOZ_ASSERT(!rv.Failed());
 
@@ -164,7 +164,7 @@ AccessibleCaret::CreateCaretElement(nsIDocument* aDocument) const
   nsCOMPtr<Element> parent = aDocument->CreateHTMLElement(nsGkAtoms::div);
   parent->ClassList()->Add(NS_LITERAL_STRING("moz-accessiblecaret"), rv);
   parent->ClassList()->Add(NS_LITERAL_STRING("none"), rv);
-  parent->ClassList()->Add(NS_LITERAL_STRING("nobar"), rv);
+  parent->ClassList()->Add(NS_LITERAL_STRING("no-bar"), rv);
 
   nsCOMPtr<Element> image = aDocument->CreateHTMLElement(nsGkAtoms::div);
   image->ClassList()->Add(NS_LITERAL_STRING("image"), rv);

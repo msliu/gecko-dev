@@ -344,7 +344,7 @@ div:-moz-native-anonymous.moz-accessiblecaret > div.bar {
   background-color: #008aa0;
 }
 
-div:-moz-native-anonymous.moz-accessiblecaret.nobar > div.bar {
+div:-moz-native-anonymous.moz-accessiblecaret.no-bar > div.bar {
   display: none;
 }
 
