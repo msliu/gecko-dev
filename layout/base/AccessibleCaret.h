@@ -86,8 +86,8 @@ public:
            (mAppearance != Appearance::NormalNotShown);
   }
 
-  // Control the "Text Selection Bar" described in "Text Selection Visual Spec"
-  // in bug 921965.
+  // Set true to enable the "Text Selection Bar" described in "Text Selection
+  // Visual Spec" in bug 921965.
   void SetSelectionBarEnabled(bool aEnabled);
 
   // This enumeration representing the result returned by SetPosition().
@@ -104,10 +104,11 @@ public:
   PositionChangedResult SetPosition(nsIFrame* aFrame, int32_t aOffset);
 
   // Does two AccessibleCarets overlap?
-  bool Intersects(const AccessibleCaret& rhs) const;
+  bool Intersects(const AccessibleCaret& aCaret) const;
 
-  // Is the position within the caret's rect?
-  bool Contains(const nsPoint& aPosition) const;
+  // Is the point within the caret's rect? The point should be relative to root
+  // frame.
+  bool Contains(const nsPoint& aPoint) const;
 
   // The geometry center of the imaginary caret (nsCaret) to which this
   // AccessibleCaret is attached. It is needed when dragging the caret.
@@ -179,9 +180,18 @@ private:
 
   // Member variables
   Appearance mAppearance = Appearance::None;
+
   bool mSelectionBarEnabled = false;
-  nsIPresShell* mPresShell = nullptr;
+
+  // AccessibleCaretManager owns us. When it's destroyed by
+  // AccessibleCaretEventHub::Terminate() which is called in
+  // PresShell::Destroy(), it frees us automatically. No need to worry we
+  // outlive mPresShell.
+  nsIPresShell* MOZ_NON_OWNING_REF const mPresShell = nullptr;
+
   nsRefPtr<dom::AnonymousContent> mCaretElementHolder;
+
+  // mImaginaryCaretRect is relative to root frame.
   nsRect mImaginaryCaretRect;
 
   // A no-op touch-start listener which prevents APZ from panning when dragging

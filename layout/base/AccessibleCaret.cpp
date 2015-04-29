@@ -123,7 +123,7 @@ AccessibleCaret::Intersects(const AccessibleCaret& aCaret) const
 }
 
 bool
-AccessibleCaret::Contains(const nsPoint& aPosition) const
+AccessibleCaret::Contains(const nsPoint& aPoint) const
 {
   if (!IsVisuallyVisible()) {
     return false;
@@ -132,7 +132,7 @@ AccessibleCaret::Contains(const nsPoint& aPosition) const
   nsRect rect =
     nsLayoutUtils::GetRectRelativeToFrame(CaretImageElement(), RootFrame());
 
-  return rect.Contains(aPosition);
+  return rect.Contains(aPoint);
 }
 
 void
