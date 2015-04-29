@@ -446,6 +446,7 @@ AccessibleCaretEventHub::Terminate()
   }
 
   mManager = nullptr;
+  mPresShell = nullptr;
   mInitialized = false;
 }
 

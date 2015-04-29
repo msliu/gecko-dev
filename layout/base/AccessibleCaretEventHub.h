@@ -135,7 +135,8 @@ protected:
 
   State* mState = NoActionState();
 
-  nsIPresShell* mPresShell = nullptr;
+  // Will be set to nullptr in Terminate().
+  nsIPresShell* MOZ_NON_OWNING_REF mPresShell = nullptr;
 
   UniquePtr<AccessibleCaretManager> mManager;
 
