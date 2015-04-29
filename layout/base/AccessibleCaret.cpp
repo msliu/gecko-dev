@@ -8,7 +8,6 @@
 
 #include "AccessibleCaretLogger.h"
 #include "mozilla/Preferences.h"
-#include "mozilla/dom/AnonymousContent.h"
 #include "nsCanvasFrame.h"
 #include "nsCaret.h"
 #include "nsDOMTokenList.h"
@@ -46,25 +45,6 @@ AccessibleCaret::AccessibleCaret(nsIPresShell* aPresShell)
 AccessibleCaret::~AccessibleCaret()
 {
   RemoveCaretElement(mPresShell->GetDocument());
-}
-
-bool
-AccessibleCaret::IsLogicallyVisible() const
-{
-  return mAppearance != Appearance::None;
-}
-
-bool
-AccessibleCaret::IsVisuallyVisible() const
-{
-  return (mAppearance != Appearance::None) &&
-         (mAppearance != Appearance::NormalNotShown);
-}
-
-AccessibleCaret::Appearance
-AccessibleCaret::GetAppearance() const
-{
-  return mAppearance;
 }
 
 void
@@ -126,24 +106,6 @@ AccessibleCaret::AppearanceString(Appearance aAppearance)
     break;
   }
   return string;
-}
-
-Element*
-AccessibleCaret::CaretElement() const
-{
-  return mCaretElementHolder->GetContentNode();
-}
-
-Element*
-AccessibleCaret::CaretImageElement() const
-{
-  return CaretElement()->GetFirstElementChild();
-}
-
-Element*
-AccessibleCaret::SelectionBarElement() const
-{
-  return CaretElement()->GetLastElementChild();
 }
 
 bool
@@ -260,30 +222,12 @@ AccessibleCaret::SetPosition(nsIFrame* aFrame, int32_t aOffset)
 }
 
 nsIFrame*
-AccessibleCaret::RootFrame() const
-{
-  return mPresShell->GetRootFrame();
-}
-
-nsIFrame*
 AccessibleCaret::CustomContentContainerFrame() const
 {
   nsCanvasFrame* canvasFrame = mPresShell->GetCanvasFrame();
   Element* container = canvasFrame->GetCustomContentContainer();
   nsIFrame* containerFrame = container->GetPrimaryFrame();
   return containerFrame;
-}
-
-nsPoint
-AccessibleCaret::LogicalPosition() const
-{
-  return mImaginaryCaretRect.Center();
-}
-
-/* static */ nsPoint
-AccessibleCaret::CaretElementPosition(const nsRect& aRect)
-{
-  return aRect.TopLeft() + nsPoint(aRect.width / 2, aRect.height);
 }
 
 void

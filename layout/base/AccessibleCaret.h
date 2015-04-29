@@ -8,10 +8,12 @@
 #define AccessibleCaret_h__
 
 #include "mozilla/Attributes.h"
+#include "mozilla/dom/AnonymousContent.h"
+#include "mozilla/dom/Element.h"
+#include "nsCOMPtr.h"
 #include "nsIDOMEventListener.h"
 #include "nsISupportsBase.h"
 #include "nsISupportsImpl.h"
-#include "nsCOMPtr.h"
 #include "nsRect.h"
 #include "nsRefPtr.h"
 #include "nsString.h"
@@ -22,11 +24,6 @@ class nsIPresShell;
 struct nsPoint;
 
 namespace mozilla {
-
-namespace dom {
-class AnonymousContent;
-class Element;
-}
 
 // -----------------------------------------------------------------------------
 // Upon the creation of AccessibleCaret, it will insert DOM Element as an
@@ -67,15 +64,27 @@ public:
     // Display the caret which is tilted to the right.
     Right
   };
-  Appearance GetAppearance() const;
+
+  Appearance GetAppearance() const
+  {
+    return mAppearance;
+  }
+
   void SetAppearance(Appearance aAppearance);
 
   // Return true if current appearance is either Normal, NormalNotShown, Left,
   // or Right.
-  bool IsLogicallyVisible() const;
+  bool IsLogicallyVisible() const
+  {
+      return mAppearance != Appearance::None;
+  }
 
   // Return true if current appearance is either Normal, Left, or Right.
-  bool IsVisuallyVisible() const;
+  bool IsVisuallyVisible() const
+  {
+    return (mAppearance != Appearance::None) &&
+           (mAppearance != Appearance::NormalNotShown);
+  }
 
   // Control the "Text Selection Bar" described in "Text Selection Visual Spec"
   // in bug 921965.
@@ -102,34 +111,57 @@ public:
 
   // The geometry center of the imaginary caret (nsCaret) to which this
   // AccessibleCaret is attached. It is needed when dragging the caret.
-  nsPoint LogicalPosition() const;
+  nsPoint LogicalPosition() const
+  {
+    return mImaginaryCaretRect.Center();
+  }
 
   // Element for 'Intersects' test. Container of image and bar elements.
-  dom::Element* CaretElement() const;
+  dom::Element* CaretElement() const
+  {
+    return mCaretElementHolder->GetContentNode();
+  }
 
 private:
   void SetCaretElementPosition(nsIFrame* aFrame, const nsRect& aRect);
   void SetSelectionBarElementPosition(nsIFrame* aFrame, const nsRect& aRect);
 
   // Element which contains the caret image for 'Contains' test.
-  dom::Element* CaretImageElement() const;
+  dom::Element* CaretImageElement() const
+  {
+    return CaretElement()->GetFirstElementChild();
+  }
 
   // Element which represents the text selection bar.
-  dom::Element* SelectionBarElement() const;
+  dom::Element* SelectionBarElement() const
+  {
+    return CaretElement()->GetLastElementChild();
+  }
 
-  nsIFrame* RootFrame() const;
+  nsIFrame* RootFrame() const
+  {
+    return mPresShell->GetRootFrame();
+  }
+
   nsIFrame* CustomContentContainerFrame() const;
 
   // Transform Appearance to CSS class name in ua.css.
   static nsString AppearanceString(Appearance aAppearance);
 
-  void InjectCaretElement(nsIDocument* aDocument);
   already_AddRefed<dom::Element> CreateCaretElement(nsIDocument* aDocument) const;
+
+  // Inject caret element into custom content container.
+  void InjectCaretElement(nsIDocument* aDocument);
+
+  // Remove caret element from custom content container.
   void RemoveCaretElement(nsIDocument* aDocument);
 
   // The bottom-center of the imaginary caret to which this AccessibleCaret is
   // attached.
-  static nsPoint CaretElementPosition(const nsRect& aRect);
+  static nsPoint CaretElementPosition(const nsRect& aRect)
+  {
+    return aRect.TopLeft() + nsPoint(aRect.width / 2, aRect.height);
+  }
 
   class DummyTouchListener final : public nsIDOMEventListener
   {
