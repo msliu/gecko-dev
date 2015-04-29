@@ -114,7 +114,11 @@ protected:
 
   // Member variables
   nscoord mOffsetYToCaretLogicalPosition = NS_UNCONSTRAINEDSIZE;
-  nsIPresShell* mPresShell = nullptr;
+
+  // AccessibleCaretEventHub owns us. When it's Terminate() called by
+  // PresShell::Destroy(), we will be destroyed. No need to worry we outlive
+  // mPresShell.
+  nsIPresShell* MOZ_NON_OWNING_REF const mPresShell = nullptr;
 
   // First caret is attached to nsCaret in cursor mode, and is attached to
   // selection highlight as the left caret in selection mode.
