@@ -179,7 +179,7 @@ private:
 
   // Member variables
   Appearance mAppearance = Appearance::None;
-  bool mBarEnabled = false;
+  bool mSelectionBarEnabled = false;
   nsIPresShell* mPresShell = nullptr;
   nsRefPtr<dom::AnonymousContent> mCaretElementHolder;
   nsRect mImaginaryCaretRect;

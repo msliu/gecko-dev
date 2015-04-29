@@ -72,7 +72,7 @@ AccessibleCaret::SetAppearance(Appearance aAppearance)
 void
 AccessibleCaret::SetSelectionBarEnabled(bool aEnabled)
 {
-  if (mBarEnabled == aEnabled) {
+  if (mSelectionBarEnabled == aEnabled) {
     return;
   }
 
@@ -83,7 +83,7 @@ AccessibleCaret::SetSelectionBarEnabled(bool aEnabled)
                                       Optional<bool>(!aEnabled), rv);
   MOZ_ASSERT(!rv.Failed());
 
-  mBarEnabled = aEnabled;
+  mSelectionBarEnabled = aEnabled;
 }
 
 /* static */ nsString
