@@ -395,6 +395,9 @@ AccessibleCaretEventHub::Init(nsIPresShell* aPresShell)
     return;
   }
 
+  // Without this, root frame might become nullptr in AccessibleCaretManager's
+  // constructor after mFirstCaret is constructed.
+  // Run "./mach crashtest layout/base/crashtests" to reproduce.
   nsAutoScriptBlocker scriptBlocker;
 
   mPresShell = aPresShell;
