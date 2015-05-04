@@ -395,9 +395,13 @@ AccessibleCaretEventHub::Init(nsIPresShell* aPresShell)
     return;
   }
 
-  // Without this, root frame might become nullptr in AccessibleCaretManager's
-  // constructor after mFirstCaret is constructed.
-  // Run "./mach crashtest layout/base/crashtests" to reproduce.
+  // Without nsAutoScriptBlocker, the script might be run after constructing
+  // mFirstCaret in AccessibleCaretManager's constructor, which might destructs
+  // the whole frame tree. Therefore we'll fail to construct mSecondCaret
+  // because we cannot get root frame or canvas frame from mPresShell to inject
+  // anonymous content. To avoid that, we protect Init() by nsAutoScriptBlocker.
+  // To reproduce, run "./mach crashtest layout/base/crashtests/897852.html"
+  // without the following scriptBlocker.
   nsAutoScriptBlocker scriptBlocker;
 
   mPresShell = aPresShell;
