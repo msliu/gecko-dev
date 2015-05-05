@@ -34,8 +34,8 @@ namespace mozilla {
 // explicitly.
 //
 // None of the methods in AccessibleCaret will flush layout or style. To ensure
-// that SetPostion() works correctly, the caller must make sure the layout is up
-// to date.
+// that SetPosition() works correctly, the caller must make sure the layout is
+// up to date.
 //
 class AccessibleCaret final
 {
