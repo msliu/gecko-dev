@@ -228,6 +228,7 @@ include('/ipc/chromium/chromium-config.mozbuild')
 LOCAL_INCLUDES += [
     '/dom/base',
     '/dom/ipc',
+    '/dom/workers',
     '/layout/base',
     '/layout/forms',
     '/layout/generic',

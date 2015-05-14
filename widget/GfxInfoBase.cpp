@@ -30,6 +30,8 @@
 #include "nsIXULAppInfo.h"
 #include "mozilla/Preferences.h"
 #include "mozilla/dom/ContentChild.h"
+#include "mozilla/dom/WorkerPrivate.h"
+#include "mozilla/dom/WorkerRunnable.h"
 #include "mozilla/gfx/2D.h"
 #include "mozilla/gfx/Logging.h"
 #include "gfxPrefs.h"
@@ -45,6 +47,44 @@ using mozilla::MutexAutoLock;
 
 nsTArray<GfxDriverInfo>* GfxInfoBase::mDriverInfo;
 bool GfxInfoBase::mDriverInfoObserverInitialized;
+
+class GetFeatureStatusRunnable final : public dom::workers::WorkerMainThreadRunnable
+{
+public:
+    GetFeatureStatusRunnable(dom::workers::WorkerPrivate* aWorkerPrivate,
+                             GfxInfoBase* aGfxInfoBase,
+                             int32_t aFeature,
+                             int32_t* aStatus)
+      : WorkerMainThreadRunnable(aWorkerPrivate)
+      , mGfxInfoBase(aGfxInfoBase)
+      , mFeature(aFeature)
+      , mStatus(aStatus)
+      , mNSResult(NS_OK)
+    {
+    }
+
+    bool MainThreadRun() override
+    {
+      if (mGfxInfoBase) {
+        mNSResult = mGfxInfoBase->GetFeatureStatus(mFeature, mStatus);
+      }
+      return true;
+    }
+
+    nsresult GetNSResult() const
+    {
+      return mNSResult;
+    }
+
+protected:
+    ~GetFeatureStatusRunnable() {}
+
+private:
+    RefPtr<GfxInfoBase> mGfxInfoBase;
+    int32_t mFeature;
+    int32_t* mStatus;
+    nsresult mNSResult;
+};
 
 // Observes for shutdown so that the child GfxDriverInfo list is freed.
 class ShutdownObserver : public nsIObserver
@@ -681,6 +721,17 @@ GfxInfoBase::Init()
 NS_IMETHODIMP
 GfxInfoBase::GetFeatureStatus(int32_t aFeature, int32_t* aStatus)
 {
+  if (!NS_IsMainThread()) {
+    dom::workers::WorkerPrivate* workerPrivate =
+      dom::workers::GetCurrentThreadWorkerPrivate();
+    nsRefPtr<GetFeatureStatusRunnable> runnable =
+      new GetFeatureStatusRunnable(workerPrivate, this, aFeature, aStatus);
+
+    runnable->Dispatch(workerPrivate->GetJSContext());
+
+    return runnable->GetNSResult();
+  }
+
   int32_t blocklistAll = gfxPrefs::BlocklistAll();
   if (blocklistAll > 0) {
     gfxCriticalErrorOnce(gfxCriticalError::DefaultOptions(false)) << "Forcing blocklisting all features";
@@ -696,11 +747,11 @@ GfxInfoBase::GetFeatureStatus(int32_t aFeature, int32_t* aStatus)
     return NS_OK;
 
   if (XRE_IsContentProcess()) {
-      // Delegate to the parent process.
-      mozilla::dom::ContentChild* cc = mozilla::dom::ContentChild::GetSingleton();
-      bool success;
-      cc->SendGetGraphicsFeatureStatus(aFeature, aStatus, &success);
-      return success ? NS_OK : NS_ERROR_FAILURE;
+    // Delegate to the parent process.
+    mozilla::dom::ContentChild* cc = mozilla::dom::ContentChild::GetSingleton();
+    bool success;
+    cc->SendGetGraphicsFeatureStatus(aFeature, aStatus, &success);
+    return success ? NS_OK : NS_ERROR_FAILURE;
   }
 
   nsString version;
