@@ -1,0 +1,76 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>WorkerCanvas: Test subworkers</title>
+<script src="/tests/SimpleTest/SimpleTest.js"></script>
+<link rel="stylesheet" href="/tests/SimpleTest/test.css">
+</head>
+<body>
+<div><canvas id="c1" width="64" height="64"></canvas></div>
+<div><canvas id="c2" width="64" height="64"></canvas></div>
+<div><canvas id="c3" width="64" height="64"></canvas></div>
+<div><canvas id="c4" width="64" height="64"></canvas></div>
+<div><canvas id="c5" width="64" height="64"></canvas></div>
+<div><canvas id="c6" width="64" height="64"></canvas></div>
+<div><canvas id="c7" width="64" height="64"></canvas></div>
+<div><canvas id="c8" width="64" height="64"></canvas></div>
+<div><canvas id="c9" width="64" height="64"></canvas></div>
+<div><canvas id="c10" width="64" height="64"></canvas></div>
+
+<script>
+
+SimpleTest.waitForExplicitFinish();
+
+function runTest() {
+
+  var worker = new Worker("workercanvas.js");
+
+  worker.onmessage = function(evt) {
+    var msg = evt.data || {};
+    if (msg.type == "test") {
+      ok(msg.result, msg.name);
+    }
+    if (msg.type == "todo") {
+      todo(false, msg.name);
+    }
+    if (msg.type == "finish") {
+      worker.terminate();
+      SimpleTest.finish();
+    }
+  }
+
+  var c = [1,2,3,4,5,6,7,8,9,10].map(function(i) {
+    return document.getElementById("c" + i)
+      .transferControlToWorker();
+  });
+
+  worker.postMessage(
+    {test: 'subworker', subtests: [
+      {test: 'webgl', canvas: c[0]},
+      {test: 'subworker', subtests: [
+        {test: 'webgl', canvas: c[1]},
+        {test: 'webgl_changesize', canvas: c[2]},
+        {test: 'webgl', canvas: c[3]}]},
+      {test: 'subworker', subtests: [
+        {test: 'webgl', canvas: c[4]},
+        {test: 'webgl_changesize', canvas: c[5]},
+        {test: 'subworker', subtests: [
+          {test: 'webgl_changesize', canvas: c[6]},
+          {test: 'webgl', canvas: c[7]}]},
+        {test: 'subworker', subtests: [
+          {test: 'webgl_changesize', canvas: c[8]},
+          {test: 'subworker', subtests: [
+            {test: 'subworker', subtests: [
+              {test: 'webgl_changesize', canvas: c[9]}]}]}]},
+      ]}
+    ]}, c);
+}
+
+SpecialPowers.pushPrefEnv({'set': [
+  ['gfx.workercanvas.enabled', true],
+  ['webgl.force-enabled', true],
+]}, runTest);
+
+</script>
+</body>
+</html>

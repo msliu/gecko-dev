@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>WebGL in WorkerCanvas</title>
+<script src="/tests/SimpleTest/SimpleTest.js"></script>
+<link rel="stylesheet" href="/tests/SimpleTest/test.css">
+</head>
+<body>
+<canvas id="c" width="64" height="64"></canvas>
+<script>
+
+SimpleTest.waitForExplicitFinish();
+
+function runTest() {
+
+  var htmlCanvas = document.getElementById("c");
+  var worker = new Worker("workercanvas.js");
+
+  worker.onmessage = function(evt) {
+    var msg = evt.data || {};
+    if (msg.type == "test") {
+      ok(msg.result, msg.name);
+    }
+    if (msg.type == "todo") {
+      todo(false, msg.name);
+    }
+    if (msg.type == "finish") {
+      worker.terminate();
+      SimpleTest.finish();
+    }
+  }
+
+  var workerCanvas = htmlCanvas.transferControlToWorker();
+  worker.postMessage({test: 'webgl_changesize', canvas: workerCanvas}, [workerCanvas]);
+}
+
+SpecialPowers.pushPrefEnv({'set': [
+  ['gfx.workercanvas.enabled', true],
+  ['webgl.force-enabled', true],
+]}, runTest);
+
+</script>
+</body>
+</html>

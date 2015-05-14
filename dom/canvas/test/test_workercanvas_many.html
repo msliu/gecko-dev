@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>WebGL in WorkerCanvas</title>
+<script src="/tests/SimpleTest/SimpleTest.js"></script>
+<link rel="stylesheet" href="/tests/SimpleTest/test.css">
+</head>
+<body>
+<div><canvas id="c1" width="64" height="64"></canvas></div>
+<div><canvas id="c2" width="64" height="64"></canvas></div>
+<div><canvas id="c3" width="64" height="64"></canvas></div>
+<div><canvas id="c4" width="64" height="64"></canvas></div>
+<div><canvas id="c5" width="64" height="64"></canvas></div>
+<div><canvas id="c6" width="64" height="64"></canvas></div>
+<div><canvas id="c7" width="64" height="64"></canvas></div>
+<div><canvas id="c8" width="64" height="64"></canvas></div>
+<script>
+
+SimpleTest.waitForExplicitFinish();
+
+function runTest() {
+
+  var stillRunning = 0;
+
+  var startWorker = function(canvas, test) {
+
+    stillRunning++;
+    var worker = new Worker("workercanvas.js");
+
+    worker.onmessage = function(evt) {
+      var msg = evt.data || {};
+      if (msg.type == "test") {
+        ok(msg.result, msg.name);
+      }
+      if (msg.type == "todo") {
+        todo(false, msg.name);
+      }
+      if (msg.type == "finish") {
+        worker.terminate();
+        if (--stillRunning == 0)
+          SimpleTest.finish();
+      }
+    }
+
+    var workerCanvas = htmlCanvas.transferControlToWorker();
+    worker.postMessage({test: test, canvas: workerCanvas}, [workerCanvas]);
+  }
+
+  /* create 4 workers that do the regular drawing test and 4 workers
+     that do the size change test */
+  for (var i = 1; i < 9; i++) {
+    var htmlCanvas = document.getElementById("c" + i);
+    startWorker(htmlCanvas, i % 2 == 0 ? 'webgl' : 'webgl_changesize');
+  }
+}
+
+SpecialPowers.pushPrefEnv({'set': [
+  ['gfx.workercanvas.enabled', true],
+  ['webgl.force-enabled', true]
+]}, runTest);
+
+</script>
+</body>
+</html>
