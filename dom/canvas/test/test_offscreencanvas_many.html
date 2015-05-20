@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>WebGL in WorkerCanvas</title>
+<title>WebGL in OffscreenCanvas</title>
 <script src="/tests/SimpleTest/SimpleTest.js"></script>
 <link rel="stylesheet" href="/tests/SimpleTest/test.css">
 </head>
@@ -25,15 +25,12 @@ function runTest() {
   var startWorker = function(canvas, test) {
 
     stillRunning++;
-    var worker = new Worker("workercanvas.js");
+    var worker = new Worker("offscreencanvas.js");
 
     worker.onmessage = function(evt) {
       var msg = evt.data || {};
       if (msg.type == "test") {
         ok(msg.result, msg.name);
-      }
-      if (msg.type == "todo") {
-        todo(false, msg.name);
       }
       if (msg.type == "finish") {
         worker.terminate();
@@ -42,8 +39,8 @@ function runTest() {
       }
     }
 
-    var workerCanvas = htmlCanvas.transferControlToWorker();
-    worker.postMessage({test: test, canvas: workerCanvas}, [workerCanvas]);
+    var offscreenCanvas = htmlCanvas.transferControlToOffscreen();
+    worker.postMessage({test: test, canvas: offscreenCanvas}, [offscreenCanvas]);
   }
 
   /* create 4 workers that do the regular drawing test and 4 workers
@@ -55,7 +52,7 @@ function runTest() {
 }
 
 SpecialPowers.pushPrefEnv({'set': [
-  ['gfx.workercanvas.enabled', true],
+  ['gfx.offscreencanvas.enabled', true],
   ['webgl.force-enabled', true]
 ]}, runTest);
 

@@ -1,12 +1,8 @@
 
-/* WebWorker for test_workercanvas_*.html */
+/* WebWorker for test_offscreencanvas_*.html */
 
 function ok(expect, msg) {
     postMessage({type: "test", result: !!expect, name: msg});
-}
-
-function todo(msg) {
-    postMessage({type: "todo", name: msg});
 }
 
 function finish() {
@@ -22,11 +18,11 @@ function createDrawFunc(canvas) {
     var gl;
 
     try {
-        gl = canvas.getContext("webgl");
+        gl = canvas.getContext("experimental-webgl");
     } catch (e) {}
 
     if (!gl) {
-        todo("WebGL is unavailable");
+        ok(false, "WebGL is unavailable");
         return null;
     }
 
@@ -155,8 +151,8 @@ onmessage = function(evt) {
         ok(canvas, "Canvas successfully transfered to worker");
         ok(canvas.getContext, "Canvas has getContext");
 
-        ok(canvas.width == 64, "WorkerCanvas width should be 64");
-        ok(canvas.height == 64, "WorkerCanvas height should be 64");
+        ok(canvas.width == 64, "OffscreenCanvas width should be 64");
+        ok(canvas.height == 64, "OffscreenCanvas height should be 64");
     }
 
     var draw;
@@ -217,14 +213,14 @@ onmessage = function(evt) {
         }, 0);
     }
     //------------------------------------------------------------------------
-    // Using WorkerCanvas from sub workers
+    // Using OffscreenCanvas from sub workers
     //------------------------------------------------------------------------
     else if (test == "subworker") {
         /* subworker tests take a list of tests to run on children */
         var stillRunning = 0;
         evt.data.subtests.forEach(function (subtest) {
             ++stillRunning;
-            var subworker = new Worker('workercanvas.js');
+            var subworker = new Worker('offscreencanvas.js');
             subworker.onmessage = function(evt) {
                 /* report finish to parent when all children are finished */
                 if (evt.data.type == "finish") {
