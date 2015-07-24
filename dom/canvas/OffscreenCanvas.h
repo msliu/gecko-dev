@@ -58,6 +58,8 @@ public:
   virtual JSObject* WrapObject(JSContext* aCx,
                                JS::Handle<JSObject*> aGivenProto) override;
 
+  void ClearResources();
+
   uint32_t Width() const
   {
     return mWidth;

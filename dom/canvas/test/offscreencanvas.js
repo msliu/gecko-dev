@@ -137,6 +137,7 @@ function createDrawFunc(canvas) {
         preDraw(prefix);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         postDraw(prefix);
+        gl.commit();
         checkGLError(prefix);
     };
 }

@@ -269,6 +269,7 @@ public:
   void OnMemoryPressure();
 
   static void SetAttrFromAsyncCanvasRenderer(AsyncCanvasRenderer *aRenderer);
+  static void InvalidateFromAsyncCanvasRenderer(AsyncCanvasRenderer *aRenderer);
 
 protected:
   virtual ~HTMLCanvasElement();
@@ -294,6 +295,7 @@ protected:
 
   AsyncCanvasRenderer* GetAsyncCanvasRenderer();
 
+  bool mResetLayer;
   nsRefPtr<HTMLCanvasElement> mOriginalCanvas;
   nsRefPtr<PrintCallback> mPrintCallback;
   nsRefPtr<HTMLCanvasPrintState> mPrintState;
