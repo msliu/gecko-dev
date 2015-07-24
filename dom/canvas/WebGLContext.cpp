@@ -72,6 +72,7 @@
 // Generated
 #include "mozilla/dom/WebGLRenderingContextBinding.h"
 
+mozilla::StaticMutex mozilla::WebGLContext::sContextCreationMutex;
 
 namespace mozilla {
 
@@ -515,6 +516,7 @@ static already_AddRefed<GLContext>
 CreateHeadlessGL(CreateContextFlags flags, const nsCOMPtr<nsIGfxInfo>& gfxInfo,
                  WebGLContext* webgl)
 {
+    StaticMutexAutoLock lock(mozilla::WebGLContext::sContextCreationMutex);
     bool preferEGL = PR_GetEnv("MOZ_WEBGL_PREFER_EGL");
     bool disableANGLE = gfxPrefs::WebGLDisableANGLE();
 

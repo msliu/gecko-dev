@@ -19,6 +19,7 @@
 #include "mozilla/LinkedList.h"
 #include "mozilla/UniquePtr.h"
 #include "mozilla/WeakPtr.h"
+#include "mozilla/StaticMutex.h"
 #include "nsCycleCollectionNoteChild.h"
 #include "nsICanvasRenderingContextInternal.h"
 #include "nsLayoutUtils.h"
@@ -1501,6 +1502,8 @@ public:
 public:
     UniquePtr<webgl::FormatUsageAuthority> mFormatUsage;
     virtual UniquePtr<webgl::FormatUsageAuthority> CreateFormatUsage() const = 0;
+
+    static StaticMutex sContextCreationMutex;
 
     // Friend list
     friend class WebGLTexture;

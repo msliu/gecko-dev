@@ -122,6 +122,7 @@ WebGLContext::DrawArrays_check(GLint first, GLsizei count, GLsizei primcount,
 void
 WebGLContext::DrawArrays(GLenum mode, GLint first, GLsizei count)
 {
+    StaticMutexAutoLock lock(WebGLContext::sContextCreationMutex);
     if (IsContextLost())
         return;
 
