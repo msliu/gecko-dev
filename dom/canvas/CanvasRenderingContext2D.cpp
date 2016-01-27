@@ -682,7 +682,9 @@ CanvasGradient::AddColorStop(float aOffset, const nsAString& aColorstr, ErrorRes
   }
 
   nscolor color;
-  nsCOMPtr<nsIPresShell> presShell = mContext ? mContext->GetPresShell() : nullptr;
+  nsCOMPtr<nsIPresShell> presShell = NS_IsMainThread() && mContext
+                                     ? mContext->GetPresShell()
+                                     : nullptr;
   if (!nsRuleNode::ComputeColor(value, presShell ? presShell->GetPresContext() : nullptr,
                                 nullptr, color)) {
     aRv.Throw(NS_ERROR_DOM_SYNTAX_ERR);
@@ -1010,7 +1012,7 @@ bool
 CanvasRenderingContext2D::ParseColor(const nsAString& aString,
                                      nscolor* aColor)
 {
-  nsIDocument* document = mCanvasElement
+  nsIDocument* document = NS_IsMainThread() && mCanvasElement
                           ? mCanvasElement->OwnerDoc()
                           : nullptr;
 
@@ -1027,8 +1029,11 @@ CanvasRenderingContext2D::ParseColor(const nsAString& aString,
     *aColor = value.GetColorValue();
   } else {
     // otherwise resolve it
-    nsCOMPtr<nsIPresShell> presShell = GetPresShell();
-    RefPtr<nsStyleContext> parentContext;
+    nsCOMPtr<nsIPresShell> presShell = NS_IsMainThread()
+                                      ? GetPresShell()
+                                      : nullptr;
+
+    RefPtr<nsStyleContext> parentContext = nullptr;
     if (mCanvasElement && mCanvasElement->IsInDoc()) {
       // Inherit from the canvas element.
       parentContext = nsComputedDOMStyle::GetStyleContextForElement(

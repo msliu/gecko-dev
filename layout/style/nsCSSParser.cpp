@@ -17166,23 +17166,29 @@ nsCSSParser::Startup()
 nsCSSParser::nsCSSParser(mozilla::css::Loader* aLoader,
                          CSSStyleSheet* aSheet)
 {
-  CSSParserImpl *impl = gFreeList;
-  if (impl) {
-    gFreeList = impl->mNextFree;
-    impl->mNextFree = nullptr;
+  CSSParserImpl *impl;
+  if (NS_IsMainThread()) {
+    impl = gFreeList;
+    if (impl) {
+      gFreeList = impl->mNextFree;
+      impl->mNextFree = nullptr;
+    } else {
+      impl = new CSSParserImpl();
+    }
+
+    if (aLoader) {
+      impl->SetChildLoader(aLoader);
+      impl->SetQuirkMode(aLoader->GetCompatibilityMode() ==
+                         eCompatibility_NavQuirks);
+    }
+    if (aSheet) {
+      impl->SetStyleSheet(aSheet);
+    }
   } else {
+    MOZ_ASSERT(!aLoader);
+    MOZ_ASSERT(!aSheet);
     impl = new CSSParserImpl();
   }
-
-  if (aLoader) {
-    impl->SetChildLoader(aLoader);
-    impl->SetQuirkMode(aLoader->GetCompatibilityMode() ==
-                       eCompatibility_NavQuirks);
-  }
-  if (aSheet) {
-    impl->SetStyleSheet(aSheet);
-  }
-
   mImpl = static_cast<void*>(impl);
 }
 
@@ -17190,8 +17196,10 @@ nsCSSParser::~nsCSSParser()
 {
   CSSParserImpl *impl = static_cast<CSSParserImpl*>(mImpl);
   impl->Reset();
-  impl->mNextFree = gFreeList;
-  gFreeList = impl;
+  if (NS_IsMainThread()) {
+    impl->mNextFree = gFreeList;
+    gFreeList = impl;
+  }
 }
 
 /* static */ void
