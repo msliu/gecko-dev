@@ -25,6 +25,7 @@
 #include "nsDebug.h"                    // for printf_stderr, NS_ASSERTION
 #include "nsXULAppAPI.h"                // for XRE_GetProcessType, etc
 #include "TextureClientSharedSurface.h"
+#include "gfxUtils.h"
 
 using namespace mozilla::gfx;
 using namespace mozilla::gl;
@@ -69,37 +70,68 @@ CanvasClientBridge::UpdateAsync(AsyncCanvasRenderer* aRenderer)
 void
 CanvasClient2D::Update(gfx::IntSize aSize, ClientCanvasLayer* aLayer)
 {
+  Renderer renderer;
+  renderer.construct<ClientCanvasLayer*>(aLayer);
+  UpdateRenderer(aSize, renderer);
+}
+
+void
+CanvasClient2D::UpdateAsync(AsyncCanvasRenderer* aRenderer)
+{
+  Renderer renderer;
+  renderer.construct<AsyncCanvasRenderer*>(aRenderer);
+  UpdateRenderer(aRenderer->GetSize(), renderer);
+}
+
+void
+CanvasClient2D::UpdateRenderer(gfx::IntSize aSize, Renderer& aRenderer)
+{
   AutoRemoveTexture autoRemove(this);
+  ClientCanvasLayer* layer = nullptr;
+  AsyncCanvasRenderer* asyncRenderer = nullptr;
+  if (aRenderer.constructed<ClientCanvasLayer*>()) {
+    layer = aRenderer.ref<ClientCanvasLayer*>();
+  } else {
+    asyncRenderer = aRenderer.ref<AsyncCanvasRenderer*>();
+  }
+
   if (mBuffer &&
       (mBuffer->IsImmutable() || mBuffer->GetSize() != aSize)) {
     autoRemove.mTexture = mBuffer;
     mBuffer = nullptr;
   }
 
-  bool bufferCreated = false;
+  mBufferCreated = false;
   if (!mBuffer) {
-    bool isOpaque = (aLayer->GetContentFlags() & Layer::CONTENT_OPAQUE);
-    gfxContentType contentType = isOpaque
-                                                ? gfxContentType::COLOR
-                                                : gfxContentType::COLOR_ALPHA;
-    gfx::SurfaceFormat surfaceFormat
-      = gfxPlatform::GetPlatform()->Optimal2DFormatForContent(contentType);
+    bool isOpaque;
+    gfxContentType contentType;
+    if (layer) {
+      isOpaque = (layer->GetContentFlags() & Layer::CONTENT_OPAQUE);
+    } else {
+      isOpaque = (asyncRenderer->GetOpaque() & Layer::CONTENT_OPAQUE);
+    }
+    contentType = isOpaque
+                    ? gfxContentType::COLOR
+                    : gfxContentType::COLOR_ALPHA;
+    gfx::SurfaceFormat surfaceFormat =
+      gfxPlatform::GetPlatform()->Optimal2DFormatForContent(contentType);
     TextureFlags flags = TextureFlags::DEFAULT;
     if (mTextureFlags & TextureFlags::ORIGIN_BOTTOM_LEFT) {
       flags |= TextureFlags::ORIGIN_BOTTOM_LEFT;
     }
+    flags = TextureFlags::NO_FLAGS;
+    mBuffer = CreateTextureClientForCanvas(surfaceFormat, aSize, flags, layer);
 
-    mBuffer = CreateTextureClientForCanvas(surfaceFormat, aSize, flags, aLayer);
     if (!mBuffer) {
       NS_WARNING("Failed to allocate the TextureClient");
       return;
     }
     MOZ_ASSERT(mBuffer->CanExposeDrawTarget());
 
-    bufferCreated = true;
+    mBufferCreated = true;
   }
 
-  bool updated = false;
+  mUpdated = false;
   {
     TextureClientAutoLock autoLock(mBuffer, OpenMode::OPEN_WRITE_ONLY);
     if (!autoLock.Succeeded()) {
@@ -107,19 +139,28 @@ CanvasClient2D::Update(gfx::IntSize aSize, ClientCanvasLayer* aLayer)
       return;
     }
 
-    RefPtr<DrawTarget> target = mBuffer->BorrowDrawTarget();
-    if (target) {
-      aLayer->UpdateTarget(target);
-      updated = true;
+    if (layer) {
+      RefPtr<DrawTarget> target = mBuffer->BorrowDrawTarget();
+      if (target) {
+        layer->UpdateTarget(target);
+      }
+    } else {
+      asyncRenderer->UpdateTarget(mBuffer);
     }
-  }
 
-  if (bufferCreated && !AddTextureClient(mBuffer)) {
+    mUpdated = true;
+  }
+}
+
+void
+CanvasClient2D::Updated()
+{
+  if (mBufferCreated && !AddTextureClient(mBuffer)) {
     mBuffer = nullptr;
     return;
   }
 
-  if (updated) {
+  if (mUpdated) {
     AutoTArray<CompositableForwarder::TimedTextureClient,1> textures;
     CompositableForwarder::TimedTextureClient* t = textures.AppendElement();
     t->mTextureClient = mBuffer;
@@ -136,7 +177,7 @@ CanvasClient2D::CreateTextureClientForCanvas(gfx::SurfaceFormat aFormat,
                                              TextureFlags aFlags,
                                              ClientCanvasLayer* aLayer)
 {
-  if (aLayer->IsGLLayer()) {
+  if (aLayer && aLayer->IsGLLayer()) {
     // We want a cairo backend here as we don't want to be copying into
     // an accelerated backend and we like LockBits to work. This is currently
     // the most effective way to make this work.
