@@ -298,6 +298,12 @@ AsyncCanvasRenderer::GetSurface()
       return UpdateTarget();
     }
   } else {
+    mBufferProvider = mContext2D->GetBufferProvider(nullptr);
+
+    if (!mBufferProvider) {
+      return nullptr;
+    }
+
     RefPtr<gfx::SourceSurface> sourceSurface = mBufferProvider->GetSnapshot();
 
     if (!sourceSurface) {
