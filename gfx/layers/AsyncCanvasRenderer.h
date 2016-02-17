@@ -30,6 +30,7 @@ class GLContext;
 
 namespace dom {
 class HTMLCanvasElement;
+class CanvasRenderingContext2D;
 }
 
 namespace layers {
@@ -144,6 +145,7 @@ public:
   // canvas' surface texture destructor will deref and destroy it too early
   // Only accessed in active thread.
   RefPtr<gl::GLContext> mGLContext;
+  RefPtr<mozilla::dom::CanvasRenderingContext2D> mContext2D;
   PersistentBufferProvider* mBufferProvider;
 private:
 

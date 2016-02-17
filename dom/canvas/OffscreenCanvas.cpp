@@ -165,7 +165,8 @@ OffscreenCanvas::GetContext(JSContext* aCx,
     } else if (contextType == CanvasContextType::Canvas2D) {
       CanvasRenderingContext2D* context2D = static_cast<CanvasRenderingContext2D*>(mCurrentContext.get());
       mCanvasRenderer->mGLContext = nullptr;
-      mCanvasRenderer->mBufferProvider = context2D->GetBufferProvider(nullptr);
+      mCanvasRenderer->mContext = mCurrentContext;
+      mCanvasRenderer->mContext2D = context2D;
 
       mCanvasClient = ImageBridgeChild::GetSingleton()->
         CreateCanvasClient(CanvasClient::CanvasClientSurface, flags).take();

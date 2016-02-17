@@ -11,6 +11,7 @@
 #include "GLReadTexImageHelper.h"
 #include "GLScreenBuffer.h"
 #include "mozilla/dom/HTMLCanvasElement.h"
+#include "mozilla/dom/CanvasRenderingContext2D.h"
 #include "mozilla/layers/BufferTexture.h"
 #include "mozilla/layers/CanvasClient.h"
 #include "mozilla/layers/TextureClient.h"
@@ -21,12 +22,18 @@
 #include "PersistentBufferProvider.h"
 
 namespace mozilla {
+
+namespace dom {
+class CanvasRenderingContext2D;
+}
+
 namespace layers {
 
 AsyncCanvasRenderer::AsyncCanvasRenderer()
   : mHTMLCanvasElement(nullptr)
   , mContext(nullptr)
   , mGLContext(nullptr)
+  , mContext2D(nullptr)
   , mIsAlphaPremultiplied(true)
   , mWidth(0)
   , mHeight(0)
@@ -238,6 +245,12 @@ AsyncCanvasRenderer::UpdateTarget()
 void
 AsyncCanvasRenderer::UpdateTarget(TextureClient* aTexture)
 {
+  if (!mContext2D) {
+    return;
+  }
+
+  mBufferProvider = nullptr;
+  mBufferProvider = mContext2D->GetBufferProvider(nullptr);
   if (!mBufferProvider) {
     return;
   }
@@ -256,27 +269,41 @@ AsyncCanvasRenderer::GetSurface()
 {
   MOZ_ASSERT(NS_IsMainThread());
   MutexAutoLock lock(mMutex);
-  if (mSurfaceForBasic) {
-    // Since SourceSurface isn't thread-safe, we need copy to a new SourceSurface.
-    RefPtr<gfx::DataSourceSurface> result =
-      gfx::Factory::CreateDataSourceSurfaceWithStride(mSurfaceForBasic->GetSize(),
-                                                      mSurfaceForBasic->GetFormat(),
-                                                      mSurfaceForBasic->Stride());
 
-    gfx::DataSourceSurface::ScopedMap srcMap(mSurfaceForBasic, gfx::DataSourceSurface::READ);
-    gfx::DataSourceSurface::ScopedMap dstMap(result, gfx::DataSourceSurface::WRITE);
+  if (!mContext) {
+    return nullptr;
+  }
 
-    if (NS_WARN_IF(!srcMap.IsMapped()) ||
-        NS_WARN_IF(!dstMap.IsMapped())) {
+  if (mGLContext) {
+    if (mSurfaceForBasic) {
+      // Since SourceSurface isn't thread-safe, we need copy to a new SourceSurface.
+      RefPtr<gfx::DataSourceSurface> result =
+        gfx::Factory::CreateDataSourceSurfaceWithStride(mSurfaceForBasic->GetSize(),
+                                                        mSurfaceForBasic->GetFormat(),
+                                                        mSurfaceForBasic->Stride());
+
+      gfx::DataSourceSurface::ScopedMap srcMap(mSurfaceForBasic, gfx::DataSourceSurface::READ);
+      gfx::DataSourceSurface::ScopedMap dstMap(result, gfx::DataSourceSurface::WRITE);
+
+      if (NS_WARN_IF(!srcMap.IsMapped()) ||
+          NS_WARN_IF(!dstMap.IsMapped())) {
+        return nullptr;
+      }
+
+      memcpy(dstMap.GetData(),
+             srcMap.GetData(),
+             srcMap.GetStride() * mSurfaceForBasic->GetSize().height);
+      return result.forget();
+    } else {
+      return UpdateTarget();
+    }
+  } else {
+    RefPtr<gfx::SourceSurface> sourceSurface = mBufferProvider->GetSnapshot();
+
+    if (!sourceSurface) {
       return nullptr;
     }
-
-    memcpy(dstMap.GetData(),
-           srcMap.GetData(),
-           srcMap.GetStride() * mSurfaceForBasic->GetSize().height);
-    return result.forget();
-  } else {
-    return UpdateTarget();
+    return sourceSurface->GetDataSurface();
   }
 }
 
@@ -291,8 +318,10 @@ AsyncCanvasRenderer::GetInputStream(const char *aMimeType,
     return NS_ERROR_FAILURE;
   }
 
-  // Handle y flip.
-  RefPtr<gfx::DataSourceSurface> dataSurf = gl::YInvertImageSurface(surface);
+  // Only handle y flip in webgl.
+  RefPtr<gfx::DataSourceSurface> dataSurf = mGLContext
+                                            ? gl::YInvertImageSurface(surface)
+                                            : surface;
 
   return gfxUtils::GetInputStream(dataSurf, false, aMimeType, aEncoderOptions, aStream);
 }

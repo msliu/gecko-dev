@@ -1054,10 +1054,12 @@ CanvasRenderingContext2D::Reset()
     mCanvasElement->InvalidateCanvas();
   }
 
-  // only do this for non-docshell created contexts,
-  // since those are the ones that we created a surface for
-  if (mTarget && IsTargetValid() && !mDocShell) {
-    gCanvasAzureMemoryUsed -= mWidth * mHeight * 4;
+  if (NS_IsMainThread()) {
+    // only do this for non-docshell created contexts,
+    // since those are the ones that we created a surface for
+    if (mTarget && IsTargetValid() && !mDocShell) {
+      gCanvasAzureMemoryUsed -= mWidth * mHeight * 4;
+    }
   }
 
   ReturnTarget();
@@ -1138,14 +1140,16 @@ CanvasRenderingContext2D::Redraw()
 
   mIsEntireFrameInvalid = true;
 
-  if (!mCanvasElement) {
-    NS_ASSERTION(mDocShell, "Redraw with no canvas element or docshell!");
-    return NS_OK;
+  if (NS_IsMainThread()) {
+    if (!mCanvasElement) {
+      NS_ASSERTION(mDocShell, "Redraw with no canvas element or docshell!");
+      return NS_OK;
+    }
+
+    nsSVGEffects::InvalidateDirectRenderingObservers(mCanvasElement);
+
+    mCanvasElement->InvalidateCanvasContent(nullptr);
   }
-
-  nsSVGEffects::InvalidateDirectRenderingObservers(mCanvasElement);
-
-  mCanvasElement->InvalidateCanvasContent(nullptr);
 
   return NS_OK;
 }
@@ -1167,14 +1171,16 @@ CanvasRenderingContext2D::Redraw(const gfx::Rect& aR)
     return;
   }
 
-  if (!mCanvasElement) {
-    NS_ASSERTION(mDocShell, "Redraw with no canvas element or docshell!");
-    return;
+  if (NS_IsMainThread()) {
+    if (!mCanvasElement) {
+      NS_ASSERTION(mDocShell, "Redraw with no canvas element or docshell!");
+      return;
+    }
+
+    nsSVGEffects::InvalidateDirectRenderingObservers(mCanvasElement);
+
+    mCanvasElement->InvalidateCanvasContent(&aR);
   }
-
-  nsSVGEffects::InvalidateDirectRenderingObservers(mCanvasElement);
-
-  mCanvasElement->InvalidateCanvasContent(&aR);
 }
 
 void
@@ -1418,7 +1424,8 @@ CanvasRenderingContext2D::EnsureTarget(RenderingMode aRenderingMode)
         nsContentUtils::PersistentLayerManagerForDocument(ownerDoc);
     }
 
-    if (mode == RenderingMode::OpenGLBackendMode &&
+    if (NS_IsMainThread() &&
+        mode == RenderingMode::OpenGLBackendMode &&
         gfxPlatform::GetPlatform()->UseAcceleratedSkiaCanvas() &&
         CheckSizeForSkiaGL(size)) {
       DemoteOldestContextIfNecessary();
@@ -1431,9 +1438,7 @@ CanvasRenderingContext2D::EnsureTarget(RenderingMode aRenderingMode)
         mTarget = Factory::CreateDrawTargetSkiaWithGrContext(glue->GetGrContext(), size, format);
         if (mTarget) {
           AddDemotableContext(this);
-          if (NS_IsMainThread()) {
-            mBufferProvider = new PersistentBufferProviderBasic(mTarget);
-          }
+          mBufferProvider = new PersistentBufferProviderBasic(mTarget);
           mIsSkiaGL = true;
         } else {
           gfxCriticalNote << "Failed to create a SkiaGL DrawTarget, falling back to software\n";
@@ -1460,16 +1465,18 @@ CanvasRenderingContext2D::EnsureTarget(RenderingMode aRenderingMode)
   }
 
   if (mTarget) {
-    static bool registered = false;
-    if (!registered) {
-      registered = true;
-      RegisterStrongMemoryReporter(new Canvas2dPixelsReporter());
-    }
+    if (NS_IsMainThread()) {
+      static bool registered = false;
+      if (!registered) {
+        registered = true;
+        RegisterStrongMemoryReporter(new Canvas2dPixelsReporter());
+      }
 
-    gCanvasAzureMemoryUsed += mWidth * mHeight * 4;
-    JSContext* context = nsContentUtils::GetCurrentJSContext();
-    if (context) {
-      JS_updateMallocCounter(context, mWidth * mHeight * 4);
+      gCanvasAzureMemoryUsed += mWidth * mHeight * 4;
+      JSContext* context = nsContentUtils::GetCurrentJSContext();
+      if (context) {
+        JS_updateMallocCounter(context, mWidth * mHeight * 4);
+      }
     }
 
     mTarget->ClearRect(gfx::Rect(Point(0, 0), Size(mWidth, mHeight)));
@@ -3453,7 +3460,12 @@ CanvasRenderingContext2D::GetCanvas(Nullable<dom::OwningHTMLCanvasElementOrOffsc
 {
     if (mCanvasElement) {
       MOZ_RELEASE_ASSERT(!mOffscreenCanvas);
-      aRetval.SetValue().SetAsHTMLCanvasElement() = mCanvasElement;
+
+      if (mCanvasElement->IsInNativeAnonymousSubtree()) {
+        aRetval.SetNull();
+      } else {
+        aRetval.SetValue().SetAsHTMLCanvasElement() = mCanvasElement;
+      }
     } else if (mOffscreenCanvas) {
       aRetval.SetValue().SetAsOffscreenCanvas() = mOffscreenCanvas;
     } else {
@@ -5618,15 +5630,17 @@ void CanvasRenderingContext2D::RemoveDrawObserver()
 PersistentBufferProvider*
 CanvasRenderingContext2D::GetBufferProvider(LayerManager* aManager)
 {
-  if (!mTarget) {
-    EnsureTarget();
-  }
-
   if (mBufferProvider) {
     return mBufferProvider;
-  } else {
+  }
+
+  if (!mTarget) {
     return nullptr;
   }
+
+  mBufferProvider = new PersistentBufferProviderBasic(mTarget);
+
+  return mBufferProvider;
 }
 
 already_AddRefed<Layer>
